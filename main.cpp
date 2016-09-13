@@ -62,7 +62,7 @@ int main() {
   create();
 
   if(simu.create_points()) {
-    set_fields();
+    set_fields_Zalesak();
     number();
   }
 

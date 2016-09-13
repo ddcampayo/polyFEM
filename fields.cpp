@@ -152,7 +152,8 @@ FT field_r(const FT x,const FT y, bool deriv) {
 }
 
 
-FT field_Zalezak(const FT x,const FT y) {
+
+FT field_Zalesak(const FT x,const FT y) {
 
   const FT radius=0.5;
   const FT w= (1.0/6.0) / 2.0 + 0.001;
