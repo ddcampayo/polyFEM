@@ -96,7 +96,7 @@ FT solve_linear(std::vector<Periodic_point>& vP,
 		  std::vector<FT>& AA );
 
 void prune(std::vector<Vertex_handle>& v);
-void set_fields(void);
+void set_fields_Zalesak(void);
 void set_vels(void);
 void curvature(void) ;
 FT move(FT) ;

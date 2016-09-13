@@ -1,13 +1,16 @@
 #include"main.h"
 #include"periodic.h"
 #include"sim_pars.h"
-extern Triangulation T;
+//extern Triangulation T;
 
 extern sim_pars simu;
 
 
+//typedef FT (*field)(const FT x,const FT y, bool deriv=false); // pointer to function returning field
+
+
 FT field_r(const FT x,const FT y, bool deriv=false) ;
-FT field_slot(const FT x,const FT y) ;
+FT field_Zalesak(const FT x,const FT y) ;
 FT field_cos(const FT x, bool deriv=false) ;
 FT field_sin(const FT x, bool deriv=false) ;
 FT field_linear(const FT x,const FT y, bool deriv=false) ;
@@ -16,7 +19,7 @@ Vector_2 field_rotation(const FT x,const FT y, bool deriv=false) ;
 
 FT field_sin_cos(const FT x,const FT y, bool deriv=false) ;
 
-void set_fields(void) {
+void set_fields_Zalesak(void) {
 
   static bool first=true;
 
@@ -28,7 +31,7 @@ void set_fields(void) {
     FT y=vit->point().y();
 
     vit->rold.set( vit->point() );
-    vit->alpha.set( field_slot(x,y) ) ;
+    vit->alpha.set( field_Zalesak(x,y) ) ;
     vit->Uold.set( vit->U.val() );
   }
 
@@ -39,7 +42,7 @@ void set_fields(void) {
     FT x=vit->point().x();
     FT y=vit->point().y();
 
-    vit->alpha.set( field_slot(x,y) ) ;
+    vit->alpha.set( field_Zalesak(x,y) ) ;
     vit->rold.set( vit->point() );
     vit->Uold.set( vit->U.val() );
 
@@ -71,7 +74,7 @@ void fidelity(Triangulation& T, std::ofstream& log_file ) {
     FT x=fv->point().x();
     FT y=fv->point().y();
 
-    FT al0= field_slot(x,y) ;
+    FT al0= field_Zalesak(x,y) ;
 
     dd += (al-al0) * (al-al0) ;
     dd2+= al0 * al0 ;
@@ -149,7 +152,7 @@ FT field_r(const FT x,const FT y, bool deriv) {
 }
 
 
-FT field_slot(const FT x,const FT y) {
+FT field_Zalezak(const FT x,const FT y) {
 
   const FT radius=0.5;
   const FT w= (1.0/6.0) / 2.0 + 0.001;
