@@ -13,6 +13,7 @@
 #include"sim_pars.h"
 #include"linear.h"
 
+#include"fields.h"
 
 // Init global stuff.-
 
@@ -54,7 +55,7 @@ int main() {
 //
 //  time.start();
 
-
+  
   cout << "Creating point cloud" << endl;
 
   simu.read();
@@ -62,7 +63,7 @@ int main() {
   create();
 
   if(simu.create_points()) {
-    set_fields_Zalesak();
+    set_fields_TG();
     number();
   }
 
@@ -77,11 +78,19 @@ int main() {
 
   linear algebra(Tm);
 
-  // if(simu.create_points()) {
-  //   nabla();
-  //   Delta();
-  // }
+  // every step
+  areas(Tp);
+  quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );
 
+  // just once!
+  areas(Tm);
+  quad_coeffs(Tm , simu.FEMm() ); volumes(Tm, simu.FEMm() );
+
+
+  if(simu.create_points()) {
+    nabla();
+    Delta(Tm);
+  }
   
   // just for the looks of step 0:
    // onto_mesh_lumped();
@@ -90,6 +99,20 @@ int main() {
 // #else
 //   onto_mesh_delta();
 // #endif
+
+#if defined FULL_FULL
+    {
+      Delta(Tp);
+      linear algebra_p(Tp);
+      from_mesh_full(algebra_p,kind::ALPHA);
+    }
+#elif defined FULL_LUMPED
+    from_mesh_lumped(kind::ALPHA);
+#elif defined FLIP
+    from_mesh(kind::ALPHA);
+#else
+    from_mesh(kind::ALPHA);
+#endif
 
   move_info();
 
@@ -113,7 +136,7 @@ int main() {
 //draw();
 //  return 1;
 
-  // /// Prev test end
+   /// Prev test end
 
 #ifdef WRITE
   algebra.save_matrices();
@@ -138,8 +161,6 @@ int main() {
 
   log_file.open("main.log");
 
-  areas(Tp);  quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );
-     
   for(;
       simu.current_step() <= simu.Nsteps();
       simu.next_step()) {
@@ -156,53 +177,22 @@ int main() {
 
     FT dt2 = dt / 2.0 ;
 
+    int iter=0;
+    FT displ=1e10;
+
+    FT min_displ=1e10;
+    int min_iter=0;
+
+
 //  leapfrog, special first step.-
 //    if(simu.current_step() == 1) dt2 *= 0.5;
 
 //    dt2 *= 0.5;
 
-    cout << "Transfering info to particles" << endl; 
-
-    areas(Tp);  quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );
-
-#if defined FULL_FULL
-    {
-      Delta(Tp);
-      linear algebra_p(Tp);
-      from_mesh_full(algebra_p,kind::ALPHA);
-    }
-#elif defined FULL_LUMPED
-    from_mesh_lumped(kind::ALPHA);
-#elif defined FLIP
-    from_mesh(kind::ALPHA);
-#else
-    from_mesh(kind::ALPHA);
-#endif
-
-    //    from_mesh(kind::ALPHA);
-
-// leapfrog.-
-//      displ=move( 0.5 * dt );
-
-// half step.-
-//    set_vels();
-
-    displ=move( dt2 );
-
-    cout << "Moved avg " << displ << " to half point" << endl;
-
-    set_vels();
-
-    displ=move( dt );
-
-    cout << "Moved avg " << displ << " from half point" << endl;
-
     move_info();
 
-    cout << "Transfering info onto mesh " << endl;
+    cout << "Proj alpha onto mesh " << endl;
 
-    areas(Tp);  quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );
-    
       //onto_mesh_lumped();
 #if defined FULL
     onto_mesh_full(algebra,kind::ALPHA);
@@ -213,7 +203,86 @@ int main() {
     onto_mesh_delta(kind::ALPHA);
 #endif
 
-    move_info();
+    for( ; iter<max_iter ; iter++) {
+
+      cout << "Proj U from mesh " << endl;
+
+#if defined FULL_FULL
+      {
+	Delta(Tp);
+	linear algebra_p(Tp);
+	from_mesh_full_v(algebra_p,kind::U);
+      }
+#elif defined FULL_LUMPED
+      from_mesh_lumped_v(kind::U);
+#elif defined FLIP
+      from_mesh_v(kind::U);
+#else
+      from_mesh_v(kind::U);
+#endif
+
+      displ=move( dt2 );
+
+      cout << "Moved avg " << displ << " to half point" << endl;
+
+      areas(Tp);
+      quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );
+
+      if( displ < min_displ) {
+	min_displ=displ;
+	min_iter=iter;
+      }
+
+      cout << "  ; relative displacement:  " << displ << endl;
+
+      if(displ < max_displ) break;
+
+      cout << "Proj U0 onto mesh " << endl;
+
+#if defined FULL
+      onto_mesh_full_v(algebra,kind::UOLD);
+#elif defined FLIP
+      flip_volumes(Tp , Tm , simu.FEMm() );
+      onto_mesh_flip_v(Tp,Tm,simu.FEMm(),kind::UOLD);
+#else
+      onto_mesh_delta_v(kind::UOLD);
+#endif
+
+      cout << "Calculating Ustar implicitely" << endl;
+
+      algebra.ustar_inv(kind::USTAR,  0 , kind::UOLD, false);
+
+      cout << "Solving PPE" << endl;
+      
+      algebra.PPE( kind::USTAR, dt2 , kind:: P );
+
+      cout << "Calculating grad p" << endl;
+      algebra.gradient(kind::P, kind::GRADP);
+
+      cout << "Evolving U " << endl;
+
+    //      u_new( dt );
+      u_new( dt2 );
+    }
+
+    displ=move( dt );
+
+    update_half_velocity( ); 
+
+    areas(Tp);
+
+    quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );
+
+    cout << "Proj U_t+1 onto mesh " << endl;
+
+#if defined FULL
+    onto_mesh_full_v(algebra,kind::U);
+#elif defined FLIP
+    flip_volumes(Tp , Tm , simu.FEMm() );
+    onto_mesh_flip_v(Tp,Tm,simu.FEMm(),kind::U);
+#else
+    onto_mesh_delta_v(kind::U);
+#endif
 
     if(simu.current_step()%simu.every()==0) draw();
 
