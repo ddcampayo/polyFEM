@@ -34,7 +34,7 @@ sim_pars simu;
 // stuff only used here:
 
 //#define FULL
-//#define FULL_FULL
+#define FULL_FULL
 //#define FULL_LUMPED
 //#define FLIP
 
@@ -45,7 +45,6 @@ sim_pars simu;
 #ifdef FULL_LUMPED
 #define FULL
 #endif
-
 
 #include"onto_from_mesh.h"
 

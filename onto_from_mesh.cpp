@@ -45,6 +45,16 @@ void from_mesh_full(linear& algebra_p, const kind::f scalarf) {
 }
 
 
+void from_mesh_full_v(linear& algebra_p, const kind::f vectorf) {
+
+ lumped_full_common_v( Tm, Tp , vectorf);
+
+  algebra_p.mass_v(vectorf);
+
+  return;
+}
+
+
 void from_mesh_lumped(const kind::f scalarf) {
 
   lumped_full_common( Tm, Tp , scalarf);
