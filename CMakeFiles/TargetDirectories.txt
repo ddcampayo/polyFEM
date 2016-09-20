@@ -1,3 +1,0 @@
-/home/daniel/ownCloud/fem/polyFEM/CMakeFiles/rebuild_cache.dir
-/home/daniel/ownCloud/fem/polyFEM/CMakeFiles/edit_cache.dir
-/home/daniel/ownCloud/fem/polyFEM/CMakeFiles/main.dir
