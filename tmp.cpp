@@ -67,7 +67,6 @@ int main() {
     number();
   }
 
-  
   // // every step
   // areas(Tp);  quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );   Delta(Tp);
 
@@ -172,6 +171,8 @@ int main() {
       << " ; t step " << simu.dt()
       << endl;
 
+    FT displ;
+
     FT dt=simu.dt();
 
     FT dt2 = dt / 2.0 ;
@@ -181,9 +182,6 @@ int main() {
 
     FT min_displ=1e10;
     int min_iter=0;
-
-    const int max_iter=10;
-    const FT  max_displ= 1e-8; // < 0 : disable
 
 
 //  leapfrog, special first step.-

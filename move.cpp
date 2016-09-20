@@ -189,3 +189,27 @@ void u_star(FT dt , bool semi ) {
   return;
 
 }
+
+
+void update_half_velocity( void ) {
+
+   for(F_v_it fv=Tp.finite_vertices_begin();
+       fv!=Tp.finite_vertices_end();
+       fv++) {
+
+//  for(F_v_it fv=Tm.finite_vertices_begin();
+//      fv!=Tm.finite_vertices_end();
+//      fv++) {
+
+    Vector_2  v  = fv->U();
+    Vector_2  v0 = fv->Uold();
+//    Vector_2  v_star = fv->Ustar();
+
+    fv->U.set(  2 * v - v0 );
+ //   fv->U.set(  v + v_star - v0 );
+
+  }
+  
+  return;
+
+}

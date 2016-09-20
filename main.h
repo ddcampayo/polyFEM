@@ -103,6 +103,7 @@ FT move(FT) ;
 void move_info(void) ;
 void u_star(FT, bool) ;
 void u_new(FT) ;
+void update_half_velocity( void );
 void nabla(void) ;
 void Delta(Triangulation& T);
 

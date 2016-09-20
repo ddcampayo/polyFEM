@@ -5,6 +5,7 @@
 
 extern sim_pars simu;
 
+#include"fields.h"
 
 //typedef FT (*field)(const FT x,const FT y, bool deriv=false); // pointer to function returning field
 
@@ -18,6 +19,51 @@ FT field_quad(const FT x,const FT y, bool deriv=false) ;
 Vector_2 field_rotation(const FT x,const FT y, bool deriv=false) ;
 
 FT field_sin_cos(const FT x,const FT y, bool deriv=false) ;
+
+void set_fields_TG(void) {
+
+  for(F_v_it vit=Tp.finite_vertices_begin();
+      vit != Tp.finite_vertices_end();
+      vit++) {
+
+    FT x=vit->point().x();
+    FT y=vit->point().y();
+
+    vit->rold.set( vit->point() );
+
+//    vit->p.set( field_quad(x,y) );
+//    vit->p.set( (field_cos(2*x) + field_cos(2*y))/4.0 ) ;
+//    vit->alpha.set( field_r(x,y) ) ;
+    vit->alpha.set( field_sin(x) * field_sin(y) ) ;
+    vit->U.set( Vector_2( field_sin_cos(x,y) , - field_sin_cos(y,x) ));
+//    vit->U.set( Vector_2( field_sin(x) , 0 ));
+    vit->Uold.set( vit->U.val() );
+
+  }
+
+
+  for(F_v_it vit=Tm.finite_vertices_begin();
+      vit != Tm.finite_vertices_end();
+      vit++) {
+    FT x=vit->point().x();
+    FT y=vit->point().y();
+    vit->alpha.set( field_sin(x) * field_sin(y) ) ;
+    vit->U.set( Vector_2( field_sin_cos(x,y) , - field_sin_cos(y,x) ));
+    vit->Uold.set( vit->U.val() );
+//
+//    vit->rold.set( vit->point() );
+//
+//    //    vit->p.set( field_cos(x) );
+//    //    vit->U.set( Vector_2( field_cos(x) , 0 ) );
+//    //    vit->Uold.set( vit->U.val() );
+//    //    vit->Ustar.set( vit->U.val() );
+//
+  }
+
+
+  return;
+}
+
 
 void set_fields_Zalesak(void) {
 
@@ -53,7 +99,7 @@ void set_fields_Zalesak(void) {
 
 
   if(first) {
-    set_vels();
+    set_vels_rotating();
     first=false;
   }
 
@@ -89,7 +135,7 @@ void fidelity(Triangulation& T, std::ofstream& log_file ) {
 
 
 
-void set_vels(void) {
+void set_vels_rotating(void) {
 
   for(F_v_it vit=Tp.finite_vertices_begin();
       vit != Tp.finite_vertices_end();

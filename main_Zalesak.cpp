@@ -191,7 +191,7 @@ int main() {
 
     cout << "Moved avg " << displ << " to half point" << endl;
 
-    set_vels();
+    set_vels_rotating();
 
     displ=move( dt );
 
