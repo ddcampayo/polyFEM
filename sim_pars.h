@@ -153,7 +153,7 @@ public:
   bool initial_velocity() const {return  v0_ > 1e-10;}
 
   FT Re() const {
-    return 4*v0()/mu();
+    return 1*v0()/mu();
   }
 
   FT Co() const {
