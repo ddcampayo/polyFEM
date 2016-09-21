@@ -73,20 +73,16 @@ int main() {
 
   // just once!
 
-  areas(Tm);  quad_coeffs(Tm , simu.FEMm() );
-  volumes(Tm, simu.FEMm() );
-  Delta(Tm);
-
-  linear algebra(Tm);
 
   // every step
   areas(Tp);
   quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );
 
   // just once!
+  linear algebra(Tm);
+
   areas(Tm);
   quad_coeffs(Tm , simu.FEMm() ); volumes(Tm, simu.FEMm() );
-
 
   if(simu.create_points()) {
     nabla();

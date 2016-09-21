@@ -34,7 +34,7 @@ sim_pars simu;
 // stuff only used here:
 
 //#define FULL
-#define FULL_FULL
+//#define FULL_FULL
 //#define FULL_LUMPED
 //#define FLIP
 
@@ -45,6 +45,7 @@ sim_pars simu;
 #ifdef FULL_LUMPED
 #define FULL
 #endif
+
 
 #include"onto_from_mesh.h"
 
@@ -72,20 +73,16 @@ int main() {
 
   // just once!
 
-  areas(Tm);  quad_coeffs(Tm , simu.FEMm() );
-  volumes(Tm, simu.FEMm() );
-  Delta(Tm);
-
-  linear algebra(Tm);
 
   // every step
   areas(Tp);
   quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );
 
   // just once!
+  linear algebra(Tm);
+
   areas(Tm);
   quad_coeffs(Tm , simu.FEMm() ); volumes(Tm, simu.FEMm() );
-
 
   if(simu.create_points()) {
     nabla();

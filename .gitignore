@@ -7,4 +7,10 @@
 *.o
 *.so
 main
+
+# Compilation stuff #
+###################
 Makefile
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
