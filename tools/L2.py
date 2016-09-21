@@ -7,6 +7,7 @@ from numpy import pi
 
 Dt=0.01
 nu=0.001
+LL=1
 
 for line in open("simu.cfg"):
  if "viscosity" in line:
@@ -26,7 +27,7 @@ for dir_step in dirs :
 
 	time=Dt*step # + Dt/1
 
-	A = np.exp( -2 * pi**2 * nu * time)
+	A = np.exp( -8 * pi**2 * nu * time)
 
 	dt = np.loadtxt(dir_step+'/particles.dat')
 	#dt = np.loadtxt(dir_step+'/mesh.dat')
@@ -39,8 +40,8 @@ for dir_step in dirs :
 	vx=dt[:,8]
 	vy=dt[:,9]
 
-	fx=  A*np.sin(pi*x)*np.cos(pi*y)
-	fy=- A*np.cos(pi*x)*np.sin(pi*y)
+	fx=  A*np.sin(2*pi*x / LL)*np.cos(2*pi*y / LL)
+	fy=- A*np.cos(2*pi*x / LL)*np.sin(2*pi*y / LL)
 
 	ddx=(vx-fx)**2
 	ddy=(vy-fy)**2

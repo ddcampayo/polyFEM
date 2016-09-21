@@ -225,18 +225,18 @@ FT field_cos(const FT x, bool deriv) {
   // else
   //   return 0;
  
-    return std::cos(M_PI*x);
+    return std::cos(2*M_PI*x/LL);
 
 }
 
 
 FT field_sin(const FT x , bool deriv) {
-  return std::sin( M_PI * x  );
+  return std::sin(2* M_PI * x/LL  );
 }
 
 
 FT field_sin_cos(const FT x,const FT y, bool deriv) {
-  return std::sin( M_PI * x  ) * std::cos( M_PI * y  );
+  return std::sin( 2*M_PI * x/LL  ) * std::cos(2* M_PI * y/LL  );
 }
 
 FT field_quad(const FT x,const FT y, bool deriv) {

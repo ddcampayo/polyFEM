@@ -13,6 +13,8 @@ for line in open("simu.cfg"):
  if "step" in line:
    Dt=float(line.split()[1])
 
+LL=1
+
 dirs=glob.glob('[0-9]*')
 
 #dirs = sorted(dirs)
@@ -25,7 +27,7 @@ for dir_step in dirs :
 
 	time = Dt*step # + Dt/2.0
 
-	A = np.exp( -4 * pi**2 * nu * time)
+	A = np.exp( -16 * pi**2 * nu * time)
 
 #	dt = np.loadtxt(dir_step+'/particles.dat')
 	dt = np.loadtxt(dir_step+'/mesh.dat')
@@ -35,7 +37,7 @@ for dir_step in dirs :
 #	y=dt[:,19]
 	p=dt[:,5]
 
-	p0=  A/4*(np.cos(2*pi*x)+np.cos(2*pi*y))
+	p0=  A/4*(np.cos(4*pi*x/LL)+np.cos(4*pi*y/LL))
         p_off= p0[0] - p[0]
 
 #        p0 -=  p_off
