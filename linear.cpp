@@ -524,7 +524,9 @@ void linear::mass_v(const kind::f vectorf ) {
 
   if(mass.size()==0)   fill_mass();
 
-  //  cout << "matrix  vector of size " << mass.rows() << " x " << mass.cols() << endl;
+    cout << "matrix  vector of size " << mass.rows() << " x " << mass.cols() << endl;
+
+    cout << "x component" << endl;
 
   // x component.-
 
@@ -541,6 +543,7 @@ void linear::mass_v(const kind::f vectorf ) {
   vctr_to_vfield(grad_x , vectorf , 0 );
 
   // y component.-
+    cout << "y component" << endl;
 
   VectorXd lambda_v_y = vfield_to_vctr( vectorf , 1 );
 
