@@ -69,6 +69,11 @@ void set_fields_Zalesak(void) {
 
   static bool first=true;
 
+  if(first) {
+    set_vels_rotating();
+    first=false;
+  }
+
   for(F_v_it vit=Tp.finite_vertices_begin();
       vit != Tp.finite_vertices_end();
       vit++) {
@@ -98,10 +103,6 @@ void set_fields_Zalesak(void) {
   }
 
 
-  if(first) {
-    set_vels_rotating();
-    first=false;
-  }
 
   return;
 }
@@ -125,6 +126,8 @@ void fidelity(Triangulation& T, std::ofstream& log_file ) {
     dd += (al-al0) * (al-al0) ;
     dd2+= al0 * al0 ;
   }
+
+//   cout << "dd = " << dd << endl ;
 
   log_file << "  " << std::sqrt( dd / dd2 );
 

@@ -140,6 +140,11 @@ int main() {
   log_file.open("main.log");
 
   areas(Tp);  quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );
+
+    integrals( Tm , log_file);     log_file << "  ";
+    fidelity(Tm,log_file );        log_file << "  ";
+    integrals( Tp , log_file);     log_file << "  ";
+    fidelity(  Tp , log_file );        log_file << endl;
      
   for(;
       simu.current_step() <= simu.Nsteps();
@@ -222,6 +227,8 @@ int main() {
       << simu.current_step() << "  "
       <<  simu.time() << "  " ;
 
+    areas(Tp);  quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );
+    
     integrals( Tm , log_file);     log_file << "  ";
     fidelity(Tm,log_file );        log_file << "  ";
     integrals( Tp , log_file);     log_file << "  ";

@@ -53,6 +53,12 @@ void integrals(Triangulation& T, std::ofstream& log_file ) {
     k += v2;
 
     vm = vm + v;
+
+//   cout << "M: "<<
+//    m  << "  " <<
+//    m2 << "  " <<
+//    vm << "  " <<
+//    k << endl ;
   }
 
   log_file <<
