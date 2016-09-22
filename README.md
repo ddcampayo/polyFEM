@@ -27,6 +27,7 @@ The rotating Zalesak disk test (main_Zalesak.cpp)
 # Requires
 
 CGAL 4.8
-eigen3 libs
+eigen3 3.2.9 libs
+( sudo cp -r cmake/ /usr/local/include/eigen3/ )
 
 

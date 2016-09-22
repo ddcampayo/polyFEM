@@ -21,7 +21,7 @@ find_package(CGAL QUIET COMPONENTS Core )
 include( ${CGAL_USE_FILE} )
 
 #set(EIGEN3_INCLUDE_DIR "/usr/local/include/eigen")
-set(EIGEN3_INCLUDE_DIR "/usr/include/eigen3")
+set(EIGEN3_INCLUDE_DIR "/usr/local/include/eigen3")
 
 find_package(Eigen3) 
 
@@ -33,11 +33,11 @@ else()
 endif() 
 
 
-#set(CMAKE_MODULE_PATH "/usr/local/include/eigen/cmake/;${CMAKE_MODULE_PATH}")
-set(CMAKE_MODULE_PATH "/usr/include/eigen3/cmake/;${CMAKE_MODULE_PATH}")
+set(CMAKE_MODULE_PATH "/usr/local/include/eigen/cmake/;${CMAKE_MODULE_PATH}")
+#set(CMAKE_MODULE_PATH "/usr/include/eigen3/cmake/;${CMAKE_MODULE_PATH}")
 #set(CHOLMOD_LIBRARIES "/usr/include/suitesparse/")
 
-#find_package( Cholmod )
+find_package( Cholmod )
 
 find_library(LAPACK_LIB NAMES lapack)
 
