@@ -200,7 +200,7 @@ public:
   int no_of_nodes() const {return no_of_nodes_;}
 
   int set_no_of_particles(int nn)  {
-    h_=std::sqrt(4.0/FT(nn));
+    h_=std::sqrt(1.0/FT(nn));
     return no_of_particles_=nn;
   }
 
