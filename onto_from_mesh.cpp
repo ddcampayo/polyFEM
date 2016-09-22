@@ -576,7 +576,7 @@ void flip_volumes(Triangulation& Tpart, Triangulation& Tmesh, bool FEM) {
   for(F_v_it fv=Tmesh.finite_vertices_begin();
       fv!=Tmesh.finite_vertices_end();
       fv++) {
-    fv->fvol.reset();
+    //    fv->fvol.reset();
 
     Point pm = fv->point();
 
@@ -587,8 +587,13 @@ void flip_volumes(Triangulation& Tpart, Triangulation& Tmesh, bool FEM) {
 
     FEM_hs( fc , pm, v, hh);
 
+    FT fvol=0
+
     for(int i0=0; i0< 3 ;i0++)
-      fv->fvol() += hh[i0] * v[i0]->vol();
+      fvol += hh[i0] * v[i0]->vol();
+
+    fv->fvol.set( fvol ) ;
+
   }
 
   cout << "FLIP volumes computed" << endl;
