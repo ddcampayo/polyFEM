@@ -575,36 +575,21 @@ void flip_volumes(Triangulation& Tpart, Triangulation& Tmesh, bool FEM) {
 
   for(F_v_it fv=Tmesh.finite_vertices_begin();
       fv!=Tmesh.finite_vertices_end();
-      fv++)
+      fv++) {
     fv->fvol.reset();
 
-  for(F_v_it part=Tpart.finite_vertices_begin();
-      part!=Tpart.finite_vertices_end();
-      part++) {
+    Point pm = fv->point();
 
-    Point p0    = part->point();
-    FT part_vol = part->vol();
+    Face_handle fc=Tpart.locate( pm );
 
     std::vector<Vertex_handle> v(3);
     std::vector<FT> hh(3);
 
-    Face_handle fc=Tmesh.locate( p0 );
-
-    FEM_hs( fc , p0, v, hh);
+    FEM_hs( fc , pm, v, hh);
 
     for(int i0=0; i0< 3 ;i0++)
-      v[i0]->fvol += hh[i0] * part_vol;
-
-    //      if(FEM) continue; // TODO extend !!!
-
+      fv->fvol += hh[i0] * v[i0]->vol;
   }
-
-  for(F_v_it fv=Tmesh.finite_vertices_begin();
-      fv!=Tmesh.finite_vertices_end();
-      fv++) {
-    if( fv->fvol() < 1e-10 ) fv->fvol.set( fv->vol() );
-    //    fv->vol.set( fv->fvol() );
-    }
 
   cout << "FLIP volumes computed" << endl;
 }
@@ -614,79 +599,54 @@ void flip_volumes(Triangulation& Tpart, Triangulation& Tmesh, bool FEM) {
 
 void onto_mesh_flip(Triangulation& Tpart, Triangulation& Tmesh, bool FEM, const kind::f scalarf ) {
 
+
   for(F_v_it fv=Tmesh.finite_vertices_begin();
       fv!=Tmesh.finite_vertices_end();
-      fv++)
+      fv++) {
     fv->sf(scalarf).reset();
-    //    fv->vol.set(0);
 
-  for(F_v_it part=Tpart.finite_vertices_begin();
-      part!=Tpart.finite_vertices_end();
-      part++) {
+    Point pm = fv->point();
 
-    Point p0    = part->point();
-    FT part_vol = part->vol();
-    FT sfield = part->sf(scalarf).val() ;
+    Face_handle fc=Tpart.locate( pm );
 
-    FT sf_vol = part_vol * sfield;
-    
     std::vector<Vertex_handle> v(3);
     std::vector<FT> hh(3);
 
-    Face_handle fc=Tmesh.locate( p0 );
+    FEM_hs( fc , pm, v, hh);
 
-    FEM_hs( fc , p0, v, hh);
+    for(int i0=0; i0< 3 ;i0++)
+      fv->sf(scalarf) += hh[i0] * v[i0]->sf(scalarf).val() * v[i0]->vol;
 
-    for(int i0=0; i0< 3 ;i0++) {
-      FT v_i=v[i0]->fvol();
-      v[i0]->sf(scalarf) += hh[i0] * sf_vol / v_i ;
-    }
-    
-    //      if(FEM) continue; // TODO extend !!!
+    fv->sf(scalarf) /= fv->fvol.val();
+
 
   }
-  
-  cout << "FLIP volumes computed" << endl;
-}
 
+}
 
 
 void onto_mesh_flip_v(Triangulation& Tpart, Triangulation& Tmesh, bool FEM, const kind::f vectorf ) {
 
   for(F_v_it fv=Tmesh.finite_vertices_begin();
       fv!=Tmesh.finite_vertices_end();
-      fv++)
-    fv->sf(vectorf).reset();
-    //    fv->vol.set(0);
+      fv++) {
+    fv->vf(vectorf).reset();
 
-  for(F_v_it part=Tpart.finite_vertices_begin();
-      part!=Tpart.finite_vertices_end();
-      part++) {
+    Point pm = fv->point();
 
-    Point p0    = part->point();
-    FT part_vol = part->vol();
-    Vector_2 vfield = part->vf(vectorf).val() ;
+    Face_handle fc=Tpart.locate( pm );
 
-    Vector_2 vf_vol = part_vol * vfield;
-    
     std::vector<Vertex_handle> v(3);
     std::vector<FT> hh(3);
 
-    Face_handle fc=Tmesh.locate( p0 );
+    FEM_hs( fc , pm, v, hh);
 
-    FEM_hs( fc , p0, v, hh);
+    for(int i0=0; i0< 3 ;i0++)
+      fv->vf(vectorf) += hh[i0] * v[i0]->vf(vectorf).val() * v[i0]->vol;
 
-    for(int i0=0; i0< 3 ;i0++) {
-      FT v_i=v[i0]->fvol();
-      v[i0]->vf(vectorf) += hh[i0] * vf_vol / v_i ;
-    }
-    
-    //      if(FEM) continue; // TODO extend !!!
+    fv->vf(vectorf) /= fv->fvol.val();
 
   }
-  
-  cout << "FLIP volumes computed" << endl;
+
 }
-
-
 
