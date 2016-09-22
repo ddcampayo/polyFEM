@@ -588,7 +588,7 @@ void flip_volumes(Triangulation& Tpart, Triangulation& Tmesh, bool FEM) {
     FEM_hs( fc , pm, v, hh);
 
     for(int i0=0; i0< 3 ;i0++)
-      fv->fvol += hh[i0] * v[i0]->vol;
+      fv->fvol() += hh[i0] * v[i0]->vol();
   }
 
   cout << "FLIP volumes computed" << endl;
@@ -615,7 +615,7 @@ void onto_mesh_flip(Triangulation& Tpart, Triangulation& Tmesh, bool FEM, const 
     FEM_hs( fc , pm, v, hh);
 
     for(int i0=0; i0< 3 ;i0++)
-      fv->sf(scalarf) += hh[i0] * v[i0]->sf(scalarf).val() * v[i0]->vol;
+      fv->sf(scalarf) += hh[i0] * v[i0]->sf(scalarf).val() * v[i0]->vol();
 
     fv->sf(scalarf) /= fv->fvol.val();
 
@@ -642,7 +642,7 @@ void onto_mesh_flip_v(Triangulation& Tpart, Triangulation& Tmesh, bool FEM, cons
     FEM_hs( fc , pm, v, hh);
 
     for(int i0=0; i0< 3 ;i0++)
-      fv->vf(vectorf) += hh[i0] * v[i0]->vf(vectorf).val() * v[i0]->vol;
+      fv->vf(vectorf) += hh[i0] * v[i0]->vf(vectorf).val() * v[i0]->vol();
 
     fv->vf(vectorf) /= fv->fvol.val();
 
