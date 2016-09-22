@@ -219,6 +219,8 @@ int main() {
       from_mesh_v(kind::U);
 #endif
 
+//      draw(); return 0;
+
       displ=move( dt2 );
 
       cout << "Moved avg " << displ << " to half point" << endl;

@@ -74,11 +74,11 @@ FT move(FT dt) {
     Vector_2 disp2 = per_vect(rnew,rnow);
     dd2 += sqrt(disp2.squared_length())/simu.h();
 
-    //    cout << "New position: " << r0 ;
+//    cout << "New position: " << r0 ;
 
     data.pos = per_point( rnew );
 
-    //    cout << " ---> " << data.pos  << endl ;
+//    cout << " ---> " << data.pos  << endl ;
 
     prev.push_back (data);
 
@@ -95,7 +95,7 @@ FT move(FT dt) {
       data!=prev.end();
       data++) {
 
-    // cout << "Inserting back at " << data->pos << endl ;
+//    cout << "Inserting back at " << data->pos << endl ;
 
     Vertex_handle fv=Tp.insert(data->pos);
 
@@ -106,6 +106,7 @@ FT move(FT dt) {
 
   }
 
+//  cout << "Insertion done" << endl ;
   Tp.convert_to_1_sheeted_covering();
 
   return dd2;

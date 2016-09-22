@@ -422,13 +422,16 @@ void lumped_full_common_vertices( Triangulation& Tfrom, Triangulation& Tto, cons
 
 void lumped_full_common_vertices_v( Triangulation& Tfrom, Triangulation& Tto, const kind::f vectorf ) {
 
-  for(F_v_it vit=Tm.vertices_begin();
-      vit != Tm.vertices_end();
+    
+  bool linear = false ; // = simu.FEMp();
+
+  for(F_v_it vit=Tto.vertices_begin();
+      vit != Tto.vertices_end();
       vit++) 
     vit->vf(vectorf).reset();
 
-  for(F_f_it fit=Tm.faces_begin();
-      fit != Tm.faces_end();
+  for(F_f_it fit=Tto.faces_begin();
+      fit != Tto.faces_end();
       fit++) {
 
     vector<Vector_2> field_at_v( 3 );
@@ -444,7 +447,8 @@ void lumped_full_common_vertices_v( Triangulation& Tfrom, Triangulation& Tto, co
 
     vector<Vector_2> field_op_v( 3 );
 
-    if( !simu.FEMp() ) {
+    //        if( !simu.FEMp() ) {
+    if( !linear ) {
       for(int i0 = 0; i0 < 3 ; ++i0) {
 	int i1 = (i0+1) % 3;
 	int i2 = (i1+1) % 3;
@@ -473,7 +477,9 @@ void lumped_full_common_vertices_v( Triangulation& Tfrom, Triangulation& Tto, co
 
     std::vector<Vector_2>         pm(3);
 
-    if( !simu.FEMp() ) 
+
+    //    if( !simu.FEMp() ) 
+    if( !linear )
       for(int i0 = 0; i0 < 3 ; ++i0) {
 	int i1 = (i0+1) % 3;
 	int i2 = (i1+1) % 3;
@@ -495,8 +501,9 @@ void lumped_full_common_vertices_v( Triangulation& Tfrom, Triangulation& Tto, co
       Vector_2 U0m, U1m, U2m;
       Vector_2 Uold0m, Uold1m, Uold2m;
 
-      if( !simu.FEMp() )
-
+      
+    //    if( !simu.FEMp() ) 
+      if( !linear )
 	vm->vf(vectorf) += ( pm[i0] + 2 * pm[i1] + 2 * pm[i2] ) * a / 60.0 ;
 
       if(simu.FEMm()) continue;

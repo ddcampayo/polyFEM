@@ -556,6 +556,8 @@ void linear::mass_v(const kind::f vectorf ) {
 
   vctr_to_vfield(grad_y , vectorf , 1 );
 
+  cout << "Mass invertion of vector field " << vectorf << "  done " << endl;
+
   return;
 }
 #endif
