@@ -20,6 +20,7 @@
 
 Iso_rectangle domain(-LL/2, -LL/2, LL/2, LL/2);
 
+#include"fields.h"
 
 // TODO: the two triangulations store different things.
 //       specific bases and faces should be implemented for each
