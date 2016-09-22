@@ -5,6 +5,7 @@ void onto_mesh_delta_v(const kind::f);
 void onto_mesh_full(linear& algebra, const kind::f scalarf);
 void onto_mesh_full_v(linear& algebra, const kind::f vectorf);
 void onto_mesh_flip(Triangulation& Tpart, Triangulation& Tmesh, bool FEM, const kind::f scalarf );
+void onto_mesh_flip_v(Triangulation& Tpart, Triangulation& Tmesh, bool FEM, const kind::f vectorf );
 
 void from_mesh(const kind::f ) ;
 void from_mesh_v(const kind::f ) ;

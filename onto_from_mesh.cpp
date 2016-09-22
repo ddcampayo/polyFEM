@@ -651,3 +651,42 @@ void onto_mesh_flip(Triangulation& Tpart, Triangulation& Tmesh, bool FEM, const 
 
 
 
+void onto_mesh_flip_v(Triangulation& Tpart, Triangulation& Tmesh, bool FEM, const kind::f vectorf ) {
+
+  for(F_v_it fv=Tmesh.finite_vertices_begin();
+      fv!=Tmesh.finite_vertices_end();
+      fv++)
+    fv->sf(vectorf).reset();
+    //    fv->vol.set(0);
+
+  for(F_v_it part=Tpart.finite_vertices_begin();
+      part!=Tpart.finite_vertices_end();
+      part++) {
+
+    Point p0    = part->point();
+    FT part_vol = part->vol();
+    Vector_2 vfield = part->vf(vectorf).val() ;
+
+    Vector_2 vf_vol = part_vol * vfield;
+    
+    std::vector<Vertex_handle> v(3);
+    std::vector<FT> hh(3);
+
+    Face_handle fc=Tmesh.locate( p0 );
+
+    FEM_hs( fc , p0, v, hh);
+
+    for(int i0=0; i0< 3 ;i0++) {
+      FT v_i=v[i0]->fvol();
+      v[i0]->vf(vectorf) += hh[i0] * vf_vol / v_i ;
+    }
+    
+    //      if(FEM) continue; // TODO extend !!!
+
+  }
+  
+  cout << "FLIP volumes computed" << endl;
+}
+
+
+
