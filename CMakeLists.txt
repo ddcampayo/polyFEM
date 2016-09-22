@@ -33,7 +33,7 @@ else()
 endif() 
 
 
-set(CMAKE_MODULE_PATH "/usr/local/include/eigen/cmake/;${CMAKE_MODULE_PATH}")
+set(CMAKE_MODULE_PATH "/usr/local/include/eigen3/cmake/;${CMAKE_MODULE_PATH}")
 #set(CMAKE_MODULE_PATH "/usr/include/eigen3/cmake/;${CMAKE_MODULE_PATH}")
 #set(CHOLMOD_LIBRARIES "/usr/include/suitesparse/")
 
