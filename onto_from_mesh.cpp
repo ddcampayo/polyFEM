@@ -587,7 +587,7 @@ void flip_volumes(Triangulation& Tpart, Triangulation& Tmesh, bool FEM) {
 
     FEM_hs( fc , pm, v, hh);
 
-    FT fvol=0
+    FT fvol=0;
 
     for(int i0=0; i0< 3 ;i0++)
       fvol += hh[i0] * v[i0]->vol();
