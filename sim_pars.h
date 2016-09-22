@@ -207,7 +207,7 @@ public:
   // Dirty! If factor is too large, it is really just the no of nodes
   int set_no_of_nodes(void)  {
     if (mesh_factor_ < 50) {
-      int nn = std::sqrt(no_of_particles_) * mesh_factor_ +1 ;
+      int nn = std::sqrt(no_of_particles_) * mesh_factor_ + 0 ;
       return no_of_nodes_= nn*nn;
     } else
       return no_of_nodes_= mesh_factor_;

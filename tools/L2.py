@@ -40,15 +40,18 @@ for dir_step in dirs :
 	vx=dt[:,8]
 	vy=dt[:,9]
 
+        vol=dt[:,3]
+
+
 	fx=  A*np.sin(2*pi*x / LL)*np.cos(2*pi*y / LL)
 	fy=- A*np.cos(2*pi*x / LL)*np.sin(2*pi*y / LL)
 
 	ddx=(vx-fx)**2
 	ddy=(vy-fy)**2
 
-	dd=ddx+ddy
+	dd= vol * (ddx+ddy)
 
-	ff= fx**2 + fy**2
+	ff= vol * (fx**2 + fy**2)
 
 	print " %g  %g " % (
 	time ,
