@@ -70,6 +70,22 @@ void from_mesh_lumped(const kind::f scalarf) {
 }
 
 
+void from_mesh_lumped_v(const kind::f vectorf) {
+
+  lumped_full_common_v( Tm, Tp , vectorf);
+
+  for(F_v_it vit=Tp.vertices_begin();
+      vit != Tp.vertices_end();
+      vit++) {
+    FT V=vit->vol();
+    vit->vf(vectorf) /= V ;
+  }
+
+  return;
+}
+
+
+
 void onto_mesh_full(linear& algebra, const kind::f scalarf) {
 
   lumped_full_common( Tp, Tm , scalarf);
