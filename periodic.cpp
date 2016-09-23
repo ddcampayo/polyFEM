@@ -1,6 +1,8 @@
 #include"main.h"
 #include"periodic.h"
 
+//extern const FT LL;
+
 FT per_dist(const FT& x1, const FT& x2) {
   FT dx=x2-x1;
 

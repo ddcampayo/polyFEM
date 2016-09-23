@@ -7,6 +7,8 @@ extern sim_pars simu;
 
 #include"fields.h"
 
+//extern const FT LL;
+
 //typedef FT (*field)(const FT x,const FT y, bool deriv=false); // pointer to function returning field
 
 

@@ -1,6 +1,7 @@
 //#include"main.h"
 
-const FT LL=3; // length of original domain
+//const FT LL=3; // length of original domain
+extern const FT LL;
 
 FT per_dist(const FT& x1, const FT& x2);
 Point per_point(const FT& x1,const  FT& x2);

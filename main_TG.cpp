@@ -19,6 +19,8 @@
 
 #include"periodic.h"
 
+const FT LL=1; // length of original domain
+
 Iso_rectangle domain(-LL/2, -LL/2, LL/2, LL/2);
 
 
