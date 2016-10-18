@@ -17,7 +17,8 @@ def grid(x, y, z , resX=50, resY=50):
 figure(figsize=( 8 , 8))
 
 #levels = np.linspace( -0.2 , 1.2 , 15 )
-levels = [ -0.2 , -0.15 , - 0.1 , -0.05, 0 , 0.5 , 1 , 1.05 , 1.1 , 1.15, 1.2 ]
+#levels = [ -0.2 , -0.15 , - 0.1 , -0.05, 0 , 0.5 , 1 , 1.05 , 1.1 , 1.15, 1.2 ]
+levels = [ -0.05, 0 , 0.5 , 1 , 1.05  ]
 
 dtm = loadtxt('200/mesh.dat');
 xm=dtm[:,0]; ym=dtm[:,1];  pm=dtm[:,5];  vxm=dtm[:,8]; vym=dtm[:,9]; alm=dtm[:,4]
