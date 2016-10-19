@@ -12,7 +12,7 @@ def grid(x, y, z , resX=100, resY=100):
 
 pl.figure(figsize=(8,8))
 
-skip=2
+skip=20
 #path='timings_full/'
 path='./'
 
