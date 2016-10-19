@@ -145,6 +145,8 @@ public:
 
   vector_field laplU;
 
+  vector_field force;
+
   field<int> idx;       // an index
 
   field<bool> moved;       // whether it's moved or not
