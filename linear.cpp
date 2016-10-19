@@ -79,15 +79,12 @@ void linear::fill_stiff(void){
 	
       FT ddelta = -nn->second; // sign fixed here !
 
-      // cout << vi << " , " << vj << "  " << ddelta << endl;
+      //      cout << vi << " , " << vj << "  " << ddelta << endl;
 
       aa.push_back( triplet(vi,vj,  ddelta ));
 
       if( (vi!=0) && (vj!=0) ) bb.push_back( triplet(vi - 1 , vj -1 ,  -ddelta ));
 
-      // cout << vi << " , "
-      // 	   << vj << " : "
-      // 	   << ddelta << endl;
 
 
     }

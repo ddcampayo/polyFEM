@@ -4,7 +4,7 @@
 
 extern sim_pars simu;
 
-void nabla(void) {
+void nabla(Triangulation& Tm) {
 
   //  const bool FME_grad=false; // if true, use FEM approx to the gradient
 

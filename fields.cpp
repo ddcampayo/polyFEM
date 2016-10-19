@@ -22,10 +22,10 @@ Vector_2 field_rotation(const FT x,const FT y, bool deriv=false) ;
 
 FT field_sin_cos(const FT x,const FT y, bool deriv=false) ;
 
-void set_fields_TG(void) {
+void set_fields_TG(Triangulation& T) {
 
-  for(F_v_it vit=Tp.finite_vertices_begin();
-      vit != Tp.finite_vertices_end();
+  for(F_v_it vit=T.finite_vertices_begin();
+      vit != T.finite_vertices_end();
       vit++) {
 
     FT x=vit->point().x();
@@ -43,41 +43,21 @@ void set_fields_TG(void) {
 
   }
 
-
-  for(F_v_it vit=Tm.finite_vertices_begin();
-      vit != Tm.finite_vertices_end();
-      vit++) {
-    FT x=vit->point().x();
-    FT y=vit->point().y();
-    vit->alpha.set( field_sin(x) * field_sin(y) ) ;
-    vit->U.set( Vector_2( field_sin_cos(x,y) , - field_sin_cos(y,x) ));
-    vit->Uold.set( vit->U.val() );
-//
-//    vit->rold.set( vit->point() );
-//
-//    //    vit->p.set( field_cos(x) );
-//    //    vit->U.set( Vector_2( field_cos(x) , 0 ) );
-//    //    vit->Uold.set( vit->U.val() );
-//    //    vit->Ustar.set( vit->U.val() );
-//
-  }
-
-
   return;
 }
 
 
-void set_fields_Zalesak(void) {
+void set_fields_Zalesak(Triangulation& T) {
 
   static bool first=true;
 
   if(first) {
-    set_vels_rotating();
+    set_vels_rotating(T);
     first=false;
   }
 
-  for(F_v_it vit=Tp.finite_vertices_begin();
-      vit != Tp.finite_vertices_end();
+  for(F_v_it vit=T.finite_vertices_begin();
+      vit != T.finite_vertices_end();
       vit++) {
 
     FT x=vit->point().x();
@@ -87,23 +67,6 @@ void set_fields_Zalesak(void) {
     vit->alpha.set( field_Zalesak(x,y) ) ;
     vit->Uold.set( vit->U.val() );
   }
-
-  for(F_v_it vit=Tm.finite_vertices_begin();
-      vit != Tm.finite_vertices_end();
-      vit++) {
-
-    FT x=vit->point().x();
-    FT y=vit->point().y();
-
-    vit->alpha.set( field_Zalesak(x,y) ) ;
-    vit->rold.set( vit->point() );
-    vit->Uold.set( vit->U.val() );
-
-    //    vit->p.set( field_cos(x) );
-    //    vit->Ustar.set( vit->U.val() );
-
-  }
-
 
 
   return;
@@ -140,10 +103,10 @@ void fidelity(Triangulation& T, std::ofstream& log_file ) {
 
 
 
-void set_vels_rotating(void) {
+void set_vels_rotating(Triangulation& T) {
 
-  for(F_v_it vit=Tp.finite_vertices_begin();
-      vit != Tp.finite_vertices_end();
+  for(F_v_it vit=T.finite_vertices_begin();
+      vit != T.finite_vertices_end();
       vit++) {
 
     FT x=vit->point().x();

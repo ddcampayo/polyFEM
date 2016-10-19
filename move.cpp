@@ -48,7 +48,7 @@ struct data_kept {
 
 };
 
-FT move(FT dt) {
+FT move(Triangulation& Tp, const FT dt ) {
 
   vector<data_kept> prev;
 
@@ -113,15 +113,15 @@ FT move(FT dt) {
 }
 
 
-void move_info(void) {
+void move_info(Triangulation& T) {
 
-  for(F_v_it fv=Tp.finite_vertices_begin();
-      fv!=Tp.finite_vertices_end();
+  for(F_v_it fv=T.finite_vertices_begin();
+      fv!=T.finite_vertices_end();
       fv++) {
 
-    Periodic_point rr=Tp.periodic_point(fv);
+    Periodic_point rr=T.periodic_point(fv);
 
-    Point r=Tp.point(rr); // current point
+    Point r=T.point(rr); // current point
 
     fv->rold.set(r);
     fv->Uold.set(fv->U());
@@ -130,20 +130,14 @@ void move_info(void) {
   }
 
 
-  for(F_v_it fv=Tm.finite_vertices_begin();
-      fv!=Tm.finite_vertices_end();
-      fv++) {
-    fv->Uold.set(fv->U());
-  }
-
   return;
 }
 
 
-void u_new(FT dt) {
+void u_new(Triangulation& T, FT dt) {
 
-  for(F_v_it fv=Tm.finite_vertices_begin();
-      fv!=Tm.finite_vertices_end();
+  for(F_v_it fv=T.finite_vertices_begin();
+      fv!=T.finite_vertices_end();
       fv++) {
 
 //  for(F_v_it fv=Tp.finite_vertices_begin();
@@ -166,10 +160,10 @@ void u_new(FT dt) {
 }
 
 
-void u_star(FT dt , bool semi ) { 
+void u_star(Triangulation& T, FT dt , bool semi ) { 
 
-  for(F_v_it fv=Tm.finite_vertices_begin();
-      fv!=Tm.finite_vertices_end();
+  for(F_v_it fv=T.finite_vertices_begin();
+      fv!=T.finite_vertices_end();
       fv++) {
 
     Vector_2 U0 = fv->Uold() ;
@@ -192,7 +186,7 @@ void u_star(FT dt , bool semi ) {
 }
 
 
-void update_half_velocity( void ) {
+void update_half_velocity( Triangulation& Tp ) {
 
    for(F_v_it fv=Tp.finite_vertices_begin();
        fv!=Tp.finite_vertices_end();

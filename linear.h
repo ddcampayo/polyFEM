@@ -1,6 +1,6 @@
 //#include <Eigen/Dense>
 
-#define CHOLMOD
+//#define CHOLMOD
 
 #ifdef CHOLMOD
  #include <Eigen/CholmodSupport>

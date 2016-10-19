@@ -87,9 +87,9 @@ const Iterator_type unique_cover=Triangulation::UNIQUE_COVER_DOMAIN;
 
 typedef CGAL::Periodic_2_offset_2 Offset;
 
-void create(void);//Triangulation& T);
-void draw(void);//const Triangulation& T);
-void number(void);//Triangulation& T);
+void create(void);
+void draw(Triangulation& T,  const std::string file_name , const bool setup ) ;
+void number(Triangulation& T);
 void quad_coeffs( Triangulation& T , bool ) ;
 void matrices(void);
 FT solve_linear(std::vector<Periodic_point>& vP,
@@ -99,12 +99,12 @@ void prune(std::vector<Vertex_handle>& v);
 void set_fields_Zalesak(void);
 void set_vels(void);
 void curvature(void) ;
-FT move(FT) ;
-void move_info(void) ;
-void u_star(FT, bool) ;
-void u_new(FT) ;
-void update_half_velocity( void );
-void nabla(void) ;
+FT move(Triangulation& T, FT) ;
+void move_info(Triangulation& T) ;
+void u_star(Triangulation& T, FT, bool) ;
+void u_new(Triangulation& T, FT) ;
+void update_half_velocity( Triangulation& T );
+void nabla(Triangulation& T) ;
 void Delta(Triangulation& T);
 
 void setup_v(void);
@@ -116,8 +116,8 @@ void integrals(Triangulation& T, std::ofstream& log_file);
 void fidelity(Triangulation& T, std::ofstream& log_file );
 
 // TODO: don't have these around as global vars
-extern Triangulation Tm;
-extern Triangulation Tp;
+//extern Triangulation Tm;
+//extern Triangulation Tp;
 
 //#include <Eigen/Dense>
 // #include"linear.h"

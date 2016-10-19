@@ -4,7 +4,6 @@
 //#include"periodic.h"
 
 //extern sim_pars simu;
-extern Triangulation T;
 
 // computes the gradient (vector field) of a scalar field
 
@@ -44,7 +43,7 @@ void linear::laplacian_s(const kind::f ffield, const kind::f gradfield  ) {
   laplacian_Delta( ffield,  gradfield  ) ;
 }
 
-void linear::laplacian_v(const kind::f ffield, const kind::f gradfield  ) {
+void linear::laplacian_v( const kind::f ffield, const kind::f gradfield  ) {
 
   cout << "vector Laplacian of field " << ffield << " --> " << gradfield << '\n';
 
@@ -52,10 +51,10 @@ void linear::laplacian_v(const kind::f ffield, const kind::f gradfield  ) {
   laplacian_stiff_v( ffield,  gradfield  ) ;
 }
 
-void linear::laplacian_stiff_v(const kind::f ffield, const kind::f gradfield   ) {
+void linear::laplacian_stiff_v(const kind::f ffield, const kind::f gradfield ) {
 
-  for(F_v_it fv=Tm.finite_vertices_begin();
-      fv!=Tm.finite_vertices_end();
+  for(F_v_it fv=T.finite_vertices_begin();
+      fv!=T.finite_vertices_end();
       fv++)  {
 
     typedef Vertex::scalar_link scalar_link;
@@ -96,8 +95,8 @@ void linear::laplacian_Delta(const kind::f ffield, const kind::f gradfield   ) {
 
   //  const bool FME_grad=false; // if true, use FEM approx to the gradient
 
-  for(F_v_it fv=Tm.finite_vertices_begin();
-      fv!=Tm.finite_vertices_end();
+  for(F_v_it fv=T.finite_vertices_begin();
+      fv!=T.finite_vertices_end();
       fv++)  {
 
     //    cout << fv->idx.val() << ":  \n";
@@ -141,10 +140,10 @@ void linear::laplacian_Delta(const kind::f ffield, const kind::f gradfield   ) {
 
 }
 
-void linear::laplacian_Delta_v(const kind::f ffield, const kind::f gradfield   ) {
+void linear::laplacian_Delta_v( const kind::f ffield, const kind::f gradfield   ) {
 
-  for(F_v_it fv=Tm.finite_vertices_begin();
-      fv!=Tm.finite_vertices_end();
+  for(F_v_it fv=T.finite_vertices_begin();
+      fv!=T.finite_vertices_end();
       fv++)  {
 
     typedef Vertex::scalar_link scalar_link;
@@ -180,10 +179,10 @@ void linear::laplacian_Delta_v(const kind::f ffield, const kind::f gradfield   )
 
 // stiff-lumped procedure. another candidate for templating
 
-void linear::laplacian_stiff(const kind::f ffield, const kind::f gradfield   ) {
+void linear::laplacian_stiff( const kind::f ffield, const kind::f gradfield   ) {
 
-  for(F_v_it fv=Tm.finite_vertices_begin();
-      fv!=Tm.finite_vertices_end();
+  for(F_v_it fv=T.finite_vertices_begin();
+      fv!=T.finite_vertices_end();
       fv++)  {
 
     typedef Vertex::scalar_link scalar_link;
@@ -230,8 +229,8 @@ void linear::PPE(const kind::f velocity , FT dt,  const kind::f pressure ) {
 
   // divide by dt:
 
-  for(F_v_it fv=Tm.finite_vertices_begin();
-      fv!=Tm.finite_vertices_end();
+  for(F_v_it fv=T.finite_vertices_begin();
+      fv!=T.finite_vertices_end();
       fv++)  fv->sf(pressure) /= dt;
 
   return;

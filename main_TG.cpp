@@ -8,6 +8,7 @@
 //#define WRITE
 
 //  #define EXPLICIT
+#define MESH
 
 #include"main.h"
 #include"sim_pars.h"

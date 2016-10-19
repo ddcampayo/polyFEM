@@ -5,36 +5,37 @@ extern sim_pars simu;
 
 
 
-void draw(void) {
+void draw(Triangulation& T,  const std::string file_name , const bool setup ) {
 
-  cout << "draw on step  "<< simu.current_step() << endl;
+  if (setup) {
+    cout << "draw on step  "<< simu.current_step() << endl;
 
-  std::stringstream  mkdir;
-  std::stringstream  dirname;
+    std::stringstream  mkdir;
+    std::stringstream  dirname;
 
-  dirname << simu.current_step();
-  mkdir << "mkdir -p "  << dirname.str();
-  cout << "running : " << mkdir.str() << endl;
-  system(mkdir.str().c_str());
+    dirname << simu.current_step();
+    mkdir << "mkdir -p "  << dirname.str();
+    cout << "running : " << mkdir.str() << endl;
+    system(mkdir.str().c_str());
 
-  std::stringstream  cp_cfg;
-  cp_cfg << "cp -f simu.cfg " << dirname.str();
-  system(cp_cfg.str().c_str());
+    std::stringstream  cp_cfg;
+    cp_cfg << "cp -f simu.cfg " << dirname.str();
+    system(cp_cfg.str().c_str());
+  }
 
-  {
   std::stringstream  namefile;
-  namefile << simu.current_step() << '/' << "mesh.dat";
+  namefile << simu.current_step() << '/' << file_name;
 
   cout << "writing on file : " << namefile.str() << endl;
   std::ofstream main_data;
   main_data.open(namefile.str().c_str() );
 
-  for(F_v_it vit=Tm.vertices_begin();
-      vit != Tm.vertices_end();
+  for(F_v_it vit=T.vertices_begin();
+      vit != T.vertices_end();
       vit++) {
 
-    Periodic_point pp=Tm.periodic_point(vit);
-    Point p=Tm.point(pp);
+    Periodic_point pp=T.periodic_point(vit);
+    Point p=T.point(pp);
 
     #include"printout.h"
 
@@ -43,31 +44,10 @@ void draw(void) {
   main_data << endl;
 
   main_data.close();
-  }
-  {
-  std::stringstream  namefile;
-  namefile << simu.current_step() << '/' << "particles.dat";
+}
 
-  cout << "writing on file : " << namefile.str() << endl;
-  std::ofstream main_data;
-  main_data.open(namefile.str().c_str() );
 
-  for(F_v_it vit=Tp.vertices_begin();
-      vit != Tp.vertices_end();
-      vit++) {
-
-    Periodic_point pp=Tp.periodic_point(vit);
-    Point p=Tp.point(pp);
-
-    #include"printout.h"
-
-  }
-
-  main_data << endl;
-
-  main_data.close();
-  }
-
+void draw_vtk(Triangulation& Tp ) {
 
   std::stringstream  vtkfile;
   vtkfile << simu.current_step() << '/' << "points.vtu";

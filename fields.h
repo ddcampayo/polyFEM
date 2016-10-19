@@ -1,3 +1,3 @@
-void set_fields_Zalesak(void);
-void set_vels_rotating(void);
-void set_fields_TG(void) ;
+void set_fields_Zalesak(Triangulation& T) ;
+void set_vels_rotating(Triangulation& T) ;
+void set_fields_TG(Triangulation& T) ;

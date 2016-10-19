@@ -26,18 +26,17 @@ Iso_rectangle domain(-LL/2, -LL/2, LL/2, LL/2);
 
 // TODO: the two triangulations store different things.
 //       specific bases and faces should be implemented for each
-Triangulation Tp(domain); // particles
-Triangulation Tm(domain); // mesh
 
 sim_pars simu;
 
 //const Eigen::IOFormat OctaveFmt(Eigen::StreamPrecision, 0, ", ", ";\n", "", "", "[", "];");
 
+
 // stuff only used here:
 
 //#define FULL
-//#define FULL_FULL
-#define FULL_LUMPED
+#define FULL_FULL
+//#define FULL_LUMPED
 //#define FLIP
 
 #ifdef FULL_FULL
@@ -51,12 +50,15 @@ sim_pars simu;
 
 #include"onto_from_mesh.h"
 
+
+Triangulation Tp(domain); // particles
+Triangulation Tm(domain); // mesh
+
 int main() {
 
 //  CGAL::Timer time;
 //
 //  time.start();
-
   
   cout << "Creating point cloud" << endl;
 
@@ -65,8 +67,10 @@ int main() {
   create();
 
   if(simu.create_points()) {
-    set_fields_TG();
-    number();
+    set_fields_TG(Tp);
+    set_fields_TG(Tm);
+    number(Tp);
+    number(Tm);
   }
 
   
@@ -87,7 +91,7 @@ int main() {
   quad_coeffs(Tm , simu.FEMm() ); volumes(Tm, simu.FEMm() );
 
   if(simu.create_points()) {
-    nabla();
+    nabla(Tm);
     Delta(Tm);
   }
   
@@ -103,17 +107,18 @@ int main() {
     {
       Delta(Tp);
       linear algebra_p(Tp);
-      from_mesh_full(algebra_p,kind::ALPHA);
+      from_mesh_full( Tm , Tp ,  algebra_p,kind::ALPHA);
     }
 #elif defined FULL_LUMPED
-    from_mesh_lumped(kind::ALPHA);
+    from_mesh_lumped( Tm , Tp , kind::ALPHA);
 #elif defined FLIP
-    from_mesh(kind::ALPHA);
+    from_mesh(Tm , Tp , kind::ALPHA);
 #else
-    from_mesh(kind::ALPHA);
+    from_mesh(Tm , Tp , kind::ALPHA);
 #endif
 
-  move_info();
+  move_info(Tm);
+  move_info(Tp);
 
   // /// Prev test begin
   //cout << "Calculating Lapl U" << endl;
@@ -145,8 +150,12 @@ int main() {
 
   //  set_vels();
 
-  draw();  
+  const std::string mesh_file("mesh.dat");
+  const std::string particle_file("particles.dat");
 
+  draw(Tm, mesh_file     , true);
+  draw(Tp, particle_file , false);
+  
   simu.advance_time();
   simu.next_step();
 
@@ -183,24 +192,24 @@ int main() {
     const int max_iter=10;
     const FT  max_displ= 1e-8; // < 0 : disable
 
-
 //  leapfrog, special first step.-
 //    if(simu.current_step() == 1) dt2 *= 0.5;
 
 //    dt2 *= 0.5;
 
-    move_info();
+    move_info(Tm);
+    move_info(Tp);
 
     cout << "Proj alpha onto mesh " << endl;
 
       //onto_mesh_lumped();
 #if defined FULL
-    onto_mesh_full(algebra,kind::ALPHA);
+    onto_mesh_full( Tp , Tm , algebra, kind::ALPHA);
 #elif defined FLIP
     flip_volumes(Tp , Tm , simu.FEMm() );
     onto_mesh_flip(Tp,Tm,simu.FEMm(),kind::ALPHA);
 #else
-    onto_mesh_delta(kind::ALPHA);
+    onto_mesh_delta(Tp,Tm,kind::ALPHA);
 #endif
 
     for( ; iter<max_iter ; iter++) {
@@ -211,17 +220,17 @@ int main() {
       {
 	Delta(Tp);
 	linear algebra_p(Tp);
-	from_mesh_full_v(algebra_p,kind::U);
+	from_mesh_full_v(Tm, Tp, algebra_p , kind::U);
       }
 #elif defined FULL_LUMPED
-      from_mesh_lumped_v(kind::U);
+      from_mesh_lumped_v(Tm, Tp, kind::U);
 #elif defined FLIP
-      from_mesh_v(kind::U);
+      from_mesh_v(Tm, Tp, kind::U);
 #else
-      from_mesh_v(kind::U);
+      from_mesh_v(Tm, Tp, kind::U);
 #endif
 
-      displ=move( dt2 );
+      displ=move( Tp , dt2 );
 
       cout << "Moved avg " << displ << " to half point" << endl;
 
@@ -240,12 +249,12 @@ int main() {
       cout << "Proj U0 onto mesh " << endl;
 
 #if defined FULL
-      onto_mesh_full_v(algebra,kind::UOLD);
+      onto_mesh_full_v(Tp,Tm,algebra,kind::UOLD);
 #elif defined FLIP
       flip_volumes(Tp , Tm , simu.FEMm() );
       onto_mesh_flip_v(Tp,Tm,simu.FEMm(),kind::UOLD);
 #else
-      onto_mesh_delta_v(kind::UOLD);
+      onto_mesh_delta_v(Tp,Tm,kind::UOLD);
 #endif
 
       cout << "Calculating Ustar implicitely" << endl;
@@ -262,12 +271,12 @@ int main() {
       cout << "Evolving U " << endl;
 
     //      u_new( dt );
-      u_new( dt2 );
+      u_new( Tm , dt2 );
     }
 
-    displ=move( dt );
+    displ=move( Tp , dt );
 
-    update_half_velocity( ); 
+    update_half_velocity( Tp ); 
 
     areas(Tp);
 
@@ -276,15 +285,19 @@ int main() {
     cout << "Proj U_t+1 onto mesh " << endl;
 
 #if defined FULL
-    onto_mesh_full_v(algebra,kind::U);
+    onto_mesh_full_v(Tp,Tm,algebra,kind::U);
 #elif defined FLIP
     flip_volumes(Tp , Tm , simu.FEMm() );
     onto_mesh_flip_v(Tp,Tm,simu.FEMm(),kind::U);
 #else
-    onto_mesh_delta_v(kind::U);
+    onto_mesh_delta_v(Tp,Tm,kind::U);
 #endif
 
-    if(simu.current_step()%simu.every()==0) draw();
+    if(simu.current_step()%simu.every()==0)
+      {
+	draw(Tm, mesh_file     , true);
+	draw(Tp, particle_file , false);
+      }
 
     log_file
       << simu.current_step() << "  "
@@ -515,22 +528,12 @@ void create(void) {
 
 
 
-void number(void) {
+void number(Triangulation& T) {
 
   int i=0;
 
-  for(F_v_it vit=Tp.vertices_begin();
-      vit != Tp.vertices_end();
-      vit++) {
-    //    vit->indx.set(i); //or
-    vit->idx=i;
-    ++i;
-  }
-
-  i=0;
-
-  for(F_v_it vit=Tm.vertices_begin();
-      vit != Tm.vertices_end();
+  for(F_v_it vit=T.vertices_begin();
+      vit != T.vertices_end();
       vit++) {
     //    vit->indx.set(i); //or
     vit->idx=i;

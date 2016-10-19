@@ -35,9 +35,9 @@ void FEM_hs(const Face_handle& fc, const Point& p0,
 	    std::vector<FT>& hh    );
 
 
-void from_mesh_full(linear& algebra_p, const kind::f scalarf) {
+void from_mesh_full( Triangulation& Tfrom, Triangulation& Tto, linear& algebra_p, const kind::f scalarf) {
 
-  lumped_full_common( Tm, Tp , scalarf);
+  lumped_full_common( Tfrom , Tto , scalarf);
 
   algebra_p.mass_s(scalarf);
 
@@ -45,9 +45,9 @@ void from_mesh_full(linear& algebra_p, const kind::f scalarf) {
 }
 
 
-void from_mesh_full_v(linear& algebra_p, const kind::f vectorf) {
+void from_mesh_full_v( Triangulation& Tfrom, Triangulation& Tto, linear& algebra_p, const kind::f vectorf) {
 
- lumped_full_common_v( Tm, Tp , vectorf);
+  lumped_full_common_v( Tfrom, Tto , vectorf);
 
   algebra_p.mass_v(vectorf);
 
@@ -55,12 +55,12 @@ void from_mesh_full_v(linear& algebra_p, const kind::f vectorf) {
 }
 
 
-void from_mesh_lumped(const kind::f scalarf) {
+void from_mesh_lumped( Triangulation& Tfrom, Triangulation& Tto, const kind::f scalarf) {
 
-  lumped_full_common( Tm, Tp , scalarf);
+  lumped_full_common(  Tfrom, Tto , scalarf);
 
-  for(F_v_it vit=Tp.vertices_begin();
-      vit != Tp.vertices_end();
+  for(F_v_it vit=Tto.vertices_begin();
+      vit != Tto.vertices_end();
       vit++) {
     FT V=vit->vol();
     vit->sf(scalarf) /= V ;
@@ -70,12 +70,12 @@ void from_mesh_lumped(const kind::f scalarf) {
 }
 
 
-void from_mesh_lumped_v(const kind::f vectorf) {
+void from_mesh_lumped_v(  Triangulation& Tfrom, Triangulation& Tto, const kind::f vectorf) {
 
-  lumped_full_common_v( Tm, Tp , vectorf);
+  lumped_full_common_v( Tfrom, Tto , vectorf);
 
-  for(F_v_it vit=Tp.vertices_begin();
-      vit != Tp.vertices_end();
+  for(F_v_it vit=Tto.vertices_begin();
+      vit != Tto.vertices_end();
       vit++) {
     FT V=vit->vol();
     vit->vf(vectorf) /= V ;
@@ -86,9 +86,9 @@ void from_mesh_lumped_v(const kind::f vectorf) {
 
 
 
-void onto_mesh_full(linear& algebra, const kind::f scalarf) {
+void onto_mesh_full( Triangulation& Tfrom, Triangulation& Tto, linear& algebra, const kind::f scalarf) {
 
-  lumped_full_common( Tp, Tm , scalarf);
+  lumped_full_common( Tfrom, Tto , scalarf);
 
   algebra.mass_s(scalarf);
 
@@ -97,9 +97,9 @@ void onto_mesh_full(linear& algebra, const kind::f scalarf) {
 
 
 
-void onto_mesh_full_v(linear& algebra, const kind::f vectorf) {
+void onto_mesh_full_v( Triangulation& Tfrom, Triangulation& Tto, linear& algebra, const kind::f vectorf) {
 
-  lumped_full_common_v( Tp, Tm , vectorf);
+  lumped_full_common_v( Tfrom, Tto , vectorf);
 
   algebra.mass_v(vectorf);
 
@@ -125,16 +125,16 @@ void lumped_full_common_v(Triangulation& Tfrom, Triangulation& Tto,const kind::f
 }
 
 
-void onto_mesh_delta(const kind::f scalarf) {
+void onto_mesh_delta( Triangulation& Tfrom, Triangulation& Tto, const kind::f scalarf) {
 
-  for(F_v_it vit=Tm.vertices_begin();
-      vit != Tm.vertices_end();
+  for(F_v_it vit=Tto.vertices_begin();
+      vit != Tto.vertices_end();
       vit++) {
 
     Point pm =  vit->point();
 //    cout << pm << endl ;
 
-    FT ss=values_at(Tp , pm , simu.FEMp(), scalarf );
+    FT ss=values_at( Tfrom , pm , simu.FEMp(), scalarf );
 
     vit->sf( scalarf).set( ss );
   }
@@ -143,15 +143,15 @@ void onto_mesh_delta(const kind::f scalarf) {
 
 }
 
-void onto_mesh_delta_v(const kind::f vectorf) {
+void onto_mesh_delta_v(Triangulation& Tfrom, Triangulation& Tto, const kind::f vectorf) {
 
-  for(F_v_it vit=Tm.vertices_begin();
-      vit != Tm.vertices_end();
+  for(F_v_it vit=Tto.vertices_begin();
+      vit != Tto.vertices_end();
       vit++) {
 
     Point pm =  vit->point();
 
-    Vector_2 vv=values_at_v(Tp , pm , simu.FEMp(), vectorf );
+    Vector_2 vv=values_at_v(Tfrom , pm , simu.FEMp(), vectorf );
 
     vit->vf( vectorf ).set( vv );
   }
@@ -293,12 +293,12 @@ Vector_2 values_at_v(const Triangulation& T, const Point& p0, const bool FEM,
 
 
 
-void onto_mesh_lumped(const kind::f scalarf) {
+void onto_mesh_lumped(Triangulation& Tfrom, Triangulation& Tto, const kind::f scalarf) {
 
-  lumped_full_common( Tp , Tm ,  scalarf );
+  lumped_full_common( Tfrom , Tto ,  scalarf );
 
-  for(F_v_it vit=Tm.vertices_begin();
-      vit != Tm.vertices_end();
+  for(F_v_it vit=Tto.vertices_begin();
+      vit != Tto.vertices_end();
       vit++) {
     FT V=vit->vol();
 
@@ -552,15 +552,15 @@ void lumped_full_common_vertices_v( Triangulation& Tfrom, Triangulation& Tto, co
 
 
 
-void from_mesh(const kind::f scalarf) {
+void from_mesh(Triangulation& Tfrom, Triangulation& Tto, const kind::f scalarf) {
 
-  for(F_v_it vit=Tp.vertices_begin();
-      vit != Tp.vertices_end();
+  for(F_v_it vit=Tto.vertices_begin();
+      vit != Tto.vertices_end();
       vit++) {
 
     Point pm =  vit->point();
 
-    vit->sf( scalarf).set( values_at(Tm , pm , simu.FEMm(), scalarf) );
+    vit->sf( scalarf).set( values_at(Tfrom , pm , simu.FEMm(), scalarf) );
 
   }
 
@@ -568,15 +568,18 @@ void from_mesh(const kind::f scalarf) {
 
 }
 
-void from_mesh_v(const kind::f vectorf) {
 
-  for(F_v_it vit=Tp.vertices_begin();
-      vit != Tp.vertices_end();
+
+
+void from_mesh_v(Triangulation& Tfrom, Triangulation& Tto, const kind::f vectorf) {
+
+  for(F_v_it vit=Tto.vertices_begin();
+      vit != Tto.vertices_end();
       vit++) {
 
     Point pm =  vit->point();
 
-    vit->vf( vectorf ).set( values_at_v(Tm , pm , simu.FEMm(), vectorf) );
+    vit->vf( vectorf ).set( values_at_v(Tfrom , pm , simu.FEMm(), vectorf) );
 
   }
 
