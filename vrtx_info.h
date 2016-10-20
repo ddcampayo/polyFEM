@@ -36,7 +36,7 @@ Vector_2 {
 
 namespace kind {
   enum f {P , PSTAR, VOL , GRADP , LAPLP , 
-	  U, USTAR, UOLD, DIVU, LAPLU, ALPHA};
+	  U, USTAR, UOLD, DIVU, LAPLU, ALPHA, FORCE};
 };
 
 template < class Gt, class Vb >
@@ -196,6 +196,8 @@ public:
       return Uold;
     else if(a==kind::LAPLU)
       return laplU;
+    else if(a==kind::FORCE)
+      return force;
   }
  
 

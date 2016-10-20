@@ -599,14 +599,16 @@ void linear::ustar_inv(const kind::f Ustar, const FT dt, const kind::f U0 , bool
 
   VectorXd massU0_x;
 
+  VectorXd force_x = vfield_to_vctr( kind::FORCE , 0 );
+
   if (semi) {
 
     VectorXd grad_x = vfield_to_vctr( kind::GRADP , 0 );
 
-    massU0_x= mass * U0_x - dt * grad_x;
-  } else
-    massU0_x= mass * U0_x;
+    massU0_x = mass * (U0_x + dt * force_x) - dt * grad_x;
 
+  } else
+    massU0_x =  mass * (U0_x + dt * force_x);
 
   VectorXd Ustarx= solver_mas.solve(massU0_x);
   if(solver_mas.info()!=Eigen::Success) 
@@ -619,6 +621,9 @@ void linear::ustar_inv(const kind::f Ustar, const FT dt, const kind::f U0 , bool
 //// y
 
   VectorXd U0_y = vfield_to_vctr( U0 , 1 );
+
+  VectorXd force_y = vfield_to_vctr( kind::FORCE , 1 );
+
   VectorXd grad_y = vfield_to_vctr( kind::GRADP , 1 );
 
   VectorXd massU0_y;
@@ -626,10 +631,10 @@ void linear::ustar_inv(const kind::f Ustar, const FT dt, const kind::f U0 , bool
   if (semi) {
 
     VectorXd grad_y = vfield_to_vctr( kind::GRADP , 1 );
-    massU0_y = mass * U0_y - dt * grad_y;
+    massU0_y =  mass * (U0_y + dt * force_y) - dt * grad_y;
 
   } else
-    massU0_y = mass * U0_y;
+    massU0_y =  mass * (U0_y + dt * force_y);
 
   VectorXd Ustary= solver_mas.solve(massU0_y);
 

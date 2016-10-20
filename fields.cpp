@@ -22,6 +22,22 @@ Vector_2 field_rotation(const FT x,const FT y, bool deriv=false) ;
 
 FT field_sin_cos(const FT x,const FT y, bool deriv=false) ;
 
+void set_forces_Kolmo(Triangulation& T) {
+
+  for(F_v_it vit=T.finite_vertices_begin();
+      vit != T.finite_vertices_end();
+      vit++) {
+
+    FT f0 = 4 * M_PI * M_PI ;
+    FT y = vit->point().y();
+
+    vit->force.set( f0 * Vector_2(field_cos(y) , 0) );
+  }
+
+  return;
+}
+
+
 void set_fields_TG(Triangulation& T) {
 
   for(F_v_it vit=T.finite_vertices_begin();

@@ -2,12 +2,11 @@
 
 A free and open source pFEM simulation tool, based on the CGAL libs.
 
-This branch covers the procedure of "assignment": transferring information
+Also covered is the procedure of "assignment": transferring information
 from a set of moving particles onto a fixed mesh, and back
 
-# Case select
-For different simulations, simply copy any of the main_*.cpp files onto
-main.cpp. Same with periodic_*.h onto periodic.h
+# Case select For different simulations, simply copy any of the
+main_*.cpp files on the _mains_ dir onto main.cpp.
 
 Then, run "source cmake-4.8.sh", and "make"
 
@@ -22,7 +21,9 @@ main >& log&
 # Features
 Currently provided:
 
+Kolmogorov shear flow (main_Kolmo.cpp)
 The rotating Zalesak disk test (main_Zalesak.cpp)
+Taylor-Green vortex sheet (main_TG.cpp)
 
 # Requires
 

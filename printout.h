@@ -12,4 +12,5 @@
       << vit->Ustar.val() << "  " //  13 & 14
       << vit->Uold.val() << "  "  //  15 & 16
       << vit->pstar.val() << "  "  //  17
+      << vit->force.val() << "  "  //  18 & 19
       << endl;

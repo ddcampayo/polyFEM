@@ -17,6 +17,7 @@ struct data_kept {
   FT p;
   Vector_2 gradp;
   FT vol;
+  Vector_2 force;
 
   data_kept(const F_v_it fv) {
     idx = fv->idx();
@@ -30,6 +31,7 @@ struct data_kept {
     p= fv->p();
     gradp= fv->gradp();
     vol= fv->vol();
+    force= fv->force();
   }
 
   void restore(Vertex_handle fv) {
@@ -44,6 +46,7 @@ struct data_kept {
     fv->p.set( p );
     fv->gradp.set( gradp );
     fv->vol.set(vol);
+    fv->force.set( force );
   }
 
 };
@@ -171,9 +174,9 @@ void u_star(Triangulation& T, FT dt , bool semi ) {
     Vector_2 f;
 
     if(semi)
-      f = simu.mu() * fv->laplU() - fv->gradp();
+      f = simu.mu() * fv->laplU() - fv->gradp() + fv->force();
     else
-      f= simu.mu() * fv->laplU() ; // Include all forces here, but for the pressure grad!
+      f= simu.mu() * fv->laplU() + fv->force(); // Include all forces here, but for the pressure grad!
 
     Vector_2 Ustar = U0 + dt * f;
 
