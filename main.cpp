@@ -167,7 +167,6 @@ int main() {
       areas(Tp);
       quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );
 
-      volumes(Tp, simu.FEMp() );
       Delta(Tp);
 
       linear algebra(Tp);

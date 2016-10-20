@@ -47,7 +47,7 @@ class linear {
   void fill_lambda();
   void fill_stiff();
   void fill_mass();
-  void fill_mas();
+  void fill_mas( const FT& );
 
 #define DIRECT_SOLVER
 #ifdef DIRECT_SOLVER

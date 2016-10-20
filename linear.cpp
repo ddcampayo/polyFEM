@@ -14,14 +14,12 @@ void linear::save_matrices(void){
 
   if(stiff.size()==0) fill_stiff();
   if(mass.size()==0)  fill_mass();
-  if(mas.size()==0)  fill_mas();
   if(lambda_x.size()==0)  fill_lambda();
 
   std::cout << "Saving matrices" << std::endl;
 
   saveMarket(stiff, "stiff.mtx");
   saveMarket(mass, "mass.mtx");
-  saveMarket(mas, "mas.mtx");
   saveMarket(stiffp1, "stiffp1.mtx");
   saveMarket(lambda_x, "lambda_x.mtx");
   saveMarket(lambda_y, "lambda_y.mtx");
@@ -35,7 +33,6 @@ void linear::load_matrices(void){
   loadMarket(stiff, "stiff.mtx");
   loadMarket(stiffp1, "stiffp1.mtx");
   loadMarket(mass, "mass.mtx");
-  loadMarket(mas, "mas.mtx");
 
   return;
 
@@ -248,7 +245,7 @@ void linear::fill_mass() {
 
 }
 
-void linear::fill_mas(){ 
+void linear::fill_mas( const FT& dt ){ 
 
 #ifdef LOAD
   std::cout << " Reading mas matrix" << std::endl;
@@ -265,7 +262,8 @@ void linear::fill_mas(){
 
   std::cout << " Buildig MAS matrix" << std::endl;
 
-  FT a = simu.dt() * simu.mu() / 2.0 ;
+  FT a = dt * simu.mu() / 2.0 ;
+
   cout << "Buildng (mass -  " << a << "  x stiff) " ;
 
   mas = mass - a * stiff;
@@ -591,7 +589,7 @@ void linear::mass_s(const kind::f scalarf ) {
 
 void linear::ustar_inv(const kind::f Ustar, const FT dt, const kind::f U0 , bool semi) {
 
-  if(mas.size()==0)  fill_mas();
+  if(mas.size()==0)  fill_mas( dt );
 
 //// x
 
@@ -623,8 +621,6 @@ void linear::ustar_inv(const kind::f Ustar, const FT dt, const kind::f U0 , bool
   VectorXd U0_y = vfield_to_vctr( U0 , 1 );
 
   VectorXd force_y = vfield_to_vctr( kind::FORCE , 1 );
-
-  VectorXd grad_y = vfield_to_vctr( kind::GRADP , 1 );
 
   VectorXd massU0_y;
 

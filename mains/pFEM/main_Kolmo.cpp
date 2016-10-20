@@ -7,7 +7,7 @@
 // write out matrices
 //#define WRITE
 
-#define EXPLICIT
+//#define EXPLICIT
 
 #include"main.h"
 #include"sim_pars.h"
@@ -113,7 +113,7 @@ int main() {
 
   const std::string particle_file("particles.dat");
 
-  draw(Tp, particle_file , false);
+  draw(Tp, particle_file , true);
   
   simu.advance_time();
   simu.next_step();
@@ -167,7 +167,6 @@ int main() {
       areas(Tp);
       quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );
 
-      volumes(Tp, simu.FEMp() );
       Delta(Tp);
 
       linear algebra(Tp);
@@ -179,7 +178,7 @@ int main() {
 
       cout << "  ; relative displacement:  " << displ << endl;
 
-      if(displ < max_displ) break;
+      if( (displ < max_displ) && (iter !=0) ) break;
 
       set_forces_Kolmo(Tp);
 
@@ -188,14 +187,15 @@ int main() {
       cout << "Calculating Ustar explicitely" << endl;
 
       algebra.laplacian_v(kind::UOLD,kind::LAPLU);
+
+      u_star(Tp, dt2 , false );
+
 #else
 
       cout << "Calculating Ustar implicitely" << endl;
 
-      algebra.ustar_inv(kind::USTAR,  0 , kind::UOLD, false);
+      algebra.ustar_inv(kind::USTAR,  dt2 , kind::UOLD, false);
 #endif
-
-      u_star(Tp, dt2 , false );
 
       cout << "Solving PPE" << endl;
       
@@ -219,7 +219,7 @@ int main() {
     quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );
 
     if(simu.current_step()%simu.every()==0)
-	draw(Tp, particle_file , false);
+	draw(Tp, particle_file , true);
 
     log_file
       << simu.current_step() << "  "
