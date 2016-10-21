@@ -31,22 +31,6 @@ sim_pars simu;
 
 //const Eigen::IOFormat OctaveFmt(Eigen::StreamPrecision, 0, ", ", ";\n", "", "", "[", "];");
 
-
-// stuff only used here:
-
-//#define FULL
-#define FULL_FULL
-//#define FULL_LUMPED
-//#define FLIP
-
-#ifdef FULL_FULL
-#define FULL
-#endif
-
-#ifdef FULL_LUMPED
-#define FULL
-#endif
-
 Triangulation Tp(domain); // particles
 
 int main() {
@@ -160,14 +144,18 @@ int main() {
 
     for( ; iter<max_iter ; iter++) {
 
+      cout << "Move iteration  " << iter << " of " << max_iter << " ";
+
       displ=move( Tp , dt2 );
 
       cout << "Moved avg " << displ << " to half point" << endl;
 
+      if( (displ < max_displ) && (iter !=0) ) break;
+
       areas(Tp);
       quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );
 
-      volumes(Tp, simu.FEMp() );
+      nabla(Tp);
       Delta(Tp);
 
       linear algebra(Tp);
@@ -176,10 +164,6 @@ int main() {
 	min_displ=displ;
 	min_iter=iter;
       }
-
-      cout << "  ; relative displacement:  " << displ << endl;
-
-      if( (displ < max_displ) && (iter !=0) ) break;
 
       set_forces_Kolmo(Tp);
 
@@ -213,7 +197,11 @@ int main() {
 
     displ=move( Tp , dt );
 
-    update_half_velocity( Tp ); 
+//  Reynolds number discrimination
+
+    if( simu.mu() < 1 ) // hi Re
+      update_half_velocity( Tp ); 
+                        // lo Re : do nothing ( u_{t+1} = u_{t+1/2}  )
 
     areas(Tp);
 
@@ -227,7 +215,7 @@ int main() {
       <<  simu.time() << "  " ;
 
     integrals( Tp , log_file);     log_file << "  ";
-    fidelity(  Tp , log_file );        log_file << endl;
+    fidelity(  Tp , log_file );    log_file << endl;
 
     simu.advance_time();
 

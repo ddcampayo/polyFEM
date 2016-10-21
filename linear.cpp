@@ -643,3 +643,82 @@ void linear::ustar_inv(const kind::f Ustar, const FT dt, const kind::f U0 , bool
 
   return;
 }
+
+
+
+// solves   dt * mu * stiff vectorf =  mass ( ustar - U0 - dt * force )
+
+void linear::uhalf_inv(const kind::f U, const FT dt, const kind::f U0 ) {
+
+
+  if(stiff.size()==0) fill_stiff();
+  if(mass.size()==0)  fill_mass();
+
+//// x
+
+  VectorXd Ustar_x = vfield_to_vctr( kind::USTAR , 0 );
+  VectorXd U0_x    = vfield_to_vctr( U0    , 0 );
+  VectorXd force_x = vfield_to_vctr( kind::FORCE , 0 );
+
+  VectorXd mass_x1;
+
+  FT inv_mu = 1.0/simu.mu();
+  mass_x1 =  mass * ( inv_mu * (
+				(1.0/dt) * ( Ustar_x - U0_x )
+				- force_x
+				)
+		      );
+
+  int N=mass_x1.size();
+
+  VectorXd mass_x = mass_x1.tail( N-1 );
+
+  VectorXd Ux= solver_stiffp1.solve(mass_x);
+
+  if(solver_stiffp1.info()!=Eigen::Success) 
+      cout << "Warning: unsucessful mas x solve, error code " 
+	   << solver_stiffp1.info() << endl ;
+
+  VectorXd Ux1(N);
+
+  Ux1(0) = 0;
+  Ux1.tail(N-1) = Ux;
+
+  vctr_to_vfield( Ux1 , U , 0 );
+
+//// y
+
+
+  VectorXd Ustar_y = vfield_to_vctr( kind::USTAR , 1 );
+  VectorXd U0_y    = vfield_to_vctr( U0    , 1 );
+  VectorXd force_y = vfield_to_vctr( kind::FORCE , 1 );
+
+  VectorXd mass_y1;
+
+  mass_y1 =  mass * ( inv_mu * (
+				(1.0/dt) * ( Ustar_y - U0_y )
+				- force_y
+				)
+		      );
+
+  VectorXd mass_y = mass_y1.tail( N-1 );
+
+  VectorXd Uy= solver_stiffp1.solve(mass_y);
+
+  if(solver_stiffp1.info()!=Eigen::Success) 
+      cout << "Warning: unsucessful mas x solve, error code " 
+	   << solver_stiffp1.info() << endl ;
+
+  VectorXd Uy1(N);
+
+  Uy1(0) = 0;
+  Uy1.tail(N-1) = Uy;
+
+  vctr_to_vfield( Uy1 , U , 1 );
+
+  return;
+}
+
+
+
+
