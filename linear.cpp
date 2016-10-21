@@ -262,7 +262,7 @@ void linear::fill_mas( const FT& dt ){
 
   std::cout << " Buildig MAS matrix" << std::endl;
 
-  FT a = dt * simu.mu() / 2.0 ;
+  FT a = dt * simu.mu() ;
 
   cout << "Buildng (mass -  " << a << "  x stiff) " ;
 
