@@ -137,7 +137,7 @@ void move_info(Triangulation& T) {
 }
 
 
-void u_new(Triangulation& T, const FT dt , const bool force) {
+void u_new(Triangulation& T, const FT dt ) {
 
   for(F_v_it fv=T.finite_vertices_begin();
       fv!=T.finite_vertices_end();
@@ -151,9 +151,6 @@ void u_new(Triangulation& T, const FT dt , const bool force) {
     Vector_2 gradp = fv->gradp.val() ;
     Vector_2 U = Ustar - dt * gradp;
 
-    if(force)
-      U = U + dt * fv->force.val();
-    
     // relaxation mixing .-
     FT alpha=simu.alpha();
     Vector_2 U0=fv->U() ;
@@ -194,18 +191,23 @@ void u_star(Triangulation& T, FT dt , bool semi ) {
 }
 
 
-void update_half_velocity( Triangulation& Tp ) {
+void update_half_velocity( Triangulation& Tp , const bool overdamped ) {
 
    for(F_v_it fv=Tp.finite_vertices_begin();
        fv!=Tp.finite_vertices_end();
        fv++) {
 
     Vector_2  v  = fv->U();
-    Vector_2  v0 = fv->Uold();
+
+    if (overdamped) 
+       fv->U.set( v );
+    else {
+      Vector_2  v0 = fv->Uold();
 //    Vector_2  v_star = fv->Ustar();
 
-    fv->U.set(  2 * v - v0 );
+      fv->U.set(  2 * v - v0 );
  //   fv->U.set(  v + v_star - v0 );
+    }
 
   }
   

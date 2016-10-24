@@ -402,8 +402,7 @@ void linear::laplace_div(
 			 const kind::f velocity ,
 			 const FT dt,
 			 const kind::f divvel,
-			 const kind::f pressure ,
-			 const bool force ) {
+			 const kind::f pressure ) {
   
   if(stiffp1.size()==0)  fill_stiff();
 
@@ -422,14 +421,6 @@ void linear::laplace_div(
 
   vctr_to_field( div1 , divvel );
 
-  if(force) {
-    VectorXd fx = vfield_to_vctr( kind::FORCE , 0 );
-    VectorXd fy = vfield_to_vctr( kind::FORCE , 1 );
-
-    div1 += dt * (lambda_x * fx + lambda_y * fy );
-
-  }
-  
   //  divv.conservativeResize(N+1);
 
 //  divv[N]=0;
@@ -603,21 +594,21 @@ void linear::mass_s(const kind::f scalarf ) {
 void linear::ustar_inv(const kind::f Ustar,
 		       const FT dt,
 		       const kind::f U0 ,
-		       const bool force, const bool semi) {
+		       const bool overdamped, const bool semi) {
 
   if(mas.size()==0)  fill_mas( dt );
 
 //// x
 
-  VectorXd U0_x = vfield_to_vctr( U0 , 0 );
+  VectorXd U0_x = dt * vfield_to_vctr( kind::FORCE , 0 );
 
-  VectorXd massU0_x;
-
-  if(force) {
+  if(!overdamped) {
     //    VectorXd force_x
-    U0_x += dt * vfield_to_vctr( kind::FORCE , 0 );
+    U0_x += vfield_to_vctr( U0 , 0 );
   }
   
+  VectorXd massU0_x;
+
   if (semi) {
 
     VectorXd grad_x = vfield_to_vctr( kind::GRADP , 0 );
@@ -637,12 +628,12 @@ void linear::ustar_inv(const kind::f Ustar,
 
 //// y
 
-  VectorXd U0_y = vfield_to_vctr( U0 , 1 );
+  VectorXd U0_y = dt * vfield_to_vctr( kind::FORCE , 1 );
 
-  if(force) {
-
+  if(!overdamped) {
     //  VectorXd force_y = vfield_to_vctr( kind::FORCE , 1 );
-    U0_y += dt * vfield_to_vctr( kind::FORCE , 1 );
+
+    U0_y += vfield_to_vctr( U0 , 1 );
   }
 
   

@@ -112,6 +112,8 @@ int main() {
 
   log_file.open("main.log");
 
+  bool overdamped = ( simu.mu() > 1 ) ; // high or low Re
+
   for(;
       simu.current_step() <= simu.Nsteps();
       simu.next_step()) {
@@ -170,7 +172,6 @@ int main() {
 
 //  Reynolds number discrimination
 
-      if( simu.mu() < 1 ) { // hi Re
 
 
 #ifdef EXPLICIT
@@ -185,13 +186,13 @@ int main() {
 
 	cout << "Calculating Ustar implicitely" << endl;
 
-	algebra.ustar_inv(kind::USTAR,  dt2 , kind::UOLD, true, false);
+	algebra.ustar_inv(kind::USTAR,  dt2 , kind::UOLD, overdamped , false);
 
 #endif
 
 	cout << "Solving PPE" << endl;
       
-	algebra.PPE( kind::USTAR, dt2 , kind:: P , false );
+	algebra.PPE( kind::USTAR, dt2 , kind:: P );
 
 	cout << "Calculating grad p" << endl;
 	algebra.gradient(kind::P, kind::GRADP);
@@ -199,38 +200,13 @@ int main() {
 	cout << "Evolving U " << endl;
 
     //      u_new( dt );
-	u_new( Tp , dt2 , false );
-      }
-      else {  // lo Re
-
-	cout << "Calculating Ustar implicitely" << endl;
-
-	// algebra.uhalf_inv(kind::U,  dt2 , kind::UOLD);
-
-	algebra.ustar_inv(kind::USTAR,  dt2 , kind::UOLD, false, false);
-
-	cout << "Solving PPE" << endl;
-      
-	algebra.PPE( kind::USTAR, dt2 , kind:: P , true );
-
-	cout << "Calculating grad p" << endl;
-
-	algebra.gradient(kind::P, kind::GRADP);
-	
-	cout << "Evolving U " << endl;
-
-	//      u_new( dt );
-	u_new( Tp , dt2 , true );
-
-      //      update_half_velocity( Tp );  : do nothing ( u_{t+1} = u_{t+1/2}  )
-
-      }
+	u_new( Tp , dt2 );
 
     } // iter loop
 
     displ=move( Tp , dt );
     
-    update_half_velocity( Tp ); 
+    update_half_velocity( Tp , overdamped ); 
 
     areas(Tp);
 

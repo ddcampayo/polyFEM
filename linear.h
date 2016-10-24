@@ -82,8 +82,7 @@ public:
   //  void uhalf_inv(const kind::f U, const FT dt, const kind::f U0 );
   void laplacian_v(const kind::f ff1, const kind::f ff2);
   void gradient(const kind::f fsf, const kind::f fvf, bool mass=true );
-  void PPE(const kind::f velocity , const FT dt,  const kind::f pressure , const bool force );
-  void laplace_div( const kind::f velocity , const FT dt, const kind::f divv, const kind::f pressure , const bool force );
+  void PPE(const kind::f velocity , const FT dt,  const kind::f pressure );
   void mass_v(const kind::f vectorf );
   void mass_s(const kind::f scalarf );
   void save_matrices(void);
@@ -92,6 +91,7 @@ public:
 
  private:
 
+  void laplace_div( const kind::f velocity , const FT dt, const kind::f divv, const kind::f pressure );
   void laplacian_stiff(const kind::f ffield, const kind::f gradfield  );
   void laplacian_stiff_v(const kind::f ffield, const kind::f gradfield  );
   void laplacian_Delta_v(const kind::f ffield, const kind::f gradfield  );

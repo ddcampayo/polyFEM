@@ -102,9 +102,9 @@ void curvature(void) ;
 FT move(Triangulation& T, FT) ;
 void move_info(Triangulation& T) ;
 void u_star(Triangulation& T, FT, bool) ;
-void u_new(Triangulation& T, const FT, const bool) ;
+void u_new(Triangulation& T, const FT) ;
 //void u_star_new(Triangulation& T, FT) ;
-void update_half_velocity( Triangulation& T );
+void update_half_velocity( Triangulation& T , const bool );
 void nabla(Triangulation& T) ;
 void Delta(Triangulation& T);
 
