@@ -197,7 +197,11 @@ int main() {
 
     displ=move( Tp , dt );
 
-    update_half_velocity( Tp ); 
+//  Reynolds number discrimination
+
+    if( simu.mu() < 1 ) // hi Re
+      update_half_velocity( Tp ); 
+                        // lo Re : do nothing ( u_{t+1} = u_{t+1/2}  )
 
     areas(Tp);
 

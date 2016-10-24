@@ -142,6 +142,7 @@ int main() {
 
     move_info(Tp);
 
+    // iter loop
     for( ; iter<max_iter ; iter++) {
 
       cout << "Move iteration  " << iter << " of " << max_iter << " ";
@@ -167,36 +168,66 @@ int main() {
 
       set_forces_Kolmo(Tp);
 
+//  Reynolds number discrimination
+
+      if( simu.mu() < 1 ) { // hi Re
+
+
 #ifdef EXPLICIT
 
-      cout << "Calculating Ustar explicitely" << endl;
+	cout << "Calculating Ustar explicitely" << endl;
 
-      algebra.laplacian_v(kind::UOLD,kind::LAPLU);
+	algebra.laplacian_v(kind::UOLD,kind::LAPLU);
 
-      u_star(Tp, dt2 , false );
+	u_star(Tp, dt2 , false );
 
 #else
 
-      cout << "Calculating Ustar implicitely" << endl;
+	cout << "Calculating Ustar implicitely" << endl;
 
-      algebra.ustar_inv(kind::USTAR,  dt2 , kind::UOLD, false);
+	algebra.ustar_inv(kind::USTAR,  dt2 , kind::UOLD, false);
+
 #endif
 
-      cout << "Solving PPE" << endl;
+	cout << "Solving PPE" << endl;
       
-      algebra.PPE( kind::USTAR, dt2 , kind:: P );
+	algebra.PPE( kind::USTAR, dt2 , kind:: P );
 
-      cout << "Calculating grad p" << endl;
-      algebra.gradient(kind::P, kind::GRADP);
+	cout << "Calculating grad p" << endl;
+	algebra.gradient(kind::P, kind::GRADP);
 
-      cout << "Evolving U " << endl;
+	cout << "Evolving U " << endl;
 
     //      u_new( dt );
-      u_new( Tp , dt2 );
-    }
+	u_new( Tp , dt2 );
+      }
+      else {  // lo Re
+
+	cout << "Solving PPE" << endl;
+      
+	algebra.PPE( kind::USTAR, dt2 , kind:: P );
+
+	cout << "Calculating grad p" << endl;
+
+	algebra.gradient(kind::P, kind::GRADP);
+
+	cout << "Calculating Uhalf implicitely" << endl;
+
+	algebra.uhalf_inv(kind::U,  dt2 , kind::UOLD);
+
+	cout << "Evolving Ustar " << endl;
+
+    //      u_new( dt );
+	u_star_new( Tp , dt2 );
+
+      //      update_half_velocity( Tp );  : do nothing ( u_{t+1} = u_{t+1/2}  )
+
+      }
+
+    } // iter loop
 
     displ=move( Tp , dt );
-
+    
     update_half_velocity( Tp ); 
 
     areas(Tp);
@@ -204,7 +235,7 @@ int main() {
     quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );
 
     if(simu.current_step()%simu.every()==0)
-	draw(Tp, particle_file , true);
+      draw(Tp, particle_file , true);
 
     log_file
       << simu.current_step() << "  "
@@ -215,7 +246,7 @@ int main() {
 
     simu.advance_time();
 
-  }
+  } // time loop
 
   time.stop();
 

@@ -163,6 +163,24 @@ void u_new(Triangulation& T, FT dt) {
 }
 
 
+void u_star_new(Triangulation& T, FT dt) {
+
+  for(F_v_it fv=T.finite_vertices_begin();
+      fv!=T.finite_vertices_end();
+      fv++) {
+
+    Vector_2 gradp = fv->gradp.val() ;
+    Vector_2 U=fv->U() ;
+
+    fv->Ustar.set( U + dt * gradp );
+
+  }
+
+  return;
+
+}
+
+
 void u_star(Triangulation& T, FT dt , bool semi ) { 
 
   for(F_v_it fv=T.finite_vertices_begin();
@@ -176,7 +194,7 @@ void u_star(Triangulation& T, FT dt , bool semi ) {
     if(semi)
       f = simu.mu() * fv->laplU() - fv->gradp() + fv->force();
     else
-      f= simu.mu() * fv->laplU() + fv->force(); // Include all forces here, but for the pressure grad!
+      f = simu.mu() * fv->laplU() + fv->force(); // Include all forces here, but for the pressure grad!
 
     Vector_2 Ustar = U0 + dt * f;
 
@@ -194,10 +212,6 @@ void update_half_velocity( Triangulation& Tp ) {
    for(F_v_it fv=Tp.finite_vertices_begin();
        fv!=Tp.finite_vertices_end();
        fv++) {
-
-//  for(F_v_it fv=Tm.finite_vertices_begin();
-//      fv!=Tm.finite_vertices_end();
-//      fv++) {
 
     Vector_2  v  = fv->U();
     Vector_2  v0 = fv->Uold();
