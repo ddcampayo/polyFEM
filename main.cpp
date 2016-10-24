@@ -185,13 +185,13 @@ int main() {
 
 	cout << "Calculating Ustar implicitely" << endl;
 
-	algebra.ustar_inv(kind::USTAR,  dt2 , kind::UOLD, false);
+	algebra.ustar_inv(kind::USTAR,  dt2 , kind::UOLD, true, false);
 
 #endif
 
 	cout << "Solving PPE" << endl;
       
-	algebra.PPE( kind::USTAR, dt2 , kind:: P );
+	algebra.PPE( kind::USTAR, dt2 , kind:: P , false );
 
 	cout << "Calculating grad p" << endl;
 	algebra.gradient(kind::P, kind::GRADP);
@@ -199,26 +199,28 @@ int main() {
 	cout << "Evolving U " << endl;
 
     //      u_new( dt );
-	u_new( Tp , dt2 );
+	u_new( Tp , dt2 , false );
       }
       else {  // lo Re
 
+	cout << "Calculating Ustar implicitely" << endl;
+
+	// algebra.uhalf_inv(kind::U,  dt2 , kind::UOLD);
+
+	algebra.ustar_inv(kind::USTAR,  dt2 , kind::UOLD, false, false);
+
 	cout << "Solving PPE" << endl;
       
-	algebra.PPE( kind::USTAR, dt2 , kind:: P );
+	algebra.PPE( kind::USTAR, dt2 , kind:: P , true );
 
 	cout << "Calculating grad p" << endl;
 
 	algebra.gradient(kind::P, kind::GRADP);
+	
+	cout << "Evolving U " << endl;
 
-	cout << "Calculating Uhalf implicitely" << endl;
-
-	algebra.uhalf_inv(kind::U,  dt2 , kind::UOLD);
-
-	cout << "Evolving Ustar " << endl;
-
-    //      u_new( dt );
-	u_star_new( Tp , dt2 );
+	//      u_new( dt );
+	u_new( Tp , dt2 , true );
 
       //      update_half_velocity( Tp );  : do nothing ( u_{t+1} = u_{t+1/2}  )
 

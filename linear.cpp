@@ -399,24 +399,37 @@ VectorXd linear::vfield_to_vctr(const kind::f vectorf , int comp ) {
 // inter_scalarf is lambda · vectorf
 
 void linear::laplace_div(
-			 const kind::f vectorf,
-			 const kind::f inter_scalarf,
-			 const kind::f scalarf ) {
-
+			 const kind::f velocity ,
+			 const FT dt,
+			 const kind::f divvel,
+			 const kind::f pressure ,
+			 const bool force ) {
+  
   if(stiffp1.size()==0)  fill_stiff();
 
-  cout << "Solving Lapl of field " << scalarf 
-       << " = div of field " << vectorf
-       << ", with intermediate field " << inter_scalarf
+  cout << "Solving Lapl of field " << pressure 
+       << " = div of field " << velocity
+       << ", with intermediate field " << divvel
        << '\n';
 
   if(lambda_x.size()==0)  fill_lambda();
 
-  VectorXd vx = vfield_to_vctr( vectorf ,0 );
-  VectorXd vy = vfield_to_vctr( vectorf ,1 );
+  VectorXd vx = vfield_to_vctr( velocity ,0 );
+  
+  VectorXd vy = vfield_to_vctr( velocity ,1 );
 
   VectorXd div1 = lambda_x * vx + lambda_y * vy ;
 
+  vctr_to_field( div1 , divvel );
+
+  if(force) {
+    VectorXd fx = vfield_to_vctr( kind::FORCE , 0 );
+    VectorXd fy = vfield_to_vctr( kind::FORCE , 1 );
+
+    div1 += dt * (lambda_x * fx + lambda_y * fy );
+
+  }
+  
   //  divv.conservativeResize(N+1);
 
 //  divv[N]=0;
@@ -461,9 +474,9 @@ void linear::laplace_div(
   VectorXd lapl2(N);
 
   lapl2(0) = 0;
-  lapl2.tail(N-1) = lapl;
+  lapl2.tail(N-1) = ( 1.0 / dt ) * lapl;
 
-  vctr_to_field( lapl2 , scalarf);
+  vctr_to_field( lapl2 , pressure );
 
   return;
 }
@@ -587,7 +600,10 @@ void linear::mass_s(const kind::f scalarf ) {
 
 // solves (mass - a x stiff)  vectorf = mass  vectorf
 
-void linear::ustar_inv(const kind::f Ustar, const FT dt, const kind::f U0 , bool semi) {
+void linear::ustar_inv(const kind::f Ustar,
+		       const FT dt,
+		       const kind::f U0 ,
+		       const bool force, const bool semi) {
 
   if(mas.size()==0)  fill_mas( dt );
 
@@ -597,16 +613,19 @@ void linear::ustar_inv(const kind::f Ustar, const FT dt, const kind::f U0 , bool
 
   VectorXd massU0_x;
 
-  VectorXd force_x = vfield_to_vctr( kind::FORCE , 0 );
-
+  if(force) {
+    //    VectorXd force_x
+    U0_x += dt * vfield_to_vctr( kind::FORCE , 0 );
+  }
+  
   if (semi) {
 
     VectorXd grad_x = vfield_to_vctr( kind::GRADP , 0 );
 
-    massU0_x = mass * (U0_x + dt * force_x) - dt * grad_x;
+    massU0_x = mass * U0_x - dt * grad_x;
 
   } else
-    massU0_x =  mass * (U0_x + dt * force_x);
+    massU0_x =  mass * U0_x ;
 
   VectorXd Ustarx= solver_mas.solve(massU0_x);
   if(solver_mas.info()!=Eigen::Success) 
@@ -620,17 +639,21 @@ void linear::ustar_inv(const kind::f Ustar, const FT dt, const kind::f U0 , bool
 
   VectorXd U0_y = vfield_to_vctr( U0 , 1 );
 
-  VectorXd force_y = vfield_to_vctr( kind::FORCE , 1 );
+  if(force) {
 
+    //  VectorXd force_y = vfield_to_vctr( kind::FORCE , 1 );
+    U0_y += dt * vfield_to_vctr( kind::FORCE , 1 );
+  }
+
+  
   VectorXd massU0_y;
 
   if (semi) {
-
     VectorXd grad_y = vfield_to_vctr( kind::GRADP , 1 );
-    massU0_y =  mass * (U0_y + dt * force_y) - dt * grad_y;
+    massU0_y =  mass * U0_y - dt * grad_y;
 
   } else
-    massU0_y =  mass * (U0_y + dt * force_y);
+    massU0_y =  mass * U0_y ;
 
   VectorXd Ustary= solver_mas.solve(massU0_y);
 
@@ -645,6 +668,8 @@ void linear::ustar_inv(const kind::f Ustar, const FT dt, const kind::f U0 , bool
 }
 
 
+//#define compile_uhalf_inv
+#ifdef compile_uhalf_inv
 
 // solves   dt * mu * stiff vectorf =  mass ( ustar - U0 - dt * force )
 
@@ -719,6 +744,7 @@ void linear::uhalf_inv(const kind::f U, const FT dt, const kind::f U0 ) {
   return;
 }
 
+#endif
 
 
 

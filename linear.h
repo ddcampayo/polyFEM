@@ -78,12 +78,12 @@ class linear {
 
 public:
 
-  void ustar_inv(const kind::f Ustar, const FT dt, const kind::f U0 , bool ) ;
-  void uhalf_inv(const kind::f U, const FT dt, const kind::f U0 );
+  void ustar_inv(const kind::f Ustar, const FT dt, const kind::f U0 , const bool , const bool ) ;
+  //  void uhalf_inv(const kind::f U, const FT dt, const kind::f U0 );
   void laplacian_v(const kind::f ff1, const kind::f ff2);
   void gradient(const kind::f fsf, const kind::f fvf, bool mass=true );
-  void PPE(const kind::f velocity , FT dt,  const kind::f pressure );
-  void laplace_div(const kind::f vectorf, const kind::f inter_scalarf, const kind::f scalarf );
+  void PPE(const kind::f velocity , const FT dt,  const kind::f pressure , const bool force );
+  void laplace_div( const kind::f velocity , const FT dt, const kind::f divv, const kind::f pressure , const bool force );
   void mass_v(const kind::f vectorf );
   void mass_s(const kind::f scalarf );
   void save_matrices(void);

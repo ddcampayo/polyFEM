@@ -220,18 +220,18 @@ void linear::laplacian_stiff( const kind::f ffield, const kind::f gradfield   ) 
 }
 
 
-void linear::PPE(const kind::f velocity , FT dt,  const kind::f pressure ) {
+void linear::PPE(const kind::f velocity , const FT dt,  const kind::f pressure , const bool force ) {
 
 //  linear linear_problem;
 
 //  laplace_div( kind::USTAR , kind::DIVU , kind::P);
-  laplace_div( velocity , kind::DIVU , pressure );
+  laplace_div( velocity , dt , kind::DIVU , pressure , force );
 
-  // divide by dt:
+  // // divide by dt:
 
-  for(F_v_it fv=T.finite_vertices_begin();
-      fv!=T.finite_vertices_end();
-      fv++)  fv->sf(pressure) /= dt;
+  // for(F_v_it fv=T.finite_vertices_begin();
+  //     fv!=T.finite_vertices_end();
+  //     fv++)  fv->sf(pressure) /= dt;
 
   return;
 

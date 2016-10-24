@@ -137,7 +137,7 @@ void move_info(Triangulation& T) {
 }
 
 
-void u_new(Triangulation& T, FT dt) {
+void u_new(Triangulation& T, const FT dt , const bool force) {
 
   for(F_v_it fv=T.finite_vertices_begin();
       fv!=T.finite_vertices_end();
@@ -151,6 +151,9 @@ void u_new(Triangulation& T, FT dt) {
     Vector_2 gradp = fv->gradp.val() ;
     Vector_2 U = Ustar - dt * gradp;
 
+    if(force)
+      U = U + dt * fv->force.val();
+    
     // relaxation mixing .-
     FT alpha=simu.alpha();
     Vector_2 U0=fv->U() ;
@@ -163,22 +166,6 @@ void u_new(Triangulation& T, FT dt) {
 }
 
 
-void u_star_new(Triangulation& T, FT dt) {
-
-  for(F_v_it fv=T.finite_vertices_begin();
-      fv!=T.finite_vertices_end();
-      fv++) {
-
-    Vector_2 gradp = fv->gradp.val() ;
-    Vector_2 U=fv->U() ;
-
-    fv->Ustar.set( U + dt * gradp );
-
-  }
-
-  return;
-
-}
 
 
 void u_star(Triangulation& T, FT dt , bool semi ) { 
@@ -225,3 +212,22 @@ void update_half_velocity( Triangulation& Tp ) {
   return;
 
 }
+
+
+
+// void u_star_new(Triangulation& T, FT dt) {
+
+//   for(F_v_it fv=T.finite_vertices_begin();
+//       fv!=T.finite_vertices_end();
+//       fv++) {
+
+//     Vector_2 gradp = fv->gradp.val() ;
+//     Vector_2 U=fv->U() ;
+
+//     fv->Ustar.set( U + dt * gradp );
+
+//   }
+
+//   return;
+
+// }
