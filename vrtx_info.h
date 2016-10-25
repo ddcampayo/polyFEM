@@ -36,7 +36,7 @@ Vector_2 {
 
 namespace kind {
   enum f {P , PSTAR, VOL , GRADP , LAPLP , 
-	  U, USTAR, UOLD, DIVU, LAPLU, ALPHA, FORCE};
+	  U, USTAR, UOLD, DIVU, LAPLU, ALPHA, ALPHA0 , FORCE};
 };
 
 template < class Gt, class Vb >
@@ -130,6 +130,7 @@ public:
   scalar_field vol;
   scalar_field fvol;
   scalar_field alpha;
+  scalar_field alpha0;
 
   vector_field U;
   vector_field Uold;
@@ -157,6 +158,7 @@ public:
 
   void reset_fields(void) { // set fields to zero
     p.reset();
+    alpha.reset();
     pstar.reset();
     vol.reset();
     fvol.reset();
@@ -183,6 +185,8 @@ public:
       return divU;
     else if(a==kind::ALPHA)
       return alpha;
+    else if(a==kind::ALPHA0)
+      return alpha0;
   }
 
   vector_field& vf(const kind::f a) {

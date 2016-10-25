@@ -46,8 +46,10 @@ int main() {
   create();
 
   if(simu.create_points()) {
-    //     set_fields_TG(Tp);
-     number(Tp);
+
+    set_alpha_circle( Tp );
+
+    number(Tp);
   }
   
   // areas(Tp);
@@ -187,6 +189,8 @@ int main() {
 	cout << "Calculating Ustar implicitely" << endl;
 
 //	algebra.ustar_inv(kind::USTAR,  dt2 , kind::UOLD, false , false);
+	algebra.alpha_inv(kind::ALPHA,  dt2, kind::ALPHA0 );
+
 	algebra.ustar_inv(kind::USTAR,  dt2 , kind::UOLD, overdamped , false);
 
 #endif

@@ -126,6 +126,7 @@ void move_info(Triangulation& T) {
 
     Point r=T.point(rr); // current point
 
+    fv->alpha0.set( fv->alpha() );
     fv->rold.set(r);
     fv->Uold.set(fv->U());
     fv->Ustar.set(fv->U());

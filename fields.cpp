@@ -172,12 +172,30 @@ Vector_2 field_rotation(const FT x,const FT y, bool deriv) {
 
 // }
 
+
 FT field_r(const FT x,const FT y, bool deriv) {
 
   const FT radius=0.5;
 
   if( (x*x + y*y) < radius*radius )  return 1;
   else return 0;
+
+}
+
+
+void set_alpha_circle( Triangulation& T ) {
+
+  for(F_v_it fv=T.finite_vertices_begin();
+      fv!=T.finite_vertices_end();
+      fv++)    {
+
+    FT x=fv->point().x();
+    FT y=fv->point().y();
+
+    fv->alpha.set( field_r( x , y) );
+  }
+
+  return;
 
 }
 

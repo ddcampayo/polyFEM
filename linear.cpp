@@ -589,7 +589,7 @@ void linear::mass_s(const kind::f scalarf ) {
 }
 
 
-// solves (mass - a x stiff)  vectorf = mass  vectorf
+// solves (mass - dt x mu x stiff)  ustar = mass ( dt x force + u0 )
 
 void linear::ustar_inv(const kind::f Ustar,
 		       const FT dt,
@@ -654,6 +654,32 @@ void linear::ustar_inv(const kind::f Ustar,
 
 
   vctr_to_vfield( Ustary , Ustar  , 1);
+
+  return;
+}
+
+
+
+// solves (mass - dt x mu x stiff)  alpha = alpha0
+
+void linear::alpha_inv(const kind::f alpha,
+		       const FT dt,
+		       const kind::f alpha0 ) {
+
+  if(mas.size()==0)  fill_mas( dt );
+
+  VectorXd al0 = field_to_vctr( alpha0 );
+
+  VectorXd mass0 = mass * al0 ;
+
+  VectorXd al = solver_mas.solve(mass0);
+
+  if(solver_mas.info()!=Eigen::Success) 
+      cout << "Warning: unsucessful mas x solve, error code " 
+	   << solver_mas.info() << endl ;
+
+
+  vctr_to_field( al , alpha );
 
   return;
 }
