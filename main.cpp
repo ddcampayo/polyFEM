@@ -186,6 +186,7 @@ int main() {
 
 	cout << "Calculating Ustar implicitely" << endl;
 
+//	algebra.ustar_inv(kind::USTAR,  dt2 , kind::UOLD, false , false);
 	algebra.ustar_inv(kind::USTAR,  dt2 , kind::UOLD, overdamped , false);
 
 #endif
@@ -206,6 +207,7 @@ int main() {
 
     displ=move( Tp , dt );
     
+//    update_half_velocity( Tp , false ); 
     update_half_velocity( Tp , overdamped ); 
 
     areas(Tp);
