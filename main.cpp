@@ -186,10 +186,12 @@ int main() {
 
 #else
 
-	cout << "Calculating Ustar implicitely" << endl;
+	cout << "Calculating alpha implicitely" << endl;
 
 //	algebra.ustar_inv(kind::USTAR,  dt2 , kind::UOLD, false , false);
 	algebra.alpha_inv(kind::ALPHA,  dt2, kind::ALPHA0 );
+
+	cout << "Calculating Ustar implicitely" << endl;
 
 	algebra.ustar_inv(kind::USTAR,  dt2 , kind::UOLD, overdamped , false);
 

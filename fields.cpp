@@ -12,7 +12,7 @@ extern sim_pars simu;
 //typedef FT (*field)(const FT x,const FT y, bool deriv=false); // pointer to function returning field
 
 
-FT field_r(const FT x,const FT y, bool deriv=false) ;
+FT field_r(const FT x,const FT y, const FT r, bool deriv=false) ;
 FT field_Zalesak(const FT x,const FT y) ;
 FT field_cos(const FT x, bool deriv=false) ;
 FT field_sin(const FT x, bool deriv=false) ;
@@ -173,9 +173,9 @@ Vector_2 field_rotation(const FT x,const FT y, bool deriv) {
 // }
 
 
-FT field_r(const FT x,const FT y, bool deriv) {
+FT field_r(const FT x,const FT y, const FT radius, bool deriv) {
 
-  const FT radius=0.5;
+  //  const FT radius=0.5;
 
   if( (x*x + y*y) < radius*radius )  return 1;
   else return 0;
@@ -192,7 +192,7 @@ void set_alpha_circle( Triangulation& T ) {
     FT x=fv->point().x();
     FT y=fv->point().y();
 
-    fv->alpha.set( field_r( x , y) );
+    fv->alpha.set( field_r( x , y , 0.2 ) );
   }
 
   return;

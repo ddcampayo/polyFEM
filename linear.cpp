@@ -678,7 +678,6 @@ void linear::alpha_inv(const kind::f alpha,
       cout << "Warning: unsucessful mas x solve, error code " 
 	   << solver_mas.info() << endl ;
 
-
   vctr_to_field( al , alpha );
 
   return;
