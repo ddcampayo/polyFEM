@@ -13,4 +13,5 @@
       << vit->Uold.val() << "  "  //  15 & 16
       << vit->pstar.val() << "  "  //  17
       << vit->force.val() << "  "  //  18 & 19
+      << vit->gradalpha.val() << "  "  //  20 & 21
       << endl;

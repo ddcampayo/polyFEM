@@ -4,9 +4,9 @@ LL=1.0
 
 import pylab as pl
 
-pl.figure(figsize=(4,4))
+pl.figure(figsize=(8,8))
 
-skip=2
+skip=10
 #path='timings_full/'
 path='./'
 
@@ -16,7 +16,7 @@ for n in range(0,400+skip,skip):
 #    dtm=pl.loadtxt(path+str(n)+'/mesh.dat')
     xm=dtm[:,0]; ym=dtm[:,1];  pm=dtm[:,5];  vxm=dtm[:,8]; vym=dtm[:,9]; alm=dtm[:,4]
 
-    pl.scatter( xm , ym , c=alm, s=40) #, vmin=0, vmax=1)
+    pl.scatter( xm , ym , c=alm, s=80) #, vmin=0, vmax=1)
 
     pl.xlim([ -LL/2 , LL/2 ])
     pl.ylim([ -LL/2 , LL/2 ])

@@ -36,7 +36,7 @@ Vector_2 {
 
 namespace kind {
   enum f {P , PSTAR, VOL , GRADP , LAPLP , 
-	  U, USTAR, UOLD, DIVU, LAPLU, ALPHA, ALPHA0 , FORCE};
+	  U, USTAR, UOLD, DIVU, LAPLU, ALPHA, ALPHA0 , GRADALPHA , FORCE};
 };
 
 template < class Gt, class Vb >
@@ -131,7 +131,8 @@ public:
   scalar_field fvol;
   scalar_field alpha;
   scalar_field alpha0;
-
+  vector_field gradalpha;
+  
   vector_field U;
   vector_field Uold;
   vector_field Ustar;
@@ -192,6 +193,8 @@ public:
   vector_field& vf(const kind::f a) {
     if(a==kind::GRADP)
       return gradp;
+    if(a==kind::GRADALPHA)
+      return gradalpha;
     else if(a==kind::U)
       return U;
     else if(a==kind::USTAR)

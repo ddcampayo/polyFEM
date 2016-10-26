@@ -16,6 +16,7 @@ struct data_kept {
   FT alpha, alpha0;
   FT p;
   Vector_2 gradp;
+  Vector_2 gradal;
   FT vol;
   Vector_2 force;
 
@@ -29,6 +30,7 @@ struct data_kept {
     laplU = fv->laplU();
     alpha=fv->alpha();
     alpha0=fv->alpha0();
+    gradal= fv->gradalpha();
     p= fv->p();
     gradp= fv->gradp();
     vol= fv->vol();
@@ -45,6 +47,7 @@ struct data_kept {
     fv->laplU.set( laplU );
     fv->alpha.set( alpha );
     fv->alpha0.set( alpha0 );
+    fv->gradalpha.set( gradal );
     fv->p.set( p );
     fv->gradp.set( gradp );
     fv->vol.set(vol);

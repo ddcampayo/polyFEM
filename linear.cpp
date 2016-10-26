@@ -595,8 +595,12 @@ void linear::ustar_inv(const kind::f Ustar,
   if(mas.size()==0)  fill_mas( dt );
 
 //// x
-
-  VectorXd U0_x = dt * vfield_to_vctr( kind::FORCE , 0 );
+  VectorXd al = field_to_vctr( kind::ALPHA );
+    
+  VectorXd U0_x =  // = dt * vfield_to_vctr( kind::FORCE , 0 );
+  
+  // U0_x -=
+  -dt * al * vfield_to_vctr( kind::GRADALPHA , 0 );
 
   if(!overdamped) {
     //    VectorXd force_x
@@ -624,7 +628,9 @@ void linear::ustar_inv(const kind::f Ustar,
 
 //// y
 
-  VectorXd U0_y = dt * vfield_to_vctr( kind::FORCE , 1 );
+  VectorXd U0_y =  // ; dt * vfield_to_vctr( kind::FORCE , 1 );
+  //  U0_y
+  -dt * al * vfield_to_vctr( kind::GRADALPHA , 1);
 
   if(!overdamped) {
     //  VectorXd force_y = vfield_to_vctr( kind::FORCE , 1 );
