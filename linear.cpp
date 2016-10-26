@@ -251,20 +251,16 @@ void linear::fill_mas( const FT& dt ){
   std::cout << " Reading mas matrix" << std::endl;
   loadMarket(mas, "mas.mtx");
   std::cout << " Read mas matrix" << std::endl;
-
-  if(stiff.size()==0) fill_stiff();
-  if(mass.size()==0)  fill_mass();
-
 #else
 
   if(stiff.size()==0) fill_stiff();
   if(mass.size()==0)  fill_mass();
 
-  std::cout << " Buildig MAS matrix" << std::endl;
+  std::cout << " Building MAS matrix: " ;
 
   FT a = dt * simu.mu() ;
 
-  cout << "Buildng (mass -  " << a << "  x stiff) " ;
+  cout << " (mass -  " << a << "  x stiff) " << endl;
 
   mas = mass - a * stiff;
 
@@ -303,7 +299,7 @@ VectorXd linear::field_to_vctr(const kind::f scalarf ) {
     vctr(indices[nn])=ff[nn];
 
     // cout << indices[nn] << " : "
-    // 	 << ff[nn] << endl;
+    //  	 << ff[nn] << endl;
   }
 
   return vctr;
@@ -671,7 +667,7 @@ void linear::alpha_inv(const kind::f alpha,
   VectorXd al0 = field_to_vctr( alpha0 );
 
   VectorXd mass0 = mass * al0 ;
-
+  
   VectorXd al = solver_mas.solve(mass0);
 
   if(solver_mas.info()!=Eigen::Success) 

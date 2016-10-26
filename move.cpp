@@ -13,7 +13,7 @@ struct data_kept {
   Vector_2 U;
   FT divU;
   Vector_2 Ustar;
-  FT alpha;
+  FT alpha, alpha0;
   FT p;
   Vector_2 gradp;
   FT vol;
@@ -28,6 +28,7 @@ struct data_kept {
     Ustar = fv->Ustar();
     laplU = fv->laplU();
     alpha=fv->alpha();
+    alpha0=fv->alpha0();
     p= fv->p();
     gradp= fv->gradp();
     vol= fv->vol();
@@ -43,6 +44,7 @@ struct data_kept {
     fv->Ustar.set( Ustar );
     fv->laplU.set( laplU );
     fv->alpha.set( alpha );
+    fv->alpha0.set( alpha0 );
     fv->p.set( p );
     fv->gradp.set( gradp );
     fv->vol.set(vol);
@@ -129,7 +131,7 @@ void move_info(Triangulation& T) {
     fv->alpha0.set( fv->alpha() );
     fv->rold.set(r);
     fv->Uold.set(fv->U());
-    fv->Ustar.set(fv->U());
+    //    fv->Ustar.set(fv->U());
     //    fv->p.set(fv->p() +  fv->pstar() );
   }
 

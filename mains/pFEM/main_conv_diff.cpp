@@ -65,7 +65,7 @@ int main() {
   //   Delta(Tp);
   // }
   
-  move_info(Tp);
+  move_info( Tp );
 
   // /// Prev test begin
   //cout << "Calculating Lapl U" << endl;
@@ -186,10 +186,13 @@ int main() {
 
 #else
 
+	cout << "Calculating alpha implicitely" << endl;
+
+	algebra.alpha_inv(kind::ALPHA,  dt2, kind::ALPHA0 );
+
 	cout << "Calculating Ustar implicitely" << endl;
 
-//	algebra.ustar_inv(kind::USTAR,  dt2 , kind::UOLD, false , false);
-	algebra.alpha_inv(kind::ALPHA,  dt2, kind::ALPHA0 );
+	//	algebra.ustar_inv(kind::USTAR,  dt2 , kind::UOLD, false , false);
 
 	algebra.ustar_inv(kind::USTAR,  dt2 , kind::UOLD, overdamped , false);
 
