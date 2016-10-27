@@ -275,6 +275,28 @@ void linear::fill_mas( const FT& dt ){
 }
 
 
+
+void linear::fill_mbs( const FT& b ){ 
+
+
+  if(stiff.size()==0) fill_stiff();
+  if(mass.size()==0)  fill_mass();
+
+  std::cout << " Building MbS matrix: " ;
+
+  cout << " (mass -  " << b << "  x stiff) " << endl;
+
+  mbs = mass - b * stiff;
+
+  solver_mbs.compute(mbs);
+
+  if(solver_mbs.info()!=Eigen::Success) {
+    std::cout << "Failure decomposing mass minus b stiff matrix\n";
+  }
+
+}
+
+
 VectorXd linear::field_to_vctr(const kind::f scalarf ) {
 
   std::vector<int> indices;
@@ -594,14 +616,17 @@ void linear::ustar_inv(const kind::f Ustar,
 
   if(mas.size()==0)  fill_mas( dt );
 
+  FT eps=1e-1;
+  
 //// x
   VectorXd al = field_to_vctr( kind::ALPHA );
     
-  VectorXd U0_x =  // = dt * vfield_to_vctr( kind::FORCE , 0 );
+  VectorXd U0_x = vfield_to_vctr( kind::FORCE , 0 ); // = dt * 
   
-  // U0_x -=
-  -dt * al * vfield_to_vctr( kind::GRADALPHA , 0 );
+  U0_x -= eps * al * vfield_to_vctr( kind::GRADALPHA , 0 );
 
+  U0_x *= dt;
+  
   if(!overdamped) {
     //    VectorXd force_x
     U0_x += vfield_to_vctr( U0 , 0 );
@@ -628,9 +653,11 @@ void linear::ustar_inv(const kind::f Ustar,
 
 //// y
 
-  VectorXd U0_y =  // ; dt * vfield_to_vctr( kind::FORCE , 1 );
-  //  U0_y
-  -dt * al * vfield_to_vctr( kind::GRADALPHA , 1);
+  VectorXd U0_y = vfield_to_vctr( kind::FORCE , 1 ); // = dt * 
+  
+  U0_y -= eps * al * vfield_to_vctr( kind::GRADALPHA , 1 );
+
+  U0_y *= dt;
 
   if(!overdamped) {
     //  VectorXd force_y = vfield_to_vctr( kind::FORCE , 1 );
@@ -668,17 +695,17 @@ void linear::alpha_inv(const kind::f alpha,
 		       const FT dt,
 		       const kind::f alpha0 ) {
 
-  if(mas.size()==0)  fill_mas( dt );
+  if(mbs.size()==0)  fill_mbs( dt );
 
   VectorXd al0 = field_to_vctr( alpha0 );
 
   VectorXd mass0 = mass * al0 ;
   
-  VectorXd al = solver_mas.solve(mass0);
+  VectorXd al = solver_mbs.solve(mass0);
 
-  if(solver_mas.info()!=Eigen::Success) 
-      cout << "Warning: unsucessful mas x solve, error code " 
-	   << solver_mas.info() << endl ;
+  if(solver_mbs.info()!=Eigen::Success) 
+      cout << "Warning: unsucessful mbs x solve, error code " 
+	   << solver_mbs.info() << endl ;
 
   vctr_to_field( al , alpha );
 

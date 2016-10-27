@@ -183,6 +183,33 @@ FT field_r(const FT x,const FT y, const FT radius, bool deriv) {
 }
 
 
+void set_alpha_under_cos( Triangulation& T ) {
+
+  for(F_v_it fv=T.finite_vertices_begin();
+      fv!=T.finite_vertices_end();
+      fv++)    {
+
+    FT x=fv->point().x();
+    FT y=fv->point().y();
+
+    FT h=0.1 * field_cos(x);
+
+    FT val=1;
+
+    if (y < h)
+      val = -1;
+    else
+      val =  1;
+
+    fv->alpha.set( val );
+	
+  }
+
+  return;
+
+}
+
+
 void set_alpha_circle( Triangulation& T ) {
 
   for(F_v_it fv=T.finite_vertices_begin();
@@ -192,7 +219,7 @@ void set_alpha_circle( Triangulation& T ) {
     FT x=fv->point().x();
     FT y=fv->point().y();
 
-    fv->alpha.set( field_r( x , y , 0.2 ) );
+    fv->alpha.set( 2 * field_r( x , y , 0.2 ) - 1 );
   }
 
   return;

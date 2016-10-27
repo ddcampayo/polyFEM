@@ -43,18 +43,24 @@ class linear {
   SpMat mass;
   SpMat stiffp1;
   SpMat mas;
+  SpMat mbs;
 
   void fill_lambda();
   void fill_stiff();
   void fill_mass();
   void fill_mas( const FT& );
+  void fill_mbs( const FT& );
+
+  //TODO typdefs?
 
 #define DIRECT_SOLVER
+
 #ifdef DIRECT_SOLVER
   #ifdef CHOLMOD
     Eigen::CholmodSupernodalLLT<SpMat> solver_mass;
     Eigen::CholmodSupernodalLLT<SpMat> solver_stiffp1;
     Eigen::CholmodSupernodalLLT<SpMat> solver_mas;
+    Eigen::CholmodSupernodalLLT<SpMat> solver_mbs;
     // Automatic choice of SN vs simplicial
     //Eigen::CholmodDecomposition<SpMat> solver_mass;
     //Eigen::CholmodDecomposition<SpMat> solver_stiffp1;
@@ -63,11 +69,13 @@ class linear {
     Eigen::SimplicialLDLT<SpMat> solver_mass;
     Eigen::SimplicialLDLT<SpMat> solver_stiffp1;
     Eigen::SimplicialLDLT<SpMat> solver_mas;
+    Eigen::SimplicialLDLT<SpMat> solver_mbs;
   #endif
 #else
   Eigen::BiCGSTAB<SpMat> solver_mass;
   Eigen::BiCGSTAB<SpMat> solver_stiffp1;
   Eigen::BiCGSTAB<SpMat> solver_mas;
+  Eigen::BiCGSTAB<SpMat> solver_mbs;
 #endif
 
   //  ConjugateGradient<SpMat> solver_mass;

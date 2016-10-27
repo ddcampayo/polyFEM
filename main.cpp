@@ -47,7 +47,8 @@ int main() {
 
   if(simu.create_points()) {
 
-    set_alpha_circle( Tp );
+    //    set_alpha_circle( Tp );
+    set_alpha_under_cos(  Tp ) ;
 
     number(Tp);
   }
@@ -194,9 +195,9 @@ int main() {
 
 #else
 
-	//	cout << "Calculating alpha implicitely" << endl;
+	cout << "Calculating alpha implicitely" << endl;
 
-	//	algebra.alpha_inv(kind::ALPHA,  dt2, kind::ALPHA0 );
+	algebra.alpha_inv(kind::ALPHA,  1e-4 * dt2, kind::ALPHA0 );
 
 	cout << "Calculating grad alpha" << endl;
 	algebra.gradient(kind::ALPHA, kind::GRADALPHA);

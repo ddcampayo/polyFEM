@@ -6,11 +6,11 @@ import pylab as pl
 
 pl.figure(figsize=(8,8))
 
-skip=10
+skip=20
 #path='timings_full/'
 path='./'
 
-for n in range(0,400+skip,skip):
+for n in range(0,4000+skip,skip):
     pl.clf()
     dtm=pl.loadtxt(path+str(n)+'/particles.dat')
 #    dtm=pl.loadtxt(path+str(n)+'/mesh.dat')
