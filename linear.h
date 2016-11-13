@@ -91,7 +91,8 @@ public:
 
   //  void uhalf_inv(const kind::f U, const FT dt, const kind::f U0 );
   void laplacian_v(const kind::f ff1, const kind::f ff2);
-  void gradient(const kind::f fsf, const kind::f fvf, bool mass=true );
+  void gradient(const kind::f fsf, const kind::f fvf, bool do_mass=true );
+  void chempot(const kind::f fsf, const kind::f fsf2 );
   void PPE(const kind::f velocity , const FT dt,  const kind::f pressure );
   void mass_v(const kind::f vectorf );
   void mass_s(const kind::f scalarf );
@@ -100,7 +101,8 @@ public:
 
 
  private:
-
+  void mass_v( VectorXd& fx , VectorXd& fy );
+  void mass_s( VectorXd& f );
   void laplace_div( const kind::f velocity , const FT dt, const kind::f divv, const kind::f pressure );
   void laplacian_stiff(const kind::f ffield, const kind::f gradfield  );
   void laplacian_stiff_v(const kind::f ffield, const kind::f gradfield  );

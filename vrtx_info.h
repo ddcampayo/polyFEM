@@ -12,6 +12,7 @@ class field {
   void operator =(const type& ff) {f_=ff;}
   type operator +(const type& ff) const {return f_ +ff;}
   type operator += (const type& ff) {type f2=  f_ + ff ; f_=f2 ; return f2;}
+  type operator -= (const type& ff) {type f2=  f_ - ff ; f_=f2 ; return f2;}
   type operator/=(const FT& ff) {return (f_ = (1.0)/ff * f_ );}
   type operator*=(const FT& ff) {return (f_ =       ff * f_ );}
 
@@ -36,7 +37,8 @@ Vector_2 {
 
 namespace kind {
   enum f {P , PSTAR, VOL , GRADP , LAPLP , 
-	  U, USTAR, UOLD, DIVU, LAPLU, ALPHA, ALPHA0 , GRADALPHA , FORCE};
+	  U, USTAR, UOLD, DIVU, LAPLU, ALPHA, ALPHA0, CHEMPOT ,
+	  GRADALPHA , GRADCHEMPOT , FORCE};
 };
 
 template < class Gt, class Vb >
@@ -131,7 +133,9 @@ public:
   scalar_field fvol;
   scalar_field alpha;
   scalar_field alpha0;
+  scalar_field chempot;
   vector_field gradalpha;
+  vector_field gradchempot;
   
   vector_field U;
   vector_field Uold;
@@ -188,6 +192,8 @@ public:
       return alpha;
     else if(a==kind::ALPHA0)
       return alpha0;
+    else if(a==kind::CHEMPOT)
+      return chempot;
   }
 
   vector_field& vf(const kind::f a) {
@@ -195,6 +201,8 @@ public:
       return gradp;
     if(a==kind::GRADALPHA)
       return gradalpha;
+    if(a==kind::GRADCHEMPOT)
+      return gradchempot;
     else if(a==kind::U)
       return U;
     else if(a==kind::USTAR)

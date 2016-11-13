@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-LL=1.0
+LL=10
 
 import pylab as pl
 

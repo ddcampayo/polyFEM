@@ -9,7 +9,7 @@
 
 //typedef Vertex::field field;
 
-void linear::gradient(const kind::f scalarf, const kind::f vectorf, bool mass) {
+void linear::gradient(const kind::f scalarf, const kind::f vectorf, bool do_mass) {
 
   cout << "gradient of field " << scalarf << " --> " << vectorf << '\n';
 
@@ -23,11 +23,48 @@ void linear::gradient(const kind::f scalarf, const kind::f vectorf, bool mass) {
   vctr_to_vfield( grad_x  , vectorf , 0 );
   vctr_to_vfield( grad_y  , vectorf , 1 );
 
-  if(mass)
+  if(do_mass)
     // full mass inversion.-
     mass_v(vectorf);
 
   return;
+}
+
+
+void linear::chempot(const kind::f scalarf, const kind::f chempot) {
+
+  cout << "chemical potential of field " << scalarf << " --> " << chempot << '\n';
+
+  //  if(lambda_x.size()==0)  fill_lambda();
+
+  VectorXd field = field_to_vctr( scalarf );
+  VectorXd field3 = field.array().pow(3);
+
+  if(stiff.size()==0) fill_stiff();
+  if(mass.size()==0)  fill_mass();
+
+  VectorXd lapl = stiff*field;
+
+  mass_s(lapl);
+  
+  vctr_to_field( -field + field3 - 0.5 * lapl , chempot  );
+
+  return;
+
+
+  // TODO: Laplacian term
+  
+  // VectorXd grad_x = lambda_x * ( -field + field3 );
+  // VectorXd grad_y = lambda_y * ( -field + field3 );
+
+  // vctr_to_vfield( grad_x  , vectorf , 0 );
+  // vctr_to_vfield( grad_y  , vectorf , 1 );
+
+  // if(mass)
+  //   // full mass inversion.-
+  //   mass_v(vectorf);
+
+  // return;
 }
 
 
@@ -40,7 +77,8 @@ void linear::laplacian_s(const kind::f ffield, const kind::f gradfield  ) {
 
   cout << "scalar Laplacian of field " << ffield << " --> " << gradfield << '\n';
 
-  laplacian_Delta( ffield,  gradfield  ) ;
+//  laplacian_Delta( ffield,  gradfield  ) ;
+  laplacian_stiff( ffield,  gradfield  ) ;
 }
 
 void linear::laplacian_v( const kind::f ffield, const kind::f gradfield  ) {

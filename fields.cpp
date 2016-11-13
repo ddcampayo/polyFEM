@@ -192,7 +192,7 @@ void set_alpha_under_cos( Triangulation& T ) {
     FT x=fv->point().x();
     FT y=fv->point().y();
 
-    FT h=0.1 * field_cos(x);
+    FT h= 1 * field_cos(x);
 
     FT val=1;
 
@@ -233,7 +233,7 @@ void set_alpha_circle( Triangulation& T ) {
   for(F_v_it fv=T.finite_vertices_begin();
       fv!=T.finite_vertices_end();
       fv++)   
-    fv->alpha() -= mean ;
+    fv->alpha.set( fv->alpha.val() - mean );
 
   return;
 

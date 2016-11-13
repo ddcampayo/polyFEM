@@ -19,7 +19,7 @@
 
 #include"periodic.h"
 
-const FT LL=1; // length of original domain
+const FT LL=10; // length of original domain
 
 Iso_rectangle domain(-LL/2, -LL/2, LL/2, LL/2);
 
@@ -194,13 +194,14 @@ int main() {
 	u_star(Tp, dt2 , false );
 
 #else
+	cout << "Calculating chem pot" << endl;
+	algebra.chempot(kind::ALPHA0, kind::CHEMPOT);
 
 	cout << "Calculating alpha implicitely" << endl;
 
-	algebra.alpha_inv(kind::ALPHA,  1e-4 * dt2, kind::ALPHA0 );
+	algebra.alpha_inv(kind::ALPHA, dt2 , kind::ALPHA0 );
 
-	cout << "Calculating grad alpha" << endl;
-	algebra.gradient(kind::ALPHA, kind::GRADALPHA);
+	//	algebra.gradient(kind::ALPHA, kind::ALPHA0);
 
 	cout << "Calculating Ustar implicitely" << endl;
 

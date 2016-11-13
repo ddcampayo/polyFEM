@@ -47,7 +47,8 @@ int main() {
 
   if(simu.create_points()) {
 
-    set_alpha_circle( Tp );
+    //    set_alpha_circle( Tp );
+    set_alpha_under_cos(  Tp ) ;
 
     number(Tp);
   }
@@ -93,10 +94,18 @@ int main() {
   algebra.save_matrices();
 #endif
 
-  //  set_fields();
+      // areas(Tp);
+      // quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );
 
-  //  set_vels();
+      // nabla(Tp);
+      // Delta(Tp);
 
+
+      // linear algebra(Tp);
+
+      // cout << "Calculating grad alpha" << endl;
+      // algebra.gradient(kind::ALPHA, kind::GRADALPHA);
+  
   const std::string particle_file("particles.dat");
 
   draw(Tp, particle_file , true);
@@ -170,7 +179,7 @@ int main() {
 	min_iter=iter;
       }
 
-      set_forces_Kolmo(Tp);
+      //      set_forces_Kolmo(Tp);
 
 //  Reynolds number discrimination
 
@@ -188,7 +197,10 @@ int main() {
 
 	cout << "Calculating alpha implicitely" << endl;
 
-	algebra.alpha_inv(kind::ALPHA,  dt2, kind::ALPHA0 );
+	algebra.alpha_inv(kind::ALPHA,  1e-4 * dt2, kind::ALPHA0 );
+
+	cout << "Calculating grad alpha" << endl;
+	algebra.gradient(kind::ALPHA, kind::GRADALPHA);
 
 	cout << "Calculating Ustar implicitely" << endl;
 
