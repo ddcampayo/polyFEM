@@ -192,14 +192,14 @@ void set_alpha_under_cos( Triangulation& T ) {
     FT x=fv->point().x();
     FT y=fv->point().y();
 
-    FT h= 1 * field_cos(x);
+    FT h= 0 * field_cos(x);
 
-    FT val=1;
+    FT val=0.1;
 
     if (y < h)
-      val = -1;
-    else
-      val =  1;
+      val *= -1;
+    // else
+    //   val =  1;
 
     fv->alpha.set( val );
 	

@@ -19,7 +19,9 @@ struct data_kept {
   Vector_2 gradal;
   FT vol;
   Vector_2 force;
-
+  FT cp;
+  Vector_2 gcp;
+  
   data_kept(const F_v_it fv) {
     idx = fv->idx();
     U = fv->U();
@@ -35,6 +37,8 @@ struct data_kept {
     gradp= fv->gradp();
     vol= fv->vol();
     force= fv->force();
+    cp= fv->chempot();
+    gcp= fv->gradchempot();
   }
 
   void restore(Vertex_handle fv) {
@@ -52,6 +56,8 @@ struct data_kept {
     fv->gradp.set( gradp );
     fv->vol.set(vol);
     fv->force.set( force );
+    fv->chempot.set( cp );
+    fv->gradchempot.set( gcp );
   }
 
 };

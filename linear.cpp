@@ -533,40 +533,40 @@ void linear::mass_v(const kind::f vectorf ) {
 #else
 
 
-void linear::mass_v( VectorXd& fx , VectorXd& fy ) {
+// void linear::mass_v( VectorXd& fx , VectorXd& fy ) {
 
-  cout << "Mass - inverting vector x,y couple " << endl;
+//   cout << "Mass - inverting vector x,y couple " << endl;
 
-  if(mass.size()==0)   fill_mass();
+//   if(mass.size()==0)   fill_mass();
 
-  cout << "matrix  vector of size " << mass.rows() << " x " << mass.cols() << endl;
+//   cout << "matrix  vector of size " << mass.rows() << " x " << mass.cols() << endl;
 
-  cout << "x component" << endl;
+//   cout << "x component" << endl;
 
-  // x component.-
+//   // x component.-
 
-  VectorXd grad_x= solver_mass.solve(fx);
+//   VectorXd grad_x= solver_mass.solve(fx);
 
-  if(solver_mass.info()!=Eigen::Success) 
-      cout << "Warning: unsucessful mass x solve, error code " 
-	   << solver_mass.info() << endl ;
+//   if(solver_mass.info()!=Eigen::Success) 
+//       cout << "Warning: unsucessful mass x solve, error code " 
+// 	   << solver_mass.info() << endl ;
 
-  // y component.-
-  cout << "y component" << endl;
+//   // y component.-
+//   cout << "y component" << endl;
 
-  VectorXd grad_y= solver_mass.solve(fy);
+//   VectorXd grad_y= solver_mass.solve(fy);
 
-  if(solver_mass.info()!=Eigen::Success) 
-    cout << "Warning: unsucessful mass y solve, error code " 
-	 << solver_mass.info() << endl ;
+//   if(solver_mass.info()!=Eigen::Success) 
+//     cout << "Warning: unsucessful mass y solve, error code " 
+// 	 << solver_mass.info() << endl ;
 
-  fx=grad_x;
-  fy=grad_y;
+//   fx=grad_x;
+//   fy=grad_y;
 
-  cout << "Mass invertion done " << endl;
+//   cout << "Mass invertion done " << endl;
 
-  return;
-}
+//   return;
+// }
 
 
 
@@ -581,7 +581,8 @@ void linear::mass_v(const kind::f vectorf ) {
   VectorXd lambda_v_x = vfield_to_vctr( vectorf , 0 );
   VectorXd lambda_v_y = vfield_to_vctr( vectorf , 1 );
 
-  mass_v(lambda_v_x,lambda_v_y);
+  mass_s(lambda_v_x);
+  mass_s(lambda_v_y);
 
   vctr_to_vfield( lambda_v_x , vectorf , 0 );
   vctr_to_vfield( lambda_v_y , vectorf , 1 );
@@ -629,10 +630,11 @@ void linear::mass_s(const kind::f scalarf ) {
 
 // solves (mass - dt x mu x stiff)  ustar = mass ( dt x force + u0 )
 
-void linear::ustar_inv(const kind::f Ustar,
-		       const FT dt,
-		       const kind::f U0 ,
-		       const bool overdamped, const bool semi) {
+void linear::ustar_inv_cp(
+			  const kind::f Ustar,
+			  const FT dt,
+			  const kind::f U0 ,
+			  const bool overdamped, const bool semi) {
 
   if(mas.size()==0)  fill_mas( dt );
   if(lambda_x.size()==0)  fill_lambda();
@@ -655,17 +657,19 @@ void linear::ustar_inv(const kind::f Ustar,
   VectorXd grad_cp_x = lambda_x * chemp;
   VectorXd grad_cp_y = lambda_y * chemp;
 
-  // cout << "grad  chem pot back" << endl;
-
-  // vctr_to_vfield( grad_cp_x  , kind::GRADCHEMPOT , 0 );
-  // vctr_to_vfield( grad_cp_y  , kind::GRADCHEMPOT , 1 );
-
   cout << "Inverting grad chem pot" << endl;
 
-  mass_v( grad_cp_x, grad_cp_y );
+  mass_s( grad_cp_x );
+  mass_s( grad_cp_y );
 
   cout << "grad chem pot done" << endl;
-  
+
+  // optional .-
+  cout << "grad  chem pot back" << endl;
+
+  vctr_to_vfield( grad_cp_x  , kind::GRADCHEMPOT , 0 );
+  vctr_to_vfield( grad_cp_y  , kind::GRADCHEMPOT , 1 );
+
   U0_x -=  al * grad_cp_x ;
 
   U0_x *= dt;
@@ -733,12 +737,86 @@ void linear::ustar_inv(const kind::f Ustar,
 
 
 
+// solves (mass - dt x mu x stiff)  ustar = mass ( dt x force + u0 )
+
+void linear::ustar_inv(
+			  const kind::f Ustar,
+			  const FT dt,
+			  const kind::f U0 ,
+			  const bool overdamped, const bool semi) {
+
+  if(mas.size()==0)  fill_mas( dt );
+    
+  VectorXd U0_x = vfield_to_vctr( kind::FORCE , 0 ); // = dt * 
+
+  U0_x *= dt;
+  
+  if(!overdamped) {
+    //    VectorXd force_x
+    U0_x += vfield_to_vctr( U0 , 0 );
+  }
+  
+  VectorXd massU0_x;
+
+  if (semi) {
+
+    VectorXd grad_x = vfield_to_vctr( kind::GRADP , 0 );
+
+    massU0_x = mass * U0_x - dt * grad_x;
+
+  } else
+    massU0_x =  mass * U0_x ;
+
+  VectorXd Ustarx= solver_mas.solve(massU0_x);
+  if(solver_mas.info()!=Eigen::Success) 
+      cout << "Warning: unsucessful mas x solve, error code " 
+	   << solver_mas.info() << endl ;
+
+
+  vctr_to_vfield( Ustarx , Ustar , 0 );
+
+//// y
+
+  VectorXd U0_y = vfield_to_vctr( kind::FORCE , 1 ); // = dt * 
+
+  U0_y *= dt;
+
+  if(!overdamped) {
+    //  VectorXd force_y = vfield_to_vctr( kind::FORCE , 1 );
+
+    U0_y += vfield_to_vctr( U0 , 1 );
+  }
+
+  
+  VectorXd massU0_y;
+
+  if (semi) {
+    VectorXd grad_y = vfield_to_vctr( kind::GRADP , 1 );
+    massU0_y =  mass * U0_y - dt * grad_y;
+
+  } else
+    massU0_y =  mass * U0_y ;
+
+  VectorXd Ustary= solver_mas.solve(massU0_y);
+
+  if(solver_mas.info()!=Eigen::Success) 
+      cout << "Warning: unsucessful mas y solve, error code " 
+	   << solver_mas.info() << endl ;
+
+
+  vctr_to_vfield( Ustary , Ustar  , 1);
+
+  return;
+}
+
+
+
 // solves (mass - dt x mu x stiff)  alpha = alpha0
 
 void linear::alpha_inv(const kind::f alpha,
 		       const FT dt,
 		       const kind::f alpha0 ) {
-  FT D=0.00001;
+  FT D=0.0001;
 
   FT b = D*dt ;
 

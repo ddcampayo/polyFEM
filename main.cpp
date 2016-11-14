@@ -194,8 +194,6 @@ int main() {
 	u_star(Tp, dt2 , false );
 
 #else
-	cout << "Calculating chem pot" << endl;
-	algebra.chempot(kind::ALPHA0, kind::CHEMPOT);
 
 	cout << "Calculating alpha implicitely" << endl;
 
@@ -203,11 +201,14 @@ int main() {
 
 	//	algebra.gradient(kind::ALPHA, kind::ALPHA0);
 
+	cout << "Calculating chem pot" << endl;
+	algebra.chempot(kind::ALPHA, kind::CHEMPOT);
+
 	cout << "Calculating Ustar implicitely" << endl;
 
 	//	algebra.ustar_inv(kind::USTAR,  dt2 , kind::UOLD, false , false);
 
-	algebra.ustar_inv(kind::USTAR,  dt2 , kind::UOLD, overdamped , false);
+	algebra.ustar_inv_cp(kind::USTAR,  dt2 , kind::UOLD, overdamped , false);
 
 #endif
 

@@ -6,7 +6,7 @@ import pylab as pl
 
 pl.figure(figsize=(8,8))
 
-skip=20
+skip=10
 #path='timings_full/'
 path='./'
 

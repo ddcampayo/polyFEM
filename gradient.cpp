@@ -37,17 +37,17 @@ void linear::chempot(const kind::f scalarf, const kind::f chempot) {
 
   //  if(lambda_x.size()==0)  fill_lambda();
 
-  VectorXd field = field_to_vctr( scalarf );
-  VectorXd field3 = field.array().pow(3);
+  VectorXd al  = field_to_vctr( scalarf );
+  VectorXd al3 = al.array().pow(3);
 
   if(stiff.size()==0) fill_stiff();
   if(mass.size()==0)  fill_mass();
 
-  VectorXd lapl = stiff*field;
+  VectorXd lapl = stiff * al;
 
   mass_s(lapl);
   
-  vctr_to_field( -field + field3 - 0.5 * lapl , chempot  );
+  vctr_to_field( -al + al3 - 0.5 * lapl , chempot  );
 
   return;
 
