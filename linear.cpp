@@ -670,6 +670,9 @@ void linear::ustar_inv_cp(
   vctr_to_vfield( grad_cp_x  , kind::GRADCHEMPOT , 0 );
   vctr_to_vfield( grad_cp_y  , kind::GRADCHEMPOT , 1 );
 
+  //
+
+
   U0_x -=  al * grad_cp_x ;
 
   U0_x *= dt;
@@ -813,35 +816,35 @@ void linear::ustar_inv(
 
 // solves (mass - dt x mu x stiff)  alpha = alpha0
 
-void linear::alpha_inv(const kind::f alpha,
+void linear::alpha_inv_cp(const kind::f alpha,
 		       const FT dt,
 		       const kind::f alpha0 ) {
-  FT D=0.0001;
+  FT D=0.001;
 
   FT b = D*dt ;
 
   if(mbs.size()==0)  fill_mbs( b );
 
   VectorXd al0 = field_to_vctr( alpha0 );
+  VectorXd al  = field_to_vctr( alpha  );
 
-  // //  VectorXd al3 = Eigen::pow(al0,3);
-  // VectorXd al3 = al0.array().pow(3);
+  //VectorXd al3 = al.array().pow(3);
 
-  // VectorXd mass0 = mass * al0 + b * stiff * al3;
+  //VectorXd mass0 = mass * al0 + b * stiff * al3;
 
   // VectorXd al = solver_mbs.solve(mass0);
 
-  VectorXd cp = field_to_vctr( kind::CHEMPOT );
+  VectorXd cp2 = field_to_vctr( kind::CHEMPOT ) + al ;
 
-  VectorXd mass0 = mass * al0 + b * stiff * cp;
+  VectorXd mass0 = mass * al0 + b * stiff * cp2;
 
-  VectorXd al = solver_mbs.solve(mass0);
+  VectorXd new_al = solver_mbs.solve(mass0);
 
   if(solver_mbs.info()!=Eigen::Success) 
       cout << "Warning: unsucessful mbs x solve, error code " 
 	   << solver_mbs.info() << endl ;
 
-  vctr_to_field( al , alpha );
+  vctr_to_field( new_al , alpha );
 
   return;
 }

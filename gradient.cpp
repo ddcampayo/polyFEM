@@ -38,7 +38,10 @@ void linear::chempot(const kind::f scalarf, const kind::f chempot) {
   //  if(lambda_x.size()==0)  fill_lambda();
 
   VectorXd al  = field_to_vctr( scalarf );
-  VectorXd al3 = al.array().pow(3);
+//  VectorXd al3 = al.array().pow(3);
+  VectorXd al3 = al.array() * al.array().pow(2); // To make sure signs are correct
+
+  VectorXd al_al3 = al.array() * ( -1 + al.array() * al.array() ) ; // To make sure signs are correct
 
   if(stiff.size()==0) fill_stiff();
   if(mass.size()==0)  fill_mass();
@@ -47,7 +50,7 @@ void linear::chempot(const kind::f scalarf, const kind::f chempot) {
 
   mass_s(lapl);
   
-  vctr_to_field( -al + al3 - 0.5 * lapl , chempot  );
+  vctr_to_field( al_al3 - 0.5 * lapl , chempot  );
 
   return;
 

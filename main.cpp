@@ -75,7 +75,7 @@ int main() {
   //FT dt=simu.dt();
 
   //cout << "Calculating Ustar implicitely" << endl;
-  //algebra.ustar_inv(kind::USTAR,  dt , kind::UOLD, false);
+	  //algebra.ustar_inv(kind::USTAR,  dt , kind::UOLD, false);
 
   //cout << "Solving PPE" << endl;
   //algebra.PPE( kind::USTAR, dt, kind:: P );
@@ -195,14 +195,15 @@ int main() {
 
 #else
 
+	cout << "Calculating chem pot" << endl;
+
+	algebra.chempot(kind::ALPHA, kind::CHEMPOT);
+
 	cout << "Calculating alpha implicitely" << endl;
 
-	algebra.alpha_inv(kind::ALPHA, dt2 , kind::ALPHA0 );
+	algebra.alpha_inv_cp(kind::ALPHA, dt2 , kind::ALPHA0 );
 
 	//	algebra.gradient(kind::ALPHA, kind::ALPHA0);
-
-	cout << "Calculating chem pot" << endl;
-	algebra.chempot(kind::ALPHA, kind::CHEMPOT);
 
 	cout << "Calculating Ustar implicitely" << endl;
 
