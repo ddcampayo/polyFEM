@@ -650,24 +650,24 @@ void linear::ustar_inv_cp(
 
   // gradient of chem pot .-
 
-  cout << " chem pot" << endl;
+//  cout << " chem pot" << endl;
 
   VectorXd chemp = field_to_vctr( kind::CHEMPOT );
 
-  cout << "grad chem pot" << endl;
+//  cout << "grad chem pot" << endl;
 
   VectorXd grad_cp_x = lambda_x * chemp;
   VectorXd grad_cp_y = lambda_y * chemp;
 
-  cout << "Inverting grad chem pot" << endl;
+//  cout << "Inverting grad chem pot" << endl;
 
   mass_s( grad_cp_x );
   mass_s( grad_cp_y );
 
-  cout << "grad chem pot done" << endl;
+  cout << "Grad chem pot done, for u*" << endl;
 
   // optional .-
-  cout << "grad  chem pot back" << endl;
+//  cout << "grad  chem pot back" << endl;
 
   vctr_to_vfield( grad_cp_x  , kind::GRADCHEMPOT , 0 );
   vctr_to_vfield( grad_cp_y  , kind::GRADCHEMPOT , 1 );

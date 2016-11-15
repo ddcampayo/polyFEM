@@ -123,7 +123,7 @@ int main() {
 
   log_file.open("main.log");
 
-  bool overdamped = ( simu.mu() > 1 ) ; // high or low Re
+  bool is_overdamped = ( simu.mu() > 1 ) ; // high or low Re
 
   for(;
       simu.current_step() <= simu.Nsteps();
@@ -204,12 +204,13 @@ int main() {
 	algebra.alpha_inv_cp(kind::ALPHA, dt2 , kind::ALPHA0 );
 
 	//	algebra.gradient(kind::ALPHA, kind::ALPHA0);
+	algebra.chempot(kind::ALPHA, kind::CHEMPOT);
 
 	cout << "Calculating Ustar implicitely" << endl;
 
 	//	algebra.ustar_inv(kind::USTAR,  dt2 , kind::UOLD, false , false);
 
-	algebra.ustar_inv_cp(kind::USTAR,  dt2 , kind::UOLD, overdamped , false);
+	algebra.ustar_inv_cp(kind::USTAR,  dt2 , kind::UOLD, is_overdamped , false);
 
 #endif
 
@@ -230,21 +231,13 @@ int main() {
     displ=move( Tp , dt );
     
 //    update_half_velocity( Tp , false ); 
-    update_half_velocity( Tp , overdamped ); 
+    update_half_velocity( Tp , is_overdamped ); 
+    update_half_alpha( Tp ); 
 
     areas(Tp);
 
     quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );
 
-    nabla(Tp);
-    Delta(Tp);
-
-    {
-      linear algebra(Tp);
-
-      algebra.alpha_inv_cp(kind::ALPHA, dt , kind::ALPHA0 );
-    }
-    
     if(simu.current_step()%simu.every()==0)
       draw(Tp, particle_file , true);
 

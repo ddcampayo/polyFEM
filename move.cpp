@@ -227,6 +227,24 @@ void update_half_velocity( Triangulation& Tp , const bool overdamped ) {
 
 }
 
+void update_half_alpha( Triangulation& Tp ) {
+
+   for(F_v_it fv=Tp.finite_vertices_begin();
+       fv!=Tp.finite_vertices_end();
+       fv++) {
+
+    FT al  = fv->alpha();
+
+    FT al0 = fv->alpha0();
+
+    fv->alpha.set(  2 * al - al0 );
+
+  }
+
+  return;
+
+}
+
 
 
 // void u_star_new(Triangulation& T, FT dt) {
