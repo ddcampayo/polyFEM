@@ -286,6 +286,8 @@ void linear::fill_mbs( const FT& b ){
 
   cout << " (mass -  " << b << "  x stiff) " << endl;
 
+  // Model B dynamics:
+
   mbs = mass + b * stiff;
 
   solver_mbs.compute(mbs);
@@ -819,21 +821,22 @@ void linear::ustar_inv(
 void linear::alpha_inv_cp(const kind::f alpha,
 		       const FT dt,
 		       const kind::f alpha0 ) {
-  FT D=0.001;
+  FT D=0.04;
 
   FT b = D*dt ;
 
-  if(mbs.size()==0)  fill_mbs( b );
-
-  VectorXd al0 = field_to_vctr( alpha0 );
-  VectorXd al  = field_to_vctr( alpha  );
+  VectorXd al0 = field_to_vctr( alpha );
+  VectorXd al  = field_to_vctr( alpha );
 
   //VectorXd al3 = al.array().pow(3);
-
   //VectorXd mass0 = mass * al0 + b * stiff * al3;
-
   // VectorXd al = solver_mbs.solve(mass0);
 
+
+  // Model B dynamics:
+
+  if(mbs.size()==0)  fill_mbs( b );
+  
   VectorXd cp2 = field_to_vctr( kind::CHEMPOT ) + al ;
 
   VectorXd mass0 = mass * al0 + b * stiff * cp2;
@@ -841,9 +844,15 @@ void linear::alpha_inv_cp(const kind::f alpha,
   VectorXd new_al = solver_mbs.solve(mass0);
 
   if(solver_mbs.info()!=Eigen::Success) 
-      cout << "Warning: unsucessful mbs x solve, error code " 
-	   << solver_mbs.info() << endl ;
-
+    cout << "Warning: unsucessful mbs x solve, error code " 
+	 << solver_mbs.info() << endl ;
+  ////
+  
+  // Model A dynamics:
+  //  VectorXd cp2 = - al.array() * al.array() * al.array() ;
+  //  VectorXd new_al = 1.0/(1.0-b)*( al0 + b*cp2 );
+  ////
+  
   vctr_to_field( new_al , alpha );
 
   return;

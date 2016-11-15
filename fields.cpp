@@ -194,7 +194,7 @@ void set_alpha_under_cos( Triangulation& T ) {
 
     FT h= 0 * field_cos(x);
 
-    FT val=0.1;
+    FT val = 1;
 
     if (y < h)
       val *= -1;
@@ -210,7 +210,7 @@ void set_alpha_under_cos( Triangulation& T ) {
 }
 
 
-void set_alpha_circle( Triangulation& T ) {
+void set_alpha_circle( Triangulation& T , const FT& rr ) {
 
   FT mean=0;
   int NN=0;
@@ -221,7 +221,7 @@ void set_alpha_circle( Triangulation& T ) {
     FT x=fv->point().x();
     FT y=fv->point().y();
 
-    FT val = 2 * field_r( x , y , 0.2 ) - 1 ;
+    FT val = 2 * field_r( x , y , rr ) - 1 ;
     fv->alpha.set( val );
 
     mean += val;

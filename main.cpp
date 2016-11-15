@@ -47,7 +47,7 @@ int main() {
 
   if(simu.create_points()) {
 
-    //    set_alpha_circle( Tp );
+    //    set_alpha_circle( Tp , 2);
     set_alpha_under_cos(  Tp ) ;
 
     number(Tp);
@@ -145,8 +145,8 @@ int main() {
     FT min_displ=1e10;
     int min_iter=0;
 
-    const int max_iter=10;
-    const FT  max_displ= 1e-8; // < 0 : disable
+    const int max_iter=10; //10;
+    const FT  max_displ=  1e-8; // < 0 : disable
 
 //  leapfrog, special first step.-
 //    if(simu.current_step() == 1) dt2 *= 0.5;
@@ -236,6 +236,15 @@ int main() {
 
     quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );
 
+    nabla(Tp);
+    Delta(Tp);
+
+    {
+      linear algebra(Tp);
+
+      algebra.alpha_inv_cp(kind::ALPHA, dt , kind::ALPHA0 );
+    }
+    
     if(simu.current_step()%simu.every()==0)
       draw(Tp, particle_file , true);
 
