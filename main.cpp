@@ -19,7 +19,7 @@
 
 #include"periodic.h"
 
-const FT LL=10; // length of original domain
+const FT LL=40; // length of original domain
 
 Iso_rectangle domain(-LL/2, -LL/2, LL/2, LL/2);
 
@@ -48,7 +48,8 @@ int main() {
   if(simu.create_points()) {
 
     //    set_alpha_circle( Tp , 2);
-    set_alpha_under_cos(  Tp ) ;
+    //    set_alpha_under_cos(  Tp ) ;
+    set_alpha_random(  Tp ) ;
 
     number(Tp);
   }
@@ -211,6 +212,10 @@ int main() {
 	//	algebra.ustar_inv(kind::USTAR,  dt2 , kind::UOLD, false , false);
 
 	algebra.ustar_inv_cp(kind::USTAR,  dt2 , kind::UOLD, is_overdamped , false);
+
+	// substract spurious overall movement.-
+	
+	zero_mean_v( Tp , kind::USTAR);
 
 #endif
 

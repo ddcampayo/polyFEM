@@ -3,6 +3,10 @@
 #include"sim_pars.h"
 //extern Triangulation T;
 
+//#include <random>
+
+ 
+
 extern sim_pars simu;
 
 #include"fields.h"
@@ -19,8 +23,8 @@ FT field_sin(const FT x, bool deriv=false) ;
 FT field_linear(const FT x,const FT y, bool deriv=false) ;
 FT field_quad(const FT x,const FT y, bool deriv=false) ;
 Vector_2 field_rotation(const FT x,const FT y, bool deriv=false) ;
-
 FT field_sin_cos(const FT x,const FT y, bool deriv=false) ;
+void alpha_zero_mean( Triangulation& T ) ;
 
 void set_forces_Kolmo(Triangulation& T) {
 
@@ -192,9 +196,10 @@ void set_alpha_under_cos( Triangulation& T ) {
     FT x=fv->point().x();
     FT y=fv->point().y();
 
-    FT h= 0 * field_cos(x);
+//   FT dt2 = simu.dt() / 2.0;
+    FT h= 0.0 * LL * field_cos(x);
 
-    FT val = 1;
+    FT val = 0.1;
 
     if (y < h)
       val *= -1;
@@ -209,11 +214,91 @@ void set_alpha_under_cos( Triangulation& T ) {
 
 }
 
+#include <ctime>
 
-void set_alpha_circle( Triangulation& T , const FT& rr ) {
+#include <boost/random/mersenne_twister.hpp>
+#include <boost/random/uniform_real_distribution.hpp>
+#include <boost/random/variate_generator.hpp>
+
+
+void set_alpha_random( Triangulation& T  ) {
+
+  boost::mt19937 randomNumbergenerator( time( 0 ) );
+
+  const FT limit=1e-3;
+
+  typedef boost::random::uniform_real_distribution< FT > uniform;
+
+  uniform distribution( -limit , limit );
+
+  boost::variate_generator< boost::mt19937&, uniform >  gen( randomNumbergenerator, distribution );
+  
+  for(F_v_it fv=T.finite_vertices_begin();
+      fv!=T.finite_vertices_end();
+      fv++) 
+    fv->alpha.set(  gen() );
+
+
+  alpha_zero_mean( T );
+
+  return;
+
+}
+
+
+void alpha_zero_mean( Triangulation& T ) {
 
   FT mean=0;
   int NN=0;
+
+  for(F_v_it fv=T.finite_vertices_begin();
+      fv!=T.finite_vertices_end();
+      fv++)    {
+
+    mean += fv->alpha.val();
+    ++NN ;
+  }
+
+  mean /= NN;
+
+  for(F_v_it fv=T.finite_vertices_begin();
+      fv!=T.finite_vertices_end();
+      fv++)   
+    fv->alpha.set( fv->alpha.val() - mean );
+
+  return;
+
+}
+
+
+
+void zero_mean_v( Triangulation& T ,  const kind::f vectorf ) {
+
+  Vector_2 mean = CGAL::NULL_VECTOR  ;
+  int NN=0;
+
+  for(F_v_it fv=T.finite_vertices_begin();
+      fv!=T.finite_vertices_end();
+      fv++)    {
+
+    mean = mean + fv->vf( vectorf ).val();
+    ++NN ;
+  }
+
+  mean = (1.0/NN) * mean;
+
+  for(F_v_it fv=T.finite_vertices_begin();
+      fv!=T.finite_vertices_end();
+      fv++)   
+    fv->vf( vectorf ).set( fv->vf( vectorf ).val() - mean );
+
+  return;
+
+}
+
+
+void set_alpha_circle( Triangulation& T , const FT& rr ) {
+
   for(F_v_it fv=T.finite_vertices_begin();
       fv!=T.finite_vertices_end();
       fv++)    {
@@ -224,16 +309,11 @@ void set_alpha_circle( Triangulation& T , const FT& rr ) {
     FT val = 2 * field_r( x , y , rr ) - 1 ;
     fv->alpha.set( val );
 
-    mean += val;
-    ++NN ;
   }
 
-  mean /= NN;
 
-  for(F_v_it fv=T.finite_vertices_begin();
-      fv!=T.finite_vertices_end();
-      fv++)   
-    fv->alpha.set( fv->alpha.val() - mean );
+  
+  alpha_zero_mean( T );
 
   return;
 

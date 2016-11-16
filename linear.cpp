@@ -674,10 +674,11 @@ void linear::ustar_inv_cp(
 
   //
 
+  FT a = dt * simu.mu() ;
 
-  U0_x -=  al * grad_cp_x ;
+  U0_x -= al * grad_cp_x ;
 
-  U0_x *= dt;
+  U0_x *= a;
   
   if(!overdamped) {
     //    VectorXd force_x
@@ -694,6 +695,7 @@ void linear::ustar_inv_cp(
 
   } else
     massU0_x =  mass * U0_x ;
+//    massU0_x =  (-dt) * mass *  al * grad_cp_x  ;
 
   VectorXd Ustarx= solver_mas.solve(massU0_x);
   if(solver_mas.info()!=Eigen::Success) 
@@ -710,7 +712,7 @@ void linear::ustar_inv_cp(
   U0_y -= al *  grad_cp_y ;
   //  U0_y -= eps * al * vfield_to_vctr( kind::GRADALPHA , 1 );
 
-  U0_y *= dt;
+  U0_y *= a;
 
   if(!overdamped) {
     //  VectorXd force_y = vfield_to_vctr( kind::FORCE , 1 );
@@ -726,7 +728,8 @@ void linear::ustar_inv_cp(
     massU0_y =  mass * U0_y - dt * grad_y;
 
   } else
-    massU0_y =  mass * U0_y ;
+//    massU0_y =  mass * U0_y ;
+    massU0_y =  (-dt) * mass *  al * grad_cp_y  ;
 
   VectorXd Ustary= solver_mas.solve(massU0_y);
 
