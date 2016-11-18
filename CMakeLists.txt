@@ -53,6 +53,6 @@ include( CGAL_CreateSingleSourceCGALProgram )
 
 create_single_source_cgal_program("main.cpp" "linear.cpp"   "gradient.cpp"  "nabla.cpp" "quad_coeffs.cpp" "periodic.cpp" "fields.cpp" "Delta.cpp" "move.cpp" "draw.cpp" "onto_from_mesh.cpp" "volumes.cpp" )
 
-target_link_libraries(main ${CHOLMOD_LIBRARIES} ${LAPACK_LIB} ${BLAS_LIB} ${SS_LIB}) 
+#target_link_libraries(main ${CHOLMOD_LIBRARIES} ${LAPACK_LIB} ${BLAS_LIB} ${SS_LIB}) 
 #target_link_libraries(main ${CHOLMOD_LIBRARIES} ${LAPACK_LIB} ${BLAS_LIB} )
 #target_link_libraries(main ${CHOLMOD_LIBRARIES} ${LAPACK_LIB} ${BLAS_LIB} /usr/local/lib/libsuitesparseconfig.a )
