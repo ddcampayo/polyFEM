@@ -105,6 +105,7 @@ public:
  private:
   void mass_v( VectorXd& fx , VectorXd& fy );
   void mass_s( VectorXd& f );
+  VectorXd chempot2(const VectorXd& al ) ;
   void laplace_div( const kind::f velocity , const FT dt, const kind::f divv, const kind::f pressure );
   void laplacian_stiff(const kind::f ffield, const kind::f gradfield  );
   void laplacian_stiff_v(const kind::f ffield, const kind::f gradfield  );

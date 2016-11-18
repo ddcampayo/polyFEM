@@ -30,6 +30,24 @@ void linear::gradient(const kind::f scalarf, const kind::f vectorf, bool do_mass
   return;
 }
 
+VectorXd linear::chempot2(const VectorXd& al ) {
+
+  cout << "chemical potential plus phi of a field " << endl;
+
+  VectorXd al3 = al.array() * al.array() * al.array() ; // To make sure signs are correct
+
+  if(stiff.size()==0) fill_stiff();
+  if(mass.size()==0)  fill_mass();
+
+  VectorXd lapl = stiff * al;
+
+  mass_s(lapl);
+  
+  return  al3 - 0.5 * lapl ;
+  //vctr_to_field( al_al3  , chempot  );
+
+}
+
 
 void linear::chempot(const kind::f scalarf, const kind::f chempot) {
 
@@ -38,7 +56,8 @@ void linear::chempot(const kind::f scalarf, const kind::f chempot) {
   //  if(lambda_x.size()==0)  fill_lambda();
 
   VectorXd al  = field_to_vctr( scalarf );
-//  VectorXd al3 = al.array().pow(3);
+
+  //  VectorXd al3 = al.array().pow(3);
 //  VectorXd al3 = al.array() * al.array().pow(2); // To make sure signs are correct
 
   VectorXd al_al3 = al.array() * ( -1 + al.array() * al.array() ) ; // To make sure signs are correct
@@ -52,22 +71,10 @@ void linear::chempot(const kind::f scalarf, const kind::f chempot) {
   
   vctr_to_field( al_al3 - 0.5 * lapl , chempot  );
 
+  //vctr_to_field( al_al3  , chempot  );
+
   return;
 
-
-  // TODO: Laplacian term
-  
-  // VectorXd grad_x = lambda_x * ( -field + field3 );
-  // VectorXd grad_y = lambda_y * ( -field + field3 );
-
-  // vctr_to_vfield( grad_x  , vectorf , 0 );
-  // vctr_to_vfield( grad_y  , vectorf , 1 );
-
-  // if(mass)
-  //   // full mass inversion.-
-  //   mass_v(vectorf);
-
-  // return;
 }
 
 

@@ -10,7 +10,10 @@
 //#define EXPLICIT
 
 #include"main.h"
+
+
 #include"sim_pars.h"
+
 #include"linear.h"
 
 #include"fields.h"
@@ -19,7 +22,7 @@
 
 #include"periodic.h"
 
-const FT LL=40; // length of original domain
+const FT LL=10; // length of original domain
 
 Iso_rectangle domain(-LL/2, -LL/2, LL/2, LL/2);
 
@@ -44,12 +47,17 @@ int main() {
   simu.read();
 
   create();
-
+  
   if(simu.create_points()) {
 
     //    set_alpha_circle( Tp , 2);
     //    set_alpha_under_cos(  Tp ) ;
+
+    cout << "Creating alpha field " << endl;
+    
     set_alpha_random(  Tp ) ;
+
+    cout << "Numbering particles " << endl;
 
     number(Tp);
   }
@@ -110,7 +118,7 @@ int main() {
   const std::string particle_file("particles.dat");
 
   draw(Tp, particle_file , true);
-  
+
   simu.advance_time();
   simu.next_step();
 
@@ -159,11 +167,11 @@ int main() {
     // iter loop
     for( ; iter<max_iter ; iter++) {
 
-      cout << "Move iteration  " << iter << " of " << max_iter << " ";
+      cout << "Move iteration  " << iter << " of " << max_iter << " " << endl;
 
       displ=move( Tp , dt2 );
 
-      cout << "Moved avg " << displ << " to half point" << endl;
+      cout << "Iter " << iter << " , moved avg " << displ << " to half point" << endl;
 
       if( (displ < max_displ) && (iter !=0) ) break;
 
@@ -196,15 +204,18 @@ int main() {
 
 #else
 
-	cout << "Calculating chem pot" << endl;
+//	cout << "Calculating chem pot" << endl;
 
-	algebra.chempot(kind::ALPHA, kind::CHEMPOT);
+//	algebra.chempot(kind::ALPHA, kind::CHEMPOT);
 
 	cout << "Calculating alpha implicitely" << endl;
 
 	algebra.alpha_inv_cp(kind::ALPHA, dt2 , kind::ALPHA0 );
 
 	//	algebra.gradient(kind::ALPHA, kind::ALPHA0);
+
+	cout << "Calculating chem pot" << endl;
+	
 	algebra.chempot(kind::ALPHA, kind::CHEMPOT);
 
 	cout << "Calculating Ustar implicitely" << endl;
@@ -230,6 +241,8 @@ int main() {
 
     //      u_new( dt );
 	u_new( Tp , dt2 );
+
+	cout << "U evolved " << endl;
 
     } // iter loop
 
@@ -272,7 +285,7 @@ void create(void) {
 
   int N=simu.no_of_particles();
   std::vector<Point> points;
-  points.reserve(N);
+  //  points.reserve(N);
 
   if(simu.create_points()) {
     if(simu.at_random()) {
@@ -327,6 +340,11 @@ void create(void) {
     std::ifstream main_data;
     main_data.open(part_file );
 
+    if(main_data.fail()){
+      cout << "part file not found "  << endl;
+      abort();
+    }
+    
     for(int i=0;i<N;i++) {
       FT x,y;
       main_data >> x;

@@ -728,8 +728,8 @@ void linear::ustar_inv_cp(
     massU0_y =  mass * U0_y - dt * grad_y;
 
   } else
-//    massU0_y =  mass * U0_y ;
-    massU0_y =  (-dt) * mass *  al * grad_cp_y  ;
+    massU0_y =  mass * U0_y ;
+  //    massU0_y =  (-dt) * mass *  al * grad_cp_y  ;
 
   VectorXd Ustary= solver_mas.solve(massU0_y);
 
@@ -828,7 +828,7 @@ void linear::alpha_inv_cp(const kind::f alpha,
 
   FT b = D*dt ;
 
-  VectorXd al0 = field_to_vctr( alpha );
+  VectorXd al0 = field_to_vctr( alpha0 );
   VectorXd al  = field_to_vctr( alpha );
 
   //VectorXd al3 = al.array().pow(3);
@@ -840,6 +840,8 @@ void linear::alpha_inv_cp(const kind::f alpha,
 
   if(mbs.size()==0)  fill_mbs( b );
   
+//  VectorXd cp2 = chempot2( al );
+
   VectorXd cp2 = field_to_vctr( kind::CHEMPOT ) + al ;
 
   VectorXd mass0 = mass * al0 + b * stiff * cp2;

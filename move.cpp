@@ -88,11 +88,11 @@ FT move(Triangulation& Tp, const FT dt ) {
     Vector_2 disp2 = per_vect(rnew,rnow);
     dd2 += sqrt(disp2.squared_length())/simu.h();
 
-//    cout << "New position: " << r0 ;
+    //    cout << "New position: " << r0 ;
 
     data.pos = per_point( rnew );
 
-//    cout << " ---> " << data.pos  << endl ;
+    //    cout << " ---> " << data.pos  << endl ;
 
     prev.push_back (data);
 
@@ -101,7 +101,7 @@ FT move(Triangulation& Tp, const FT dt ) {
 //  cout << "relative displacement " << sqrt(dd2)/simu.no_of_points()/simu.h()  << endl ;
   dd2 /= simu.no_of_particles();
 
-//  cout << "relative displacement " << dd2 << endl ;
+  //  cout << "relative displacement " << dd2 << endl ;
 
   Tp.clear(); // clears the triangulation !!
 
@@ -109,7 +109,7 @@ FT move(Triangulation& Tp, const FT dt ) {
       data!=prev.end();
       data++) {
 
-//    cout << "Inserting back at " << data->pos << endl ;
+    //    cout << "Inserting back at " << data->pos << endl ;
 
     Vertex_handle fv=Tp.insert(data->pos);
 

@@ -98,9 +98,11 @@ public:
 
     params >> word;
     params >>  at_random_;
-    if(at_random_) cout << "Points at random" << endl;
-    else  cout << "Points on regular lattice" << endl;
-
+    if(create_points_) {
+      if(at_random_) cout << "Points at random" << endl;
+      else  cout << "Points on regular lattice" << endl;
+    }
+    
     params >> word;
     params >> perturb_;
     params >> pert_rel_;
@@ -153,7 +155,7 @@ public:
   bool initial_velocity() const {return  v0_ > 1e-10;}
 
   FT Re() const {
-    return 1*v0()/mu();
+    return 1.0*v0()/mu();
   }
 
   FT Co() const {

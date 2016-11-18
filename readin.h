@@ -4,16 +4,17 @@ int ii;
 main_data >> ii;
 vh->idx.set(ii);
 
+
 FT ff;
 
 //vol 3
 main_data >> ff;
-vh->vol.set(ii);
+vh->vol.set(ff);
 
 
 // alpha 4
 main_data >> ff;
-vh->alpha.set(ii);
+vh->alpha.set(ff);
 
 // p 5
 
@@ -48,4 +49,20 @@ vh->Uold.set(Vector_2(x,y));
 
 // p star 17
 main_data >> ff;
+
+// force  18 & 19
+main_data >> x;
+main_data >> y;
+vh->force.set(Vector_2(x,y));
+
+// gradalpha  20 & 21
+main_data >> x;
+main_data >> y;
+
+// chempot 22
+main_data >> ff;
+
+// gradchempot  23 & 24
+main_data >> x;
+main_data >> y;
 
