@@ -211,13 +211,16 @@ int main() {
 
 	cout << "Calculating alpha implicitely" << endl;
 
-	algebra.alpha_inv_cp(kind::ALPHA, dt2 , kind::ALPHA0 );
+	//	algebra.alpha_inv_cp(kind::ALPHA, dt2 , kind::ALPHA0 );
+	algebra.alpha_inv_cp2(kind::ALPHA, dt2 , kind::ALPHA0 );
 
 	//	algebra.gradient(kind::ALPHA, kind::ALPHA0);
 
-	cout << "Calculating chem pot" << endl;
-	
-	algebra.chempot(kind::ALPHA, kind::CHEMPOT);
+	// cout << "Calculating chem pot explicitely" << endl;
+	// algebra.chempot(kind::ALPHA, kind::CHEMPOT);
+
+	cout << "Calculating chem pot imlicitely" << endl;
+	algebra.chempot_inv(kind::ALPHA, dt2 , kind::ALPHA0 );
 
 	cout << "Calculating Ustar implicitely" << endl;
 

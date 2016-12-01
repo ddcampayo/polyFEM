@@ -89,7 +89,9 @@ public:
   void ustar_inv(const kind::f Ustar, const FT dt, const kind::f U0 , const bool , const bool ) ;
   void ustar_inv_cp(const kind::f Ustar, const FT dt, const kind::f U0 , const bool , const bool ) ;
   void alpha_inv(const kind::f alpha, const FT dt, const kind::f alpha0 );
-  void alpha_inv_cp(const kind::f alpha, const FT dt, const kind::f alpha0 );
+  void alpha_inv_cp( const kind::f alpha, const FT dt, const kind::f alpha0 );
+  void alpha_inv_cp2(const kind::f alpha, const FT dt, const kind::f alpha0 );
+  void chempot_inv(const kind::f alpha, const FT dt, const kind::f alpha0 ) ;
 
   //  void uhalf_inv(const kind::f U, const FT dt, const kind::f U0 );
   void laplacian_v(const kind::f ff1, const kind::f ff2);
@@ -113,6 +115,7 @@ public:
   void laplacian_Delta(const kind::f ffield, const kind::f gradfield   );
   void laplacian_s(const kind::f ff1, const kind::f ff2 ) ;
   void div(const kind::f fsf, const kind::f fvf ) ;
+  void poisson(const VectorXd& lapl,  VectorXd& f) ;
 
   VectorXd vfield_to_vctr(const kind::f vectorf , int comp ) ;
   VectorXd field_to_vctr(const kind::f scalarf    );

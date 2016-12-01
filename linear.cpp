@@ -412,6 +412,33 @@ VectorXd linear::vfield_to_vctr(const kind::f vectorf , int comp ) {
 }
 
 
+// solves for f in
+// stiffp1 x f = lapl
+
+void linear::poisson(const VectorXd& lapl,  VectorXd& f) {
+
+  if(stiffp1.size()==0)  fill_stiff();
+  if(mass.size()==0)     fill_mass();
+
+  VectorXd massl = mass * lapl ;
+
+  int N=massl.size();
+
+  VectorXd massll = massl.tail( N-1 );
+
+  VectorXd ff= solver_stiffp1.solve( massll );
+
+  f(0) = 0;
+  f.tail(N-1) = ff;
+
+ // zero mean
+
+  f = f.array() - f.mean();
+
+  return;
+
+}
+
 
 
 // solves for scalarf in
@@ -460,7 +487,6 @@ void linear::laplace_div(
   //  if(mass.size()==0)   fill_mass();
 
   //  VectorXd div2 = mass * div1;
-
   int N=div1.size();
 
   VectorXd divv = -(div1.tail( N-1 ));
@@ -818,13 +844,57 @@ void linear::ustar_inv(
 }
 
 
+// solves ( mass )^-1 s  alpha = lapl_alpha, with
+// lapl_alpha s.t.  mu = - alpha + alpha^3 - (1/2) lapl_alpha
+
+void linear::alpha_inv_cp2(const kind::f alpha,
+			   const FT dt,
+			   const kind::f alpha0 ) {
+
+  VectorXd al  = field_to_vctr( alpha0 );
+  VectorXd cp = field_to_vctr( kind::CHEMPOT ) ;
+
+  VectorXd lapl= 2*( -al.array() * ( 1 - al.array() * al.array() ) - cp.array() );
+
+  poisson( lapl , al );
+
+  vctr_to_field( al , alpha);
+
+  return;
+
+}
+
+
+void linear::chempot_inv(const kind::f alpha,
+			 const FT dt,
+			 const kind::f alpha0 ) {
+
+  const FT D=0.04;
+
+  VectorXd al  = field_to_vctr( alpha  );
+  VectorXd al0  = field_to_vctr( alpha0 );
+
+  VectorXd diff = (1.0/ ( D * dt ) ) * ( al - al0) ;
+
+  VectorXd cp( diff.size() );
+
+  poisson( diff , cp );
+
+  vctr_to_field( cp , kind::CHEMPOT );
+
+  return;
+
+}
+
+
+
 
 // solves (mass - dt x mu x stiff)  alpha = alpha0
 
 void linear::alpha_inv_cp(const kind::f alpha,
 		       const FT dt,
 		       const kind::f alpha0 ) {
-  FT D=0.04;
+  const FT D=0.04;
 
   FT b = D*dt ;
 
