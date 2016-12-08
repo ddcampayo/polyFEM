@@ -214,7 +214,7 @@ int main() {
 	int alpha_it=0;
 	
 	    // iter loop
-	for( ; alpha_it < 1 ; alpha_it++) { // max_iter ; alpha_it++) {
+	for( ; alpha_it < 10 ; alpha_it++) { // max_iter ; alpha_it++) {
 
 	  cout << "Alpha loop iter " << alpha_it << endl;
 	  
@@ -226,7 +226,7 @@ int main() {
 	// cout << "Calculating chem pot explicitely" << endl;
 	// algebra.chempot(kind::ALPHA, kind::CHEMPOT);
 
-	  cout << "Calculating chem pot imlicitely" << endl;
+	  cout << "Calculating chem pot implicitely" << endl;
 	  algebra.chempot_inv(kind::ALPHA, dt2 , kind::ALPHA0 );
 	}
 	draw(Tp, particle_file , true);

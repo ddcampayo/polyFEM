@@ -225,7 +225,8 @@ void set_alpha_random( Triangulation& T  ) {
 
   boost::mt19937 randomNumbergenerator( time( 0 ) );
 
-  const FT limit=1e-3;
+//  const FT limit=1e-3;
+  const FT limit=1e-13;
 
   typedef boost::random::uniform_real_distribution< FT > uniform;
 
@@ -236,7 +237,8 @@ void set_alpha_random( Triangulation& T  ) {
   for(F_v_it fv=T.finite_vertices_begin();
       fv!=T.finite_vertices_end();
       fv++) 
-    fv->alpha.set(  gen() );
+//    fv->alpha.set(  gen() );
+    fv->chempot.set(  gen() );
 
 
   alpha_zero_mean( T );
