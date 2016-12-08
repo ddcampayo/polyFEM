@@ -851,10 +851,12 @@ void linear::alpha_inv_cp2(const kind::f alpha,
 			   const FT dt,
 			   const kind::f alpha0 ) {
 
-  VectorXd al  = field_to_vctr( alpha0 );
+  VectorXd al  = field_to_vctr( alpha );
   VectorXd cp = field_to_vctr( kind::CHEMPOT ) ;
 
-  VectorXd lapl= 2*( -al.array() * ( 1 - al.array() * al.array() ) - cp.array() );
+  VectorXd alal3  = - al.array() * ( 1 - al.array() * al.array() ); // - al + al^3
+
+  VectorXd lapl= 2*( alal3 - cp );
 
   poisson( lapl , al );
 
