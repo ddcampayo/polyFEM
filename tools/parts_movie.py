@@ -1,14 +1,14 @@
 #!/usr/bin/python
 
-LL=20
+LL=10
 
 import pylab as pl
 
 pl.figure(figsize=(8,8))
 
-skip=10
-begin=0
-end=20000
+skip=100
+begin=50000
+end=100000
 limits=1
 #path='timings_full/'
 path='./'
@@ -24,6 +24,6 @@ for n in range(begin,end+skip,skip):
 
     pl.xlim([ -LL/2 , LL/2 ])
     pl.ylim([ -LL/2 , LL/2 ])
-#    pl.colorbar()
+    pl.colorbar()
 #    pl.colorbar(ticks=[0.45,0.55])
     pl.savefig('parts'+str(n/skip))

@@ -24,7 +24,7 @@ FT field_linear(const FT x,const FT y, bool deriv=false) ;
 FT field_quad(const FT x,const FT y, bool deriv=false) ;
 Vector_2 field_rotation(const FT x,const FT y, bool deriv=false) ;
 FT field_sin_cos(const FT x,const FT y, bool deriv=false) ;
-void alpha_zero_mean( Triangulation& T ) ;
+void alpha_set_mean( Triangulation& T , const FT& mean ) ;
 
 void set_forces_Kolmo(Triangulation& T) {
 
@@ -225,8 +225,7 @@ void set_alpha_random( Triangulation& T  ) {
 
   boost::mt19937 randomNumbergenerator( time( 0 ) );
 
-//  const FT limit=1e-3;
-  const FT limit=1e-13;
+  const FT limit=1e-2;
 
   typedef boost::random::uniform_real_distribution< FT > uniform;
 
@@ -237,36 +236,36 @@ void set_alpha_random( Triangulation& T  ) {
   for(F_v_it fv=T.finite_vertices_begin();
       fv!=T.finite_vertices_end();
       fv++) 
-//    fv->alpha.set(  gen() );
-    fv->chempot.set(  gen() );
+    fv->alpha.set(  gen() );
+  //    fv->chempot.set(  gen() );
 
 
-  alpha_zero_mean( T );
+  alpha_set_mean( T, 0 );
 
   return;
 
 }
 
 
-void alpha_zero_mean( Triangulation& T ) {
+void alpha_set_mean( Triangulation& T , const FT& mean ) {
 
-  FT mean=0;
+  FT prev_mean=0;
   int NN=0;
 
   for(F_v_it fv=T.finite_vertices_begin();
       fv!=T.finite_vertices_end();
       fv++)    {
 
-    mean += fv->alpha.val();
+    prev_mean += fv->alpha.val();
     ++NN ;
   }
 
-  mean /= NN;
+  prev_mean /= NN;
 
   for(F_v_it fv=T.finite_vertices_begin();
       fv!=T.finite_vertices_end();
       fv++)   
-    fv->alpha.set( fv->alpha.val() - mean );
+    fv->alpha.set( fv->alpha.val() - prev_mean + mean );
 
   return;
 
@@ -314,8 +313,7 @@ void set_alpha_circle( Triangulation& T , const FT& rr ) {
   }
 
 
-  
-  alpha_zero_mean( T );
+  alpha_set_mean( T ,0 );
 
   return;
 

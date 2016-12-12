@@ -58,20 +58,33 @@ void linear::chempot(const kind::f scalarf, const kind::f chempot) {
   VectorXd al  = field_to_vctr( scalarf );
 
   //  VectorXd al3 = al.array().pow(3);
-//  VectorXd al3 = al.array() * al.array().pow(2); // To make sure signs are correct
 
-  VectorXd al_al3 = al.array() * ( -1 + al.array() * al.array() ) ; // To make sure signs are correct
+  VectorXd al3 = al.array() * al.array().pow(2); // To make sure signs are correct
+
+  VectorXd al_al3 = al3 - al ;  //al.array() * ( -1 + al.array() * al.array() ) ;
 
   if(stiff.size()==0) fill_stiff();
-  if(mass.size()==0)  fill_mass();
+  //  if(mass.size()==0)  fill_mass();
 
   VectorXd lapl = stiff * al;
 
   mass_s(lapl);
   
-  vctr_to_field( al_al3 - 0.5 * lapl , chempot  );
+  vctr_to_field( al_al3  - 0.5 * lapl , chempot  );
 
-  //vctr_to_field( al_al3  , chempot  );
+  // vctr_to_field( al3 - 0.5 * lapl , chempot  );
+    
+  //vctr_to_field( al - 0.5 * lapl , chempot  );
+
+
+
+  //  vctr_to_field( al_al3  , chempot  );
+
+  // // model A
+  // vctr_to_field( - al3  , chempot  );
+
+  // model B
+  //vctr_to_field( al3  , chempot  );
 
   return;
 

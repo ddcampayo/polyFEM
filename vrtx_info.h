@@ -174,6 +174,7 @@ public:
     Ustar.reset();
     divU.reset();
     laplU.reset();
+    chempot.reset();
   }
 
 

@@ -284,10 +284,15 @@ void linear::fill_mbs( const FT& b ){
 
   std::cout << " Building MbS matrix: " ;
 
-  cout << " (mass -  " << b << "  x stiff) " << endl;
 
-  // Model B dynamics:
 
+  // // Model A dynamics:
+  // cout <<  "( " << 1 - b << "  mass - " << 0.5 * b << "  x stiff) " << endl;
+  // mbs = ( 1 - b ) * mass - ( 0.5 * b ) * stiff;
+
+  
+  //  Model B dynamics:
+  cout << " (mass + " << b << "  x stiff) " << endl;
   mbs = mass + b * stiff;
 
   solver_mbs.compute(mbs);
@@ -626,13 +631,13 @@ void linear::mass_s( VectorXd& lambda ) {
 
   if(mass.size()==0)   fill_mass();
 
-  VectorXd grad= solver_mass.solve(lambda);
+  VectorXd mm = solver_mass.solve(lambda);
 
   if(solver_mass.info()!=Eigen::Success) 
       cout << "Warning: unsucessful mass x solve, error code " 
 	   << solver_mass.info() << endl ;
 
-  lambda = grad;
+  lambda = mm;
 
   return;
 }
@@ -898,38 +903,47 @@ void linear::alpha_inv_cp(const kind::f alpha,
 		       const kind::f alpha0 ) {
   const FT D=0.04;
 
-  FT b = D*dt ;
+  FT b = D * dt ;
 
   VectorXd al0 = field_to_vctr( alpha0 );
   VectorXd al  = field_to_vctr( alpha );
-
+  VectorXd cp  = field_to_vctr( kind::CHEMPOT ); // + al ;
+  
   //VectorXd al3 = al.array().pow(3);
   //VectorXd mass0 = mass * al0 + b * stiff * al3;
   // VectorXd al = solver_mbs.solve(mass0);
 
-
-  // Model B dynamics:
-
-  if(mbs.size()==0)  fill_mbs( b );
+  // // Model A dynamics, no diff
+  // VectorXd new_al0 = (1.0 / (1.0 - b)) * ( al0 + b * cp );
+  // vctr_to_field( new_al0 , alpha );
+  // return;
+  
   
 //  VectorXd cp2 = chempot2( al );
 
-  VectorXd cp2 = field_to_vctr( kind::CHEMPOT ) + al ;
 
-  VectorXd mass0 = mass * al0 + b * stiff * cp2;
+  // // model A dynamics
+  // VectorXd mass0 = mass * ( al0 + b * cp );
+  
+  // model B dynamics
+  // partly implicit
+
+  if(mbs.size()==0)  fill_mbs( b );
+  VectorXd mass0 = mass * al0 + b * stiff * (cp + al);
 
   VectorXd new_al = solver_mbs.solve(mass0);
 
   if(solver_mbs.info()!=Eigen::Success) 
     cout << "Warning: unsucessful mbs x solve, error code " 
-	 << solver_mbs.info() << endl ;
-  ////
-  
-  // Model A dynamics:
-  //  VectorXd cp2 = - al.array() * al.array() * al.array() ;
-  //  VectorXd new_al = 1.0/(1.0-b)*( al0 + b*cp2 );
-  ////
-  
+  	 << solver_mbs.info() << endl ;
+
+  // //  explicit
+  // if(stiff.size()==0) fill_stiff();
+
+  // VectorXd lapl_cp =  stiff * cp ;
+  // mass_s( lapl_cp );
+  //  VectorXd new_al = al0 + b * lapl_cp;
+
   vctr_to_field( new_al , alpha );
 
   return;

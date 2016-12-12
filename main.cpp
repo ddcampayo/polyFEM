@@ -155,7 +155,7 @@ int main() {
     FT min_displ=1e10;
     int min_iter=0;
 
-    const int max_iter=10; //10;
+    const int max_iter=1; //10;
     const FT  max_displ=  1e-8; // < 0 : disable
 
 //  leapfrog, special first step.-
@@ -170,6 +170,7 @@ int main() {
 
       cout << "Move iteration  " << iter << " of " << max_iter << " " << endl;
 
+      // comment for no move.-
       displ=move( Tp , dt2 );
 
       cout << "Iter " << iter << " , moved avg " << displ << " to half point" << endl;
@@ -211,30 +212,53 @@ int main() {
 
 	cout << "Calculating alpha implicitely" << endl;
 
-	int alpha_it=0;
-	
-	    // iter loop
-	for( ; alpha_it < 10 ; alpha_it++) { // max_iter ; alpha_it++) {
+	// partly explicit ( unstable ? ):
+	cout << "Calculating chem pot explicitely" << endl;
+
+        // if (iter==0)
+	//   algebra.chempot( kind::ALPHA0, kind::CHEMPOT );
+	// else
+	//  algebra.chempot( kind::ALPHA , kind::CHEMPOT );
+
+	// inner iter loop
+
+	for( int alpha_it=0 ; alpha_it < 1 ; alpha_it++) { // max_iter ; alpha_it++) {
 
 	  cout << "Alpha loop iter " << alpha_it << endl;
-	  
-	//	algebra.alpha_inv_cp(kind::ALPHA, dt2 , kind::ALPHA0 );
-	  algebra.alpha_inv_cp2(kind::ALPHA, dt2 , kind::ALPHA0 );
 
-	//	algebra.gradient(kind::ALPHA, kind::ALPHA0);
+	  //	  algebra.chempot( kind::ALPHA , kind::CHEMPOT );
+	  algebra.chempot( kind::ALPHA , kind::CHEMPOT );
+	  algebra.alpha_inv_cp(kind::ALPHA, dt2 , kind::ALPHA0 );
 
-	// cout << "Calculating chem pot explicitely" << endl;
-	// algebra.chempot(kind::ALPHA, kind::CHEMPOT);
 
-	  cout << "Calculating chem pot implicitely" << endl;
-	  algebra.chempot_inv(kind::ALPHA, dt2 , kind::ALPHA0 );
 	}
-	draw(Tp, particle_file , true);
-      
+
+
+
+	//	algebra.gradient(kind::ALPHA, kind::ALPHA0); // ???
+	
+	// // iterative, fully implicit (does not converge):
+	
+	// int alpha_it=0;
+	
+	//     // inner iter loop
+	// for( ; alpha_it < 10 ; alpha_it++) { // max_iter ; alpha_it++) {
+
+	//   cout << "Alpha loop iter " << alpha_it << endl;
+	  
+	//   algebra.alpha_inv_cp2(kind::ALPHA, dt2 , kind::ALPHA0 );
+    
+	//   cout << "Calculating chem pot implicitely" << endl;
+	//   algebra.chempot_inv(kind::ALPHA, dt2 , kind::ALPHA0 );
+	// }
+	// //	draw(Tp, particle_file , true);
+
+	
 	cout << "Calculating Ustar implicitely" << endl;
 
 	//	algebra.ustar_inv(kind::USTAR,  dt2 , kind::UOLD, false , false);
 
+	// comment for no move.-
 	algebra.ustar_inv_cp(kind::USTAR,  dt2 , kind::UOLD, is_overdamped , false);
 
 	// substract spurious overall movement.-
@@ -244,25 +268,31 @@ int main() {
 #endif
 
 	cout << "Solving PPE" << endl;
-      
+
+	// comment for no move.-
 	algebra.PPE( kind::USTAR, dt2 , kind:: P );
 
 	cout << "Calculating grad p" << endl;
+	// comment for no move.-
 	algebra.gradient(kind::P, kind::GRADP);
 
 	cout << "Evolving U " << endl;
 
-    //      u_new( dt );
+	// comment for no move.-
 	u_new( Tp , dt2 );
 
 	cout << "U evolved " << endl;
 
     } // iter loop
 
+    // comment for no move.-
     displ=move( Tp , dt );
     
 //    update_half_velocity( Tp , false ); 
+
+    // comment for no move.-
     update_half_velocity( Tp , is_overdamped ); 
+
     update_half_alpha( Tp ); 
 
     areas(Tp);
