@@ -1,3 +1,4 @@
+// polyFEM
 // with mass matrix, and all
 // plus, correction to quadratic consistency
 // periodic boundary conditions
@@ -10,7 +11,10 @@
 //#define EXPLICIT
 
 #include"main.h"
+
+
 #include"sim_pars.h"
+
 #include"linear.h"
 
 #include"fields.h"
@@ -44,11 +48,17 @@ int main() {
   simu.read();
 
   create();
-
+  
   if(simu.create_points()) {
 
-    //    set_alpha_circle( Tp );
-    set_alpha_under_cos(  Tp ) ;
+    //    set_alpha_circle( Tp , 2);
+    //    set_alpha_under_cos(  Tp ) ;
+
+    cout << "Creating alpha field " << endl;
+    
+    set_alpha_random(  Tp ) ;
+
+    cout << "Numbering particles " << endl;
 
     number(Tp);
   }
@@ -75,7 +85,7 @@ int main() {
   //FT dt=simu.dt();
 
   //cout << "Calculating Ustar implicitely" << endl;
-  //algebra.ustar_inv(kind::USTAR,  dt , kind::UOLD, false);
+	  //algebra.ustar_inv(kind::USTAR,  dt , kind::UOLD, false);
 
   //cout << "Solving PPE" << endl;
   //algebra.PPE( kind::USTAR, dt, kind:: P );
@@ -109,7 +119,7 @@ int main() {
   const std::string particle_file("particles.dat");
 
   draw(Tp, particle_file , true);
-  
+
   simu.advance_time();
   simu.next_step();
 
@@ -123,7 +133,7 @@ int main() {
 
   log_file.open("main.log");
 
-  bool overdamped = ( simu.mu() > 1 ) ; // high or low Re
+  bool is_overdamped = ( simu.mu() > 1 ) ; // high or low Re
 
   for(;
       simu.current_step() <= simu.Nsteps();
@@ -145,8 +155,8 @@ int main() {
     FT min_displ=1e10;
     int min_iter=0;
 
-    const int max_iter=10;
-    const FT  max_displ= 1e-8; // < 0 : disable
+    const int max_iter=1; //10;
+    const FT  max_displ=  1e-8; // < 0 : disable
 
 //  leapfrog, special first step.-
 //    if(simu.current_step() == 1) dt2 *= 0.5;
@@ -158,11 +168,12 @@ int main() {
     // iter loop
     for( ; iter<max_iter ; iter++) {
 
-      cout << "Move iteration  " << iter << " of " << max_iter << " ";
+      cout << "Move iteration  " << iter << " of " << max_iter << " " << endl;
 
+      // comment for no move.-
       displ=move( Tp , dt2 );
 
-      cout << "Moved avg " << displ << " to half point" << endl;
+      cout << "Iter " << iter << " , moved avg " << displ << " to half point" << endl;
 
       if( (displ < max_displ) && (iter !=0) ) break;
 
@@ -194,41 +205,95 @@ int main() {
 	u_star(Tp, dt2 , false );
 
 #else
-	cout << "Calculating chem pot" << endl;
-	algebra.chempot(kind::ALPHA0, kind::CHEMPOT);
+
+//	cout << "Calculating chem pot" << endl;
+
+//	algebra.chempot(kind::ALPHA, kind::CHEMPOT);
 
 	cout << "Calculating alpha implicitely" << endl;
 
-	algebra.alpha_inv(kind::ALPHA, dt2 , kind::ALPHA0 );
+	// partly explicit ( unstable ? ):
+	cout << "Calculating chem pot explicitely" << endl;
 
-	//	algebra.gradient(kind::ALPHA, kind::ALPHA0);
+        // if (iter==0)
+	//   algebra.chempot( kind::ALPHA0, kind::CHEMPOT );
+	// else
+	//  algebra.chempot( kind::ALPHA , kind::CHEMPOT );
 
+	// inner iter loop
+
+	for( int alpha_it=0 ; alpha_it < 6 ; alpha_it++) { // max_iter ; alpha_it++) {
+
+	  cout << "Alpha loop iter " << alpha_it << endl;
+
+	  //	  algebra.chempot( kind::ALPHA , kind::CHEMPOT );
+	  algebra.chempot( kind::ALPHA , kind::CHEMPOT );
+	  algebra.alpha_inv_cp(kind::ALPHA, dt2 , kind::ALPHA0 );
+
+
+	}
+
+
+
+	//	algebra.gradient(kind::ALPHA, kind::ALPHA0); // ???
+	
+	// // iterative, fully implicit (does not converge):
+	
+	// int alpha_it=0;
+	
+	//     // inner iter loop
+	// for( ; alpha_it < 10 ; alpha_it++) { // max_iter ; alpha_it++) {
+
+	//   cout << "Alpha loop iter " << alpha_it << endl;
+	  
+	//   algebra.alpha_inv_cp2(kind::ALPHA, dt2 , kind::ALPHA0 );
+    
+	//   cout << "Calculating chem pot implicitely" << endl;
+	//   algebra.chempot_inv(kind::ALPHA, dt2 , kind::ALPHA0 );
+	// }
+	// //	draw(Tp, particle_file , true);
+
+	
 	cout << "Calculating Ustar implicitely" << endl;
 
 	//	algebra.ustar_inv(kind::USTAR,  dt2 , kind::UOLD, false , false);
 
-	algebra.ustar_inv(kind::USTAR,  dt2 , kind::UOLD, overdamped , false);
+	// comment for no move.-
+	algebra.ustar_inv_cp(kind::USTAR,  dt2 , kind::UOLD, is_overdamped , false);
+
+	// substract spurious overall movement.-
+	
+	zero_mean_v( Tp , kind::USTAR);
 
 #endif
 
 	cout << "Solving PPE" << endl;
-      
+
+	// comment for no move.-
 	algebra.PPE( kind::USTAR, dt2 , kind:: P );
 
 	cout << "Calculating grad p" << endl;
+	// comment for no move.-
 	algebra.gradient(kind::P, kind::GRADP);
 
 	cout << "Evolving U " << endl;
 
-    //      u_new( dt );
+	// comment for no move.-
 	u_new( Tp , dt2 );
+
+	cout << "U evolved " << endl;
 
     } // iter loop
 
+    // comment for no move.-
     displ=move( Tp , dt );
     
 //    update_half_velocity( Tp , false ); 
-    update_half_velocity( Tp , overdamped ); 
+
+    // comment for no move.-
+    update_half_velocity( Tp , is_overdamped ); 
+
+    update_half_alpha( Tp ); 
 
     areas(Tp);
 
@@ -263,7 +328,7 @@ void create(void) {
 
   int N=simu.no_of_particles();
   std::vector<Point> points;
-  points.reserve(N);
+  //  points.reserve(N);
 
   if(simu.create_points()) {
     if(simu.at_random()) {
@@ -318,6 +383,11 @@ void create(void) {
     std::ifstream main_data;
     main_data.open(part_file );
 
+    if(main_data.fail()){
+      cout << "part file not found "  << endl;
+      abort();
+    }
+    
     for(int i=0;i<N;i++) {
       FT x,y;
       main_data >> x;

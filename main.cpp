@@ -222,7 +222,7 @@ int main() {
 
 	// inner iter loop
 
-	for( int alpha_it=0 ; alpha_it < 1 ; alpha_it++) { // max_iter ; alpha_it++) {
+	for( int alpha_it=0 ; alpha_it < 6 ; alpha_it++) { // max_iter ; alpha_it++) {
 
 	  cout << "Alpha loop iter " << alpha_it << endl;
 
