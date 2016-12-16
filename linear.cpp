@@ -683,7 +683,7 @@ void linear::ustar_inv_cp(
 
 //  cout << " chem pot" << endl;
 
-  VectorXd chemp = field_to_vctr( kind::CHEMPOT ) + al ;
+  VectorXd chemp = field_to_vctr( kind::CHEMPOT ) ;
 
 //  cout << "grad chem pot" << endl;
 
