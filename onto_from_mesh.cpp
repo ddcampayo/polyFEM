@@ -194,7 +194,7 @@ FT values_at(const Triangulation& T, const Point& p0, const bool FEM,
   std::vector<Vertex_handle> v(3);
   std::vector<FT> hh(3);
 
-  //  cout << "Locating p0 = " << p0 ;
+  //  cout << "Locating p0 = " << p0 << endl ;
   Face_handle fc=T.locate( p0 );
   //  cout << "   located" << endl;
 
@@ -340,7 +340,8 @@ void lumped_full_common_vertices( Triangulation& Tfrom, Triangulation& Tto, cons
 
       Point pm=per_point( vm->point() );
 
-     field_at_v[i0] =  values_at(Tfrom , pm , simu.FEMp(), scalarf );
+      //      cout << "Finding value at " << pm << endl;
+      field_at_v[i0] =  values_at(Tfrom , pm , simu.FEMp(), scalarf );
 
     }
 

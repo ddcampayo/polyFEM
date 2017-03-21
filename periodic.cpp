@@ -23,12 +23,12 @@ Point per_point(const FT& x10,const  FT& x20) {
   FT x1=x10;
   FT x2=x20;
 
-  if (x1 > LL/2.0)
+  if (x1 >= LL/2.0)
     x1 -= LL;
   else if (x1 < -LL/2.0)
     x1 += LL;
 
-  if (x2 > LL/2.0)
+  if (x2 >= LL/2.0)
     x2 -= LL;
   else if(x2 < -LL/2.0)
     x2 += LL;

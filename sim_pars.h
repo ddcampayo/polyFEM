@@ -215,6 +215,10 @@ public:
       return no_of_nodes_= mesh_factor_;
   }
 
+  int set_no_of_nodes(const int nm)  {
+    return no_of_nodes_= nm;
+  }
+
   int mesh_factor() const {return mesh_factor_;}
 
   bool at_random() const {return at_random_;}
