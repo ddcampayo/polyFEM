@@ -6,8 +6,8 @@ import pylab as pl
 
 pl.figure(figsize=(8,8))
 
-skip=100
-begin=50000
+skip=1000
+begin=0000
 end=100000
 limits=1
 #path='timings_full/'

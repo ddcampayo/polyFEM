@@ -215,18 +215,17 @@ int main() {
 	// partly explicit ( unstable ? ):
 	cout << "Calculating chem pot explicitely" << endl;
 
-        // if (iter==0)
-	//   algebra.chempot( kind::ALPHA0, kind::CHEMPOT );
-	// else
-	//  algebra.chempot( kind::ALPHA , kind::CHEMPOT );
+        if (iter==0)
+	  algebra.chempot( kind::ALPHA0, kind::CHEMPOT );
+	else
+	 algebra.chempot( kind::ALPHA , kind::CHEMPOT );
 
 	// inner iter loop
 
-	for( int alpha_it=0 ; alpha_it < 6 ; alpha_it++) { // max_iter ; alpha_it++) {
+	for( int alpha_it=0 ; alpha_it < 1 ; alpha_it++) { // max_iter ; alpha_it++) {
 
 	  cout << "Alpha loop iter " << alpha_it << endl;
 
-	  //	  algebra.chempot( kind::ALPHA , kind::CHEMPOT );
 	  algebra.chempot( kind::ALPHA , kind::CHEMPOT );
 	  algebra.alpha_inv_cp(kind::ALPHA, dt2 , kind::ALPHA0 );
 
