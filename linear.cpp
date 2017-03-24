@@ -707,8 +707,8 @@ void linear::ustar_inv_cp(
 
   FT a = dt * simu.mu() ;
 
-  U0_x -= al * grad_cp_x ;
-
+  U0_x -= VectorXd( al.array() * grad_cp_x.array() ); // array: for c-wise *
+  
   U0_x *= a;
   
   if(!overdamped) {
@@ -740,7 +740,9 @@ void linear::ustar_inv_cp(
 
   VectorXd U0_y = vfield_to_vctr( kind::FORCE , 1 ); // = dt * 
 
-  U0_y -= al *  grad_cp_y ;
+  U0_y -= VectorXd( al.array() *  grad_cp_y.array() );
+
+
   //  U0_y -= eps * al * vfield_to_vctr( kind::GRADALPHA , 1 );
 
   U0_y *= a;

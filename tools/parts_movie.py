@@ -8,7 +8,7 @@ pl.figure(figsize=(8,8))
 
 skip=1000
 begin=0000
-end=100000
+end=1000000
 limits=1
 #path='timings_full/'
 path='./'

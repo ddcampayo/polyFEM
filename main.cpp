@@ -101,8 +101,9 @@ int main() {
   const std::string mesh_file("mesh.dat");
   const std::string particle_file("particles.dat");
 
-  draw(Tm, mesh_file     , true);
-  draw(Tp, particle_file , true);
+  // step 0 draw.-
+  //  draw(Tm, mesh_file     , true);
+  //   draw(Tp, particle_file , true);
   
   cout << "Assigning alpha to particles " << endl;
 
@@ -125,6 +126,13 @@ int main() {
   move_info( Tm );
   move_info( Tp );
 
+  algebra.chempot( kind::ALPHA , kind::CHEMPOT );
+  algebra.alpha_inv_cp(kind::ALPHA, simu.dt()/2.0 , kind::ALPHA0 );
+
+  draw(Tm, mesh_file     , true);
+  draw(Tp, particle_file , true);
+
+ 
   // /// Prev test begin
   //cout << "Calculating Lapl U" << endl;
   //algebra.laplacian_v(kind::UOLD,kind::LAPLU);
@@ -294,8 +302,9 @@ int main() {
 //	algebra.chempot(kind::ALPHA, kind::CHEMPOT);
 
       cout << "Calculating alpha implicitely" << endl;
+      //
 
-	// partly explicit ( unstable ? ):
+      // partly explicit ( unstable ? ):
       cout << "Calculating chem pot explicitely" << endl;
 
       if (iter==0)
@@ -305,7 +314,7 @@ int main() {
 
 	// inner iter loop
 
-      for( int alpha_it=0 ; alpha_it < 1 ; alpha_it++) { // max_iter ; alpha_it++) {
+      for( int alpha_it=0 ; alpha_it < 0 ; alpha_it++) { // max_iter ; alpha_it++) {
 
 	cout << "Alpha loop iter " << alpha_it << endl;
 
@@ -333,7 +342,6 @@ int main() {
 	//   algebra.chempot_inv(kind::ALPHA, dt2 , kind::ALPHA0 );
 	// }
 	// //	draw(Tp, particle_file , true);
-
 	
 	cout << "Calculating Ustar implicitely" << endl;
 
@@ -380,8 +388,10 @@ int main() {
 
     quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );
 
-    if(simu.current_step()%simu.every()==0)
+    if(simu.current_step()%simu.every()==0) {
+      draw(Tm, mesh_file     , true);
       draw(Tp, particle_file , true);
+    }
 
     log_file
       << simu.current_step() << "  "
