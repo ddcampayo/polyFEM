@@ -105,32 +105,31 @@ int main() {
   //  draw(Tm, mesh_file     , true);
   //   draw(Tp, particle_file , true);
   
-  cout << "Assigning alpha to particles " << endl;
-
-  
-#if defined FULL_FULL
-    {
-      Delta(Tp);
-      linear algebra_p(Tp);
-      from_mesh_full( Tm , Tp ,  algebra_p,kind::ALPHA);
-    }
-#elif defined FULL_LUMPED
-    from_mesh_lumped( Tm , Tp , kind::ALPHA);
-#elif defined FLIP
-    from_mesh(Tm , Tp , kind::ALPHA);
-#else
-    from_mesh(Tm , Tp , kind::ALPHA);
-#endif
+//   cout << "Assigning alpha to particles " << endl;
+ 
+// #if defined FULL_FULL
+//     {
+//       Delta(Tp);
+//       linear algebra_p(Tp);
+//       from_mesh_full( Tm , Tp ,  algebra_p,kind::ALPHA);
+//     }
+// #elif defined FULL_LUMPED
+//     from_mesh_lumped( Tm , Tp , kind::ALPHA);
+// #elif defined FLIP
+//     from_mesh(Tm , Tp , kind::ALPHA);
+// #else
+//     from_mesh(Tm , Tp , kind::ALPHA);
+// #endif
 
   cout << "Moving info" << endl;
   move_info( Tm );
   move_info( Tp );
 
-  algebra.chempot( kind::ALPHA , kind::CHEMPOT );
-  algebra.alpha_inv_cp(kind::ALPHA, simu.dt()/2.0 , kind::ALPHA0 );
+  // algebra.chempot( kind::ALPHA , kind::CHEMPOT );
+  // algebra.alpha_inv_cp(kind::ALPHA, simu.dt()/2.0 , kind::ALPHA0 );
 
-  draw(Tm, mesh_file     , true);
-  draw(Tp, particle_file , true);
+  // draw(Tm, mesh_file     , true);
+  // draw(Tp, particle_file , true);
 
  
   // /// Prev test begin
@@ -221,35 +220,39 @@ int main() {
     move_info(Tp);
 
 
-    cout << "Proj alpha onto mesh " << endl;
+//     cout << "Proj alpha onto mesh " << endl;
 
-      //onto_mesh_lumped();
-#if defined FULL
-    onto_mesh_full( Tp , Tm , algebra, kind::ALPHA);
-#elif defined FLIP
-    flip_volumes(Tp , Tm , simu.FEMm() );
-    onto_mesh_flip(Tp,Tm,simu.FEMm(),kind::ALPHA);
-#else
-    onto_mesh_delta(Tp,Tm,kind::ALPHA);
-#endif
+//       //onto_mesh_lumped();
+// #if defined FULL
+//     onto_mesh_full( Tp , Tm , algebra, kind::ALPHA);
+// #elif defined FLIP
+//     flip_volumes(Tp , Tm , simu.FEMm() );
+//     onto_mesh_flip(Tp,Tm,simu.FEMm(),kind::ALPHA);
+// #else
+//     onto_mesh_delta(Tp,Tm,kind::ALPHA);
+// #endif
   
     // iter loop
     for( ; iter<max_iter ; iter++) {
 
-      cout << "Proj U from mesh " << endl;
+      cout << "Projecting U from mesh " << endl;
 
 #if defined FULL_FULL
       {
 	Delta(Tp);
 	linear algebra_p(Tp);
 	from_mesh_full_v(Tm, Tp, algebra_p , kind::U);
+	//	from_mesh_full( Tm , Tp ,  algebra_p,kind::ALPHA);
       }
 #elif defined FULL_LUMPED
       from_mesh_lumped_v(Tm, Tp, kind::U);
+      //      from_mesh_lumped  (Tm, Tp, kind::ALPHA);
 #elif defined FLIP
       from_mesh_v(Tm, Tp, kind::U);
+      //      from_mesh  (Tm, Tp, kind::ALPHA);
 #else
       from_mesh_v(Tm, Tp, kind::U);
+      //      from_mesh  (Tm, Tp, kind::ALPHA);
 #endif
       
       // comment for no move.-
@@ -267,20 +270,20 @@ int main() {
       areas(Tp);
       quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );
 
-
       
-      cout << "Proj U0 onto mesh " << endl;
+      cout << "Proj U0, alpha0 onto mesh " << endl;
 
 #if defined FULL
       onto_mesh_full_v(Tp,Tm,algebra,kind::UOLD);
+      onto_mesh_full  (Tp,Tm,algebra,kind::ALPHA0);
 #elif defined FLIP
       flip_volumes(Tp , Tm , simu.FEMm() );
       onto_mesh_flip_v(Tp,Tm,simu.FEMm(),kind::UOLD);
+      onto_mesh_flip  (Tp,Tm,simu.FEMm(),kind::ALPHA0);
 #else
       onto_mesh_delta_v(Tp,Tm,kind::UOLD);
+      onto_mesh_delta  (Tp,Tm,kind::ALPHA0);
 #endif
-
-
 
      
 //  Reynolds number discrimination
@@ -307,22 +310,21 @@ int main() {
       // partly explicit ( unstable ? ):
       cout << "Calculating chem pot explicitely" << endl;
 
-      if (iter==0)
-	algebra.chempot( kind::ALPHA0, kind::CHEMPOT );
-      else
-	algebra.chempot( kind::ALPHA , kind::CHEMPOT );
 
 	// inner iter loop
 
-      for( int alpha_it=0 ; alpha_it < 0 ; alpha_it++) { // max_iter ; alpha_it++) {
+      for( int alpha_it=0 ; alpha_it < 1 ; alpha_it++) { // max_iter ; alpha_it++) {
 
 	cout << "Alpha loop iter " << alpha_it << endl;
-
-	algebra.chempot( kind::ALPHA , kind::CHEMPOT );
+	if (iter==0)
+	  algebra.chempot( kind::ALPHA0, kind::CHEMPOT );
+	else
+	  algebra.chempot( kind::ALPHA , kind::CHEMPOT );
+	
+      //	algebra.chempot( kind::ALPHA , kind::CHEMPOT );
 	algebra.alpha_inv_cp(kind::ALPHA, dt2 , kind::ALPHA0 );
 
       }
-
 
 
 	//	algebra.gradient(kind::ALPHA, kind::ALPHA0); // ???
