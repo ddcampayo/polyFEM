@@ -242,17 +242,17 @@ int main() {
 	Delta(Tp);
 	linear algebra_p(Tp);
 	from_mesh_full_v(Tm, Tp, algebra_p , kind::U);
-	//	from_mesh_full( Tm , Tp ,  algebra_p,kind::ALPHA);
+	from_mesh_full( Tm , Tp ,  algebra_p,kind::ALPHA0);
       }
 #elif defined FULL_LUMPED
       from_mesh_lumped_v(Tm, Tp, kind::U);
-      //      from_mesh_lumped  (Tm, Tp, kind::ALPHA);
+      from_mesh_lumped  (Tm, Tp, kind::ALPHA0);
 #elif defined FLIP
       from_mesh_v(Tm, Tp, kind::U);
-      //      from_mesh  (Tm, Tp, kind::ALPHA);
+      from_mesh  (Tm, Tp, kind::ALPHA0);
 #else
       from_mesh_v(Tm, Tp, kind::U);
-      //      from_mesh  (Tm, Tp, kind::ALPHA);
+      from_mesh  (Tm, Tp, kind::ALPHA0);
 #endif
       
       // comment for no move.-
@@ -269,7 +269,6 @@ int main() {
 
       areas(Tp);
       quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );
-
       
       cout << "Proj U0, alpha0 onto mesh " << endl;
 
@@ -304,7 +303,7 @@ int main() {
 
 //	algebra.chempot(kind::ALPHA, kind::CHEMPOT);
 
-      cout << "Calculating alpha implicitely" << endl;
+//      cout << "Calculating alpha implicitely" << endl;
       //
 
       // partly explicit ( unstable ? ):
@@ -370,12 +369,14 @@ int main() {
 	cout << "Evolving U " << endl;
 
 	// comment for no move.-
-	u_new( Tp , dt2 );
+	u_new( Tm , dt2 );
 
 	cout << "U evolved " << endl;
 
     } // iter loop
 
+
+    
     // comment for no move.-
     displ=move( Tp , dt );
     
@@ -384,12 +385,29 @@ int main() {
     // comment for no move.-
     update_half_velocity( Tp , is_overdamped ); 
 
-    update_half_alpha( Tp ); 
+    update_half_alpha( Tp );  // ??????
 
     areas(Tp);
 
     quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );
 
+    cout << "Proj U_t+1 onto mesh " << endl;
+
+#if defined FULL
+    onto_mesh_full_v(Tp,Tm,algebra,kind::U);
+    onto_mesh_full  (Tp,Tm,algebra,kind::ALPHA0);
+
+#elif defined FLIP
+    flip_volumes(Tp , Tm , simu.FEMm() );
+    onto_mesh_flip_v(Tp,Tm,simu.FEMm(),kind::U);
+    onto_mesh_flip  (Tp,Tm,simu.FEMm(),kind::ALPHA0);
+#else
+    onto_mesh_delta_v(Tp,Tm,kind::U);
+    onto_mesh_delta  (Tp,Tm,kind::ALPHA0);
+#endif
+
+
+    
     if(simu.current_step()%simu.every()==0) {
       draw(Tm, mesh_file     , true);
       draw(Tp, particle_file , true);
