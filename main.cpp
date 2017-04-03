@@ -105,21 +105,21 @@ int main() {
   //  draw(Tm, mesh_file     , true);
   //   draw(Tp, particle_file , true);
   
-//   cout << "Assigning alpha to particles " << endl;
+  cout << "Assigning alpha to particles " << endl;
  
-// #if defined FULL_FULL
-//     {
-//       Delta(Tp);
-//       linear algebra_p(Tp);
-//       from_mesh_full( Tm , Tp ,  algebra_p,kind::ALPHA);
-//     }
-// #elif defined FULL_LUMPED
-//     from_mesh_lumped( Tm , Tp , kind::ALPHA);
-// #elif defined FLIP
-//     from_mesh(Tm , Tp , kind::ALPHA);
-// #else
-//     from_mesh(Tm , Tp , kind::ALPHA);
-// #endif
+#if defined FULL_FULL
+  {
+    Delta(Tp);
+    linear algebra_p(Tp);
+    from_mesh_full( Tm , Tp ,  algebra_p,kind::ALPHA);
+  }
+#elif defined FULL_LUMPED
+  from_mesh_lumped( Tm , Tp , kind::ALPHA);
+ #elif defined FLIP
+  from_mesh(Tm , Tp , kind::ALPHA);
+ #else
+  from_mesh(Tm , Tp , kind::ALPHA);
+#endif
 
   cout << "Moving info" << endl;
   move_info( Tm );
@@ -219,7 +219,6 @@ int main() {
     move_info(Tm);
     move_info(Tp);
 
-
 //     cout << "Proj alpha onto mesh " << endl;
 
 //       //onto_mesh_lumped();
@@ -242,17 +241,13 @@ int main() {
 	Delta(Tp);
 	linear algebra_p(Tp);
 	from_mesh_full_v(Tm, Tp, algebra_p , kind::U);
-	from_mesh_full( Tm , Tp ,  algebra_p,kind::ALPHA0);
       }
 #elif defined FULL_LUMPED
       from_mesh_lumped_v(Tm, Tp, kind::U);
-      from_mesh_lumped  (Tm, Tp, kind::ALPHA0);
 #elif defined FLIP
       from_mesh_v(Tm, Tp, kind::U);
-      from_mesh  (Tm, Tp, kind::ALPHA0);
 #else
       from_mesh_v(Tm, Tp, kind::U);
-      from_mesh  (Tm, Tp, kind::ALPHA0);
 #endif
       
       // comment for no move.-
@@ -260,28 +255,31 @@ int main() {
 
       cout << "Iter " << iter << " , moved avg " << displ << " to half point" << endl;
 
-      if( (displ < max_displ) && (iter !=0) ) break;
-
       if( displ < min_displ) {
 	min_displ=displ;
 	min_iter=iter;
       }
 
+      if( (displ < max_displ) && (iter !=0) ) break;
+
       areas(Tp);
       quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );
       
-      cout << "Proj U0, alpha0 onto mesh " << endl;
+      cout << "Proj U0, alpha onto mesh " << endl;
 
 #if defined FULL
       onto_mesh_full_v(Tp,Tm,algebra,kind::UOLD);
       onto_mesh_full  (Tp,Tm,algebra,kind::ALPHA0);
+      //      onto_mesh_full  (Tp,Tm,algebra,kind::ALPHA);
 #elif defined FLIP
       flip_volumes(Tp , Tm , simu.FEMm() );
       onto_mesh_flip_v(Tp,Tm,simu.FEMm(),kind::UOLD);
       onto_mesh_flip  (Tp,Tm,simu.FEMm(),kind::ALPHA0);
+      //onto_mesh_flip  (Tp,Tm,simu.FEMm(),kind::ALPHA);
 #else
       onto_mesh_delta_v(Tp,Tm,kind::UOLD);
       onto_mesh_delta  (Tp,Tm,kind::ALPHA0);
+      //onto_mesh_delta  (Tp,Tm,kind::ALPHA);
 #endif
 
      
