@@ -71,7 +71,7 @@ int main() {
 
     cout << "Creating alpha field " << endl;
     
-    set_alpha_random(  Tp ) ;
+    //    set_alpha_random(  Tp ) ; // better take it from mesh
     set_alpha_random(  Tm ) ;
 
     cout << "Numbering particles " << endl;
@@ -393,17 +393,16 @@ int main() {
 
 #if defined FULL
     onto_mesh_full_v(Tp,Tm,algebra,kind::U);
-    onto_mesh_full  (Tp,Tm,algebra,kind::ALPHA0);
+    onto_mesh_full  (Tp,Tm,algebra,kind::ALPHA);
 
 #elif defined FLIP
     flip_volumes(Tp , Tm , simu.FEMm() );
     onto_mesh_flip_v(Tp,Tm,simu.FEMm(),kind::U);
-    onto_mesh_flip  (Tp,Tm,simu.FEMm(),kind::ALPHA0);
+    onto_mesh_flip  (Tp,Tm,simu.FEMm(),kind::ALPHA);
 #else
     onto_mesh_delta_v(Tp,Tm,kind::U);
-    onto_mesh_delta  (Tp,Tm,kind::ALPHA0);
+    onto_mesh_delta  (Tp,Tm,kind::ALPHA);
 #endif
-
 
     
     if(simu.current_step()%simu.every()==0) {
