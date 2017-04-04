@@ -265,7 +265,7 @@ int main() {
       areas(Tp);
       quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );
       
-      cout << "Proj U0, alpha onto mesh " << endl;
+      cout << "Proj U0, alpha0 onto mesh " << endl;
 
 #if defined FULL
       onto_mesh_full_v(Tp,Tm,algebra,kind::UOLD);
@@ -394,7 +394,6 @@ int main() {
 #if defined FULL
     onto_mesh_full_v(Tp,Tm,algebra,kind::U);
     onto_mesh_full  (Tp,Tm,algebra,kind::ALPHA);
-
 #elif defined FLIP
     flip_volumes(Tp , Tm , simu.FEMm() );
     onto_mesh_flip_v(Tp,Tm,simu.FEMm(),kind::U);

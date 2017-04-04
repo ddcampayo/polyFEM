@@ -878,7 +878,7 @@ void linear::chempot_inv(const kind::f alpha,
 			 const FT dt,
 			 const kind::f alpha0 ) {
 
-  const FT D=0;//.04;
+  const FT D=0.04;
 
   VectorXd al  = field_to_vctr( alpha  );
   VectorXd al0  = field_to_vctr( alpha0 );
@@ -903,7 +903,7 @@ void linear::chempot_inv(const kind::f alpha,
 void linear::alpha_inv_cp(const kind::f alpha,
 		       const FT dt,
 		       const kind::f alpha0 ) {
-  const FT D=0;//.04;
+  const FT D=0.04;
 
   FT b = D * dt ;
 

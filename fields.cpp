@@ -286,13 +286,32 @@ void zero_mean_v( Triangulation& T ,  const kind::f vectorf ) {
     ++NN ;
   }
 
-  mean = (1.0/NN) * mean;
+  mean = (1.0/ FT(NN)) * mean;
 
   for(F_v_it fv=T.finite_vertices_begin();
       fv!=T.finite_vertices_end();
-      fv++)   
-    fv->vf( vectorf ).set( fv->vf( vectorf ).val() - mean );
+      fv++)   {
+    Vector_2 corr = fv->vf( vectorf ).val() - mean ;
+    fv->vf( vectorf ).set( corr );
+  }
 
+
+  // check.-
+
+  mean = CGAL::NULL_VECTOR  ;
+
+  for(F_v_it fv=T.finite_vertices_begin();
+      fv!=T.finite_vertices_end();
+      fv++)    {
+
+    mean = mean + fv->vf( vectorf ).val();
+    ++NN ;
+  }
+
+  mean = (1.0/ FT(NN)) * mean;
+
+  cout << "mean = " << mean << endl;
+  
   return;
 
 }
