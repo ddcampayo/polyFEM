@@ -234,20 +234,25 @@ int main() {
     // iter loop
     for( ; iter<max_iter ; iter++) {
 
-      cout << "Projecting U from mesh " << endl;
+      //      cout << "Projecting U from mesh " << endl;
+      cout << "Projecting U , alpha0 from mesh " << endl;
 
 #if defined FULL_FULL
       {
 	Delta(Tp);
 	linear algebra_p(Tp);
 	from_mesh_full_v(Tm, Tp, algebra_p , kind::U);
+	from_mesh_full  (Tm, Tp, algebra_p , kind::ALPHA0);
       }
 #elif defined FULL_LUMPED
       from_mesh_lumped_v(Tm, Tp, kind::U);
+      from_mesh_lumped  (Tm, Tp, kind::ALPHA0);
 #elif defined FLIP
       from_mesh_v(Tm, Tp, kind::U);
+      from_mesh  (Tm, Tp, kind::ALPHA0);
 #else
       from_mesh_v(Tm, Tp, kind::U);
+      from_mesh  (Tm, Tp, kind::ALPHA0);
 #endif
       
       // comment for no move.-
@@ -285,8 +290,6 @@ int main() {
      
 //  Reynolds number discrimination
 
-
-
 // #ifdef EXPLICIT
 
 // 	cout << "Calculating Ustar explicitely" << endl;
@@ -307,8 +310,7 @@ int main() {
       // partly explicit ( unstable ? ):
       cout << "Calculating chem pot explicitely" << endl;
 
-
-	// inner iter loop
+      // inner iter loop
 
       for( int alpha_it=0 ; alpha_it < 1 ; alpha_it++) { // max_iter ; alpha_it++) {
 
@@ -389,7 +391,7 @@ int main() {
 
     quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );
 
-    cout << "Proj U_t+1 onto mesh " << endl;
+    cout << "Proj U_t+1 , alpha_t+1 onto mesh " << endl;
 
 #if defined FULL
     onto_mesh_full_v(Tp,Tm,algebra,kind::U);

@@ -28,8 +28,12 @@ Taylor-Green vortex sheet (main_TG.cpp)
 # Requires
 
 CGAL 4.8
+
 eigen3 3.2.9 libs:
 install as explained in INSTALL file (second option, the one that involves cmake), then
 sudo cp -r cmake/ /usr/local/include/eigen3
+(On newer versions, it seems simply ```sudo make install``` in the final step works.)
+
+Optional: The suitesparse suite, specifically, cholmod
 
 [![DOI](https://zenodo.org/badge/64474373.svg)](https://zenodo.org/badge/latestdoi/64474373)
