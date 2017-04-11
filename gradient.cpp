@@ -73,11 +73,7 @@ void linear::chempot(const kind::f scalarf, const kind::f chempot) {
   vctr_to_field( al_al3  - 0.5 * lapl , chempot  );
 
   // vctr_to_field( al3 - 0.5 * lapl , chempot  );
-    
   //vctr_to_field( al - 0.5 * lapl , chempot  );
-
-
-
   //  vctr_to_field( al_al3  , chempot  );
 
   // // model A

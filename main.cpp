@@ -12,7 +12,6 @@
 
 #include"main.h"
 
-
 #include"sim_pars.h"
 
 #include"linear.h"
@@ -243,16 +242,20 @@ int main() {
 	linear algebra_p(Tp);
 	from_mesh_full_v(Tm, Tp, algebra_p , kind::U);
 	from_mesh_full  (Tm, Tp, algebra_p , kind::ALPHA0);
+	from_mesh_full  (Tm, Tp, algebra_p , kind::ALPHA);
       }
 #elif defined FULL_LUMPED
       from_mesh_lumped_v(Tm, Tp, kind::U);
       from_mesh_lumped  (Tm, Tp, kind::ALPHA0);
+      from_mesh_lumped  (Tm, Tp, kind::ALPHA);
 #elif defined FLIP
       from_mesh_v(Tm, Tp, kind::U);
       from_mesh  (Tm, Tp, kind::ALPHA0);
+      from_mesh  (Tm, Tp, kind::ALPHA);
 #else
       from_mesh_v(Tm, Tp, kind::U);
       from_mesh  (Tm, Tp, kind::ALPHA0);
+      from_mesh  (Tm, Tp, kind::ALPHA);
 #endif
       
       // comment for no move.-
@@ -275,16 +278,16 @@ int main() {
 #if defined FULL
       onto_mesh_full_v(Tp,Tm,algebra,kind::UOLD);
       onto_mesh_full  (Tp,Tm,algebra,kind::ALPHA0);
-      //      onto_mesh_full  (Tp,Tm,algebra,kind::ALPHA);
+      onto_mesh_full  (Tp,Tm,algebra,kind::ALPHA);
 #elif defined FLIP
       flip_volumes(Tp , Tm , simu.FEMm() );
       onto_mesh_flip_v(Tp,Tm,simu.FEMm(),kind::UOLD);
       onto_mesh_flip  (Tp,Tm,simu.FEMm(),kind::ALPHA0);
-      //onto_mesh_flip  (Tp,Tm,simu.FEMm(),kind::ALPHA);
+      onto_mesh_flip  (Tp,Tm,simu.FEMm(),kind::ALPHA);
 #else
       onto_mesh_delta_v(Tp,Tm,kind::UOLD);
       onto_mesh_delta  (Tp,Tm,kind::ALPHA0);
-      //onto_mesh_delta  (Tp,Tm,kind::ALPHA);
+      onto_mesh_delta  (Tp,Tm,kind::ALPHA);
 #endif
 
      
@@ -375,9 +378,25 @@ int main() {
 
     } // iter loop
 
+#if defined FULL_FULL
+      {
+	Delta(Tp);
+	linear algebra_p(Tp);
+	from_mesh_full_v(Tm, Tp, algebra_p , kind::U);
+	from_mesh_full  (Tm, Tp, algebra_p , kind::ALPHA);
+      }
+#elif defined FULL_LUMPED
+      from_mesh_lumped_v(Tm, Tp, kind::U);
+      from_mesh_lumped  (Tm, Tp, kind::ALPHA);
+#elif defined FLIP
+      from_mesh_v(Tm, Tp, kind::U);
+      from_mesh  (Tm, Tp, kind::ALPHA);
+#else
+      from_mesh_v(Tm, Tp, kind::U);
+      from_mesh  (Tm, Tp, kind::ALPHA);
+#endif
 
-    
-    // comment for no move.-
+      // comment for no move.-
     displ=move( Tp , dt );
     
 //    update_half_velocity( Tp , false ); 
@@ -395,13 +414,16 @@ int main() {
 
 #if defined FULL
     onto_mesh_full_v(Tp,Tm,algebra,kind::U);
+    onto_mesh_full  (Tp,Tm,algebra,kind::ALPHA0);
     onto_mesh_full  (Tp,Tm,algebra,kind::ALPHA);
 #elif defined FLIP
     flip_volumes(Tp , Tm , simu.FEMm() );
     onto_mesh_flip_v(Tp,Tm,simu.FEMm(),kind::U);
+    onto_mesh_flip  (Tp,Tm,simu.FEMm(),kind::ALPHA0);
     onto_mesh_flip  (Tp,Tm,simu.FEMm(),kind::ALPHA);
 #else
     onto_mesh_delta_v(Tp,Tm,kind::U);
+    onto_mesh_delta  (Tp,Tm,kind::ALPHA);
     onto_mesh_delta  (Tp,Tm,kind::ALPHA);
 #endif
 

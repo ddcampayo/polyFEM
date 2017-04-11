@@ -278,13 +278,10 @@ void linear::fill_mas( const FT& dt ){
 
 void linear::fill_mbs( const FT& b ){ 
 
-
   if(stiff.size()==0) fill_stiff();
   if(mass.size()==0)  fill_mass();
 
   std::cout << " Building MbS matrix: " ;
-
-
 
   // // Model A dynamics:
   // cout <<  "( " << 1 - b << "  mass - " << 0.5 * b << "  x stiff) " << endl;
@@ -707,7 +704,7 @@ void linear::ustar_inv_cp(
 
   FT a = dt * simu.mu() ;
 
-  U0_x -= VectorXd( al.array() * grad_cp_x.array() ); // array: for c-wise *
+  U0_x -= VectorXd( al.array() * grad_cp_x.array() ); // array: for el-wise *
   
   U0_x *= a;
   
@@ -931,7 +928,8 @@ void linear::alpha_inv_cp(const kind::f alpha,
   // partly implicit
 
   if(mbs.size()==0)  fill_mbs( b );
-  VectorXd mass0 = mass * al0 + b * stiff * (cp + al);
+//  VectorXd mass0 = mass * al0 + b * stiff * (cp + al);
+  VectorXd mass0 = mass * al0 + b * stiff * (cp + al0);
 
   VectorXd new_al = solver_mbs.solve(mass0);
 
