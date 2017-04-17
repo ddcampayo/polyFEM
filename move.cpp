@@ -205,21 +205,26 @@ void u_star(Triangulation& T, FT dt , bool semi ) {
 
 void update_half_velocity( Triangulation& Tp , const bool overdamped ) {
 
+  if (overdamped) return;
+  
    for(F_v_it fv=Tp.finite_vertices_begin();
        fv!=Tp.finite_vertices_end();
        fv++) {
 
     Vector_2  v  = fv->U();
 
-    if (overdamped) 
-       fv->U.set( v );
-    else {
-      Vector_2  v0 = fv->Uold();
-//    Vector_2  v_star = fv->Ustar();
+    // if (overdamped) 
+    //    fv->U.set( v );
+    // else {
 
-      fv->U.set(  2 * v - v0 );
- //   fv->U.set(  v + v_star - v0 );
-    }
+    Vector_2  v0 = fv->Uold();
+      //    Vector_2  v_star = fv->Ustar();
+
+    fv->U.set(  2 * v - v0 );
+
+      //   fv->U.set(  v + v_star - v0 );
+
+      //    }
 
   }
   

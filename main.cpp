@@ -201,13 +201,12 @@ int main() {
 
     FT dt2 = dt / 2.0 ;
 
-    int iter=0;
     FT displ=1e10;
 
     FT min_displ=1e10;
     int min_iter=0;
 
-    const int max_iter  = 10; //10;
+    const int max_iter  = 1; //10;
     const FT  max_displ = 1e-8; // < 0 : disable
 
 //  leapfrog, special first step.-
@@ -231,7 +230,8 @@ int main() {
 // #endif
   
     // iter loop
-    for( ; iter<max_iter ; iter++) {
+    //    for(    int iter=0 ; iter<max_iter ; iter++) {
+    for( int iter=0 ;  ; iter++) {
 
       //      cout << "Projecting U from mesh " << endl;
       cout << "Projecting U , alpha0 from mesh " << endl;
@@ -257,6 +257,8 @@ int main() {
       from_mesh  (Tm, Tp, kind::ALPHA0);
       from_mesh  (Tm, Tp, kind::ALPHA);
 #endif
+
+      if (iter == max_iter ) break; // ensure 1 transfer, even with one iter
       
       // comment for no move.-
       displ=move( Tp , dt2 );
@@ -329,6 +331,7 @@ int main() {
       }
 
 
+      
 	//	algebra.gradient(kind::ALPHA, kind::ALPHA0); // ???
 	
 	// // iterative, fully implicit (does not converge):
@@ -378,34 +381,37 @@ int main() {
 
     } // iter loop
 
-#if defined FULL_FULL
-      {
-	Delta(Tp);
-	linear algebra_p(Tp);
-	from_mesh_full_v(Tm, Tp, algebra_p , kind::U);
-	from_mesh_full  (Tm, Tp, algebra_p , kind::ALPHA);
-      }
-#elif defined FULL_LUMPED
-      from_mesh_lumped_v(Tm, Tp, kind::U);
-      from_mesh_lumped  (Tm, Tp, kind::ALPHA);
-#elif defined FLIP
-      from_mesh_v(Tm, Tp, kind::U);
-      from_mesh  (Tm, Tp, kind::ALPHA);
-#else
-      from_mesh_v(Tm, Tp, kind::U);
-      from_mesh  (Tm, Tp, kind::ALPHA);
-#endif
+// #if defined FULL_FULL
+//       {
+// 	Delta(Tp);
+// 	linear algebra_p(Tp);
+// 	from_mesh_full_v(Tm, Tp, algebra_p , kind::U);
+// 	from_mesh_full  (Tm, Tp, algebra_p , kind::ALPHA);
+//       }
+// #elif defined FULL_LUMPED
+//       from_mesh_lumped_v(Tm, Tp, kind::U);
+//       from_mesh_lumped  (Tm, Tp, kind::ALPHA);
+// #elif defined FLIP
+//       from_mesh_v(Tm, Tp, kind::U);
+//       from_mesh  (Tm, Tp, kind::ALPHA);
+// #else
+//       from_mesh_v(Tm, Tp, kind::U);
+//       from_mesh  (Tm, Tp, kind::ALPHA);
+// #endif
 
+      
       // comment for no move.-
     displ=move( Tp , dt );
     
 //    update_half_velocity( Tp , false ); 
 
     // comment for no move.-
-    update_half_velocity( Tp , is_overdamped ); 
+    if (!is_overdamped ) {   // ??????
+      update_half_velocity( Tp , is_overdamped ); 
 
-    update_half_alpha( Tp );  // ??????
-
+      update_half_alpha( Tp );
+    }
+    
     areas(Tp);
 
     quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );
