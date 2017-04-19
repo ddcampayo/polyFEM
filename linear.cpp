@@ -658,7 +658,118 @@ void linear::mass_s(const kind::f scalarf ) {
 #endif
 
 
-// solves (mass - dt x mu x stiff)  ustar = mass ( dt x force + u0 )
+// TODO, not needed after all
+// set u_star as the force due to chem pot gradients
+
+// void linear::ustar_is_force( const kind::f Ustar) {
+
+//   chem_pot_force();  
+
+//   // TODO ... 
+//   return;
+
+// }
+
+
+// add chem pot force to already existing force
+
+void linear::chem_pot_force(void){
+
+  chem_pot_grad();
+
+  VectorXd al = field_to_vctr( kind::ALPHA );
+
+  VectorXd grad_cp_x = field_to_vctr( kind::GRADCHEMPOT , 0 );
+
+  VectorXd f_x = vfield_to_vctr( kind::FORCE , 0 );
+  
+  f_x -= VectorXd( al.array() * grad_cp_x.array() ); // array: for el-wise *
+  
+  vctr_to_vfield( f_x  , kind::FORCE , 0 );
+
+  VectorXd f_y = vfield_to_vctr( kind::FORCE , 1 );
+  
+  VectorXd grad_cp_y = field_to_vctr( kind::GRADCHEMPOT , 1 );
+  
+  f_y -= VectorXd( al.array() * grad_cp_y.array() ); // array: for el-wise *
+  
+  vctr_to_vfield( f_y  ,  kind::FORCE , 1 );
+
+  return;
+
+  
+}
+
+
+// Overdamped-only u inversion (Stokes' equation)
+// Reduced units!
+// TODO : largely redundant with laplace_div
+
+void linear::u_inv_od(const kind::f velocity) {
+
+  if(stiffp1.size()==0)  fill_stiff();
+  if(mass.size()==0)  fill_mass();
+
+//void linear::laplace_div_v_xy(
+
+// cout << "Solving Lapl of field " << pressure 
+//        << " = div of field " << velocity
+//        << ", with intermediate field " << divvel
+//        << '\n';
+
+  if(lambda_x.size()==0)  fill_lambda();
+
+  VectorXd p = vfield_to_vctr( kind::P );
+  
+  VectorXd f_x = vfield_to_vctr( kind::FORCE , 0 );
+  
+  VectorXd rhs_x  = lambda_x * p - mass * f_x;
+  
+  int N=rhs_x.size();
+
+  VectorXd rhs2_x = (rhs_x.tail( N-1 ));
+
+  VectorXd u_x= solver_stiffp1.solve( rhs2_x );
+
+  if(solver_stiffp1.info()!=Eigen::Success) 
+    cout << "Warning: unsucessful stiffp1 solve, error code " 
+	 << solver_stiffp1.info() << endl ;
+
+  VectorXd u2_x(N);
+
+  u2_x(0) = 0;
+  u2_x.tail(N-1) = u_x;
+
+  vctr_to_vfield( u2_x , velocity , 0 );
+
+
+  VectorXd f_y = vfield_to_vctr( kind::FORCE , 1 );
+  
+  VectorXd rhs_y  = lambda_y * p - mass * f_y;
+  
+  int N=rhs_y.size();
+
+  VectorXd rhs2_y = (rhs_y.tail( N-1 ));
+
+  VectorXd u_y= solver_stiffp1.solve( rhs2_y );
+
+  if(solver_stiffp1.info()!=Eigen::Success) 
+    cout << "Warning: unsucessful stiffp1 solve, error code " 
+	 << solver_stiffp1.info() << endl ;
+
+  VectorXd u2_y(N);
+
+  u2_y(0) = 0;
+  u2_y.tail(N-1) = u_y;
+
+  vctr_to_vfield( u2_y , velocity , 1 );
+
+  return;
+}
+
+
+	
+
 
 void linear::ustar_inv_cp(
 			  const kind::f Ustar,
@@ -667,45 +778,18 @@ void linear::ustar_inv_cp(
 			  const bool overdamped, const bool semi) {
 
   if(mas.size()==0)  fill_mas( dt );
-  if(lambda_x.size()==0)  fill_lambda();
+  //  if(lambda_x.size()==0)  fill_lambda();
 
   //  FT eps=1e-1;
   
 //// x
-  VectorXd al = field_to_vctr( kind::ALPHA );
     
-  VectorXd U0_x = vfield_to_vctr( kind::FORCE , 0 ); // = dt * 
-
   // gradient of chem pot .-
 
-//  cout << " chem pot" << endl;
+  chem_pot_force();  
 
-  VectorXd chemp = field_to_vctr( kind::CHEMPOT ) ;
+  VectorXd U0_x = vfield_to_vctr( kind::FORCE , 0 ); // = dt * 
 
-//  cout << "grad chem pot" << endl;
-
-  VectorXd grad_cp_x = lambda_x * chemp;
-  VectorXd grad_cp_y = lambda_y * chemp;
-
-//  cout << "Inverting grad chem pot" << endl;
-
-  mass_s( grad_cp_x );
-  mass_s( grad_cp_y );
-
-  cout << "Grad chem pot done, for u*" << endl;
-
-  // optional .-
-//  cout << "grad  chem pot back" << endl;
-
-  vctr_to_vfield( grad_cp_x  , kind::GRADCHEMPOT , 0 );
-  vctr_to_vfield( grad_cp_y  , kind::GRADCHEMPOT , 1 );
-
-  //
-
-  FT a = dt * simu.mu() ;
-
-  U0_x -= VectorXd( al.array() * grad_cp_x.array() ); // array: for el-wise *
-  
   U0_x *= a;
   
   if(!overdamped) {
@@ -736,10 +820,7 @@ void linear::ustar_inv_cp(
 //// y
 
   VectorXd U0_y = vfield_to_vctr( kind::FORCE , 1 ); // = dt * 
-
-  U0_y -= VectorXd( al.array() *  grad_cp_y.array() );
-
-
+  
   //  U0_y -= eps * al * vfield_to_vctr( kind::GRADALPHA , 1 );
 
   U0_y *= a;
