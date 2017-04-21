@@ -234,7 +234,7 @@ void linear::laplacian_Delta_v( const kind::f ffield, const kind::f gradfield   
 
 
 
-// stiff-lumped procedure. another candidate for templating
+// another candidate for templating
 
 void linear::laplacian_stiff( const kind::f ffield, const kind::f gradfield   ) {
 
@@ -243,10 +243,10 @@ void linear::laplacian_stiff( const kind::f ffield, const kind::f gradfield   ) 
       fv++)  {
 
     typedef Vertex::scalar_link scalar_link;
+
     scalar_link stiff=fv->stiff();
 
-    fv->sf(gradfield).set(0);
-
+    fv->sf(gradfield).reset();
 
     for(
 	scalar_link::iterator nn= stiff.begin();
@@ -266,15 +266,24 @@ void linear::laplacian_stiff( const kind::f ffield, const kind::f gradfield   ) 
       // 	"    " << p
       // 	       << std::endl;
 
+
     }
 
     //    if(simu.FEM())  fv->sf(gradfield) /=  6*fv->vol.val();
     //else 
 
-    fv->sf(gradfield) /=  ( fv->vol.val() );
+    //    stiff-lumped procedure
+    //    fv->sf(gradfield) /=  ( fv->vol.val() );
   }
-
+  
+  mass_s(gradfield);
+  
 }
+
+
+
+
+
 
 
 void linear::PPE(const kind::f velocity , const FT dt,  const kind::f pressure ) {

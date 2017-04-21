@@ -675,11 +675,11 @@ void linear::mass_s(const kind::f scalarf ) {
 
 void linear::chem_pot_force(void){
 
-  chem_pot_grad();
+  gradient(kind::CHEMPOT, kind::GRADCHEMPOT);
 
   VectorXd al = field_to_vctr( kind::ALPHA );
 
-  VectorXd grad_cp_x = field_to_vctr( kind::GRADCHEMPOT , 0 );
+  VectorXd grad_cp_x = vfield_to_vctr( kind::GRADCHEMPOT , 0 );
 
   VectorXd f_x = vfield_to_vctr( kind::FORCE , 0 );
   
@@ -689,7 +689,7 @@ void linear::chem_pot_force(void){
 
   VectorXd f_y = vfield_to_vctr( kind::FORCE , 1 );
   
-  VectorXd grad_cp_y = field_to_vctr( kind::GRADCHEMPOT , 1 );
+  VectorXd grad_cp_y = vfield_to_vctr( kind::GRADCHEMPOT , 1 );
   
   f_y -= VectorXd( al.array() * grad_cp_y.array() ); // array: for el-wise *
   
@@ -719,7 +719,7 @@ void linear::u_inv_od(const kind::f velocity) {
 
   if(lambda_x.size()==0)  fill_lambda();
 
-  VectorXd p = vfield_to_vctr( kind::P );
+  VectorXd p = field_to_vctr( kind::P );
   
   VectorXd f_x = vfield_to_vctr( kind::FORCE , 0 );
   
@@ -747,7 +747,7 @@ void linear::u_inv_od(const kind::f velocity) {
   
   VectorXd rhs_y  = lambda_y * p - mass * f_y;
   
-  int N=rhs_y.size();
+  //  int N=rhs_y.size();
 
   VectorXd rhs2_y = (rhs_y.tail( N-1 ));
 
@@ -768,7 +768,6 @@ void linear::u_inv_od(const kind::f velocity) {
 }
 
 
-	
 
 
 void linear::ustar_inv_cp(
@@ -790,7 +789,8 @@ void linear::ustar_inv_cp(
 
   VectorXd U0_x = vfield_to_vctr( kind::FORCE , 0 ); // = dt * 
 
-  U0_x *= a;
+  //  U0_x *= a;
+  U0_x *= dt;
   
   if(!overdamped) {
     //    VectorXd force_x
@@ -823,7 +823,8 @@ void linear::ustar_inv_cp(
   
   //  U0_y -= eps * al * vfield_to_vctr( kind::GRADALPHA , 1 );
 
-  U0_y *= a;
+  //  U0_y *= a;
+  U0_y *= dt;
 
   if(!overdamped) {
     //  VectorXd force_y = vfield_to_vctr( kind::FORCE , 1 );
@@ -1031,6 +1032,32 @@ void linear::alpha_inv_cp(const kind::f alpha,
 }
 
 
+// Simple, explicit integration
+// alpha_t+1 = alpha_t + D Dt lapl( mu )
+
+void linear::alpha_explicit(const kind::f alpha,
+			    const FT dt,
+			    const kind::f alpha0 ) {
+  const FT D=0.04;
+
+  FT b = D * dt ;
+
+  VectorXd al0 = field_to_vctr( alpha0 );
+
+  //  VectorXd cp  = field_to_vctr( kind::CHEMPOT ); // + al ;
+
+  // TODO: contaminates divU, for convenience, but another field is needed
+  laplacian_s( kind::CHEMPOT , kind::DIVU );
+
+  VectorXd lapl_cp  = field_to_vctr( kind::DIVU ); // + al ;
+
+  vctr_to_field(  al0 + b * lapl_cp , alpha );
+
+  return;
+}
+
+
+
 //#define compile_uhalf_inv
 #ifdef compile_uhalf_inv
 
@@ -1108,6 +1135,3 @@ void linear::uhalf_inv(const kind::f U, const FT dt, const kind::f U0 ) {
 }
 
 #endif
-
-
-

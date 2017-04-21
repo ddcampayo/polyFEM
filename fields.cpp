@@ -225,7 +225,7 @@ void set_alpha_random( Triangulation& T  ) {
 
   boost::mt19937 randomNumbergenerator( time( 0 ) );
 
-  const FT limit=1e-2;
+  const FT limit = 0.1 ;
 
   typedef boost::random::uniform_real_distribution< FT > uniform;
 

@@ -91,12 +91,17 @@ public:
   void alpha_inv(const kind::f alpha, const FT dt, const kind::f alpha0 );
   void alpha_inv_cp( const kind::f alpha, const FT dt, const kind::f alpha0 );
   void alpha_inv_cp2(const kind::f alpha, const FT dt, const kind::f alpha0 );
+  void alpha_explicit(const kind::f alpha,
+		      const FT dt,
+		      const kind::f alpha0 );
   void chempot_inv(const kind::f alpha, const FT dt, const kind::f alpha0 ) ;
 
   //  void uhalf_inv(const kind::f U, const FT dt, const kind::f U0 );
   void laplacian_v(const kind::f ff1, const kind::f ff2);
   void gradient(const kind::f fsf, const kind::f fvf, bool do_mass=true );
   void chempot(const kind::f fsf, const kind::f fsf2 );
+  void chem_pot_force(void);
+  void u_inv_od(const kind::f velocity);
   void PPE(const kind::f velocity , const FT dt,  const kind::f pressure );
   void mass_v(const kind::f vectorf );
   void mass_s(const kind::f scalarf );
