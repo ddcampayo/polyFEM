@@ -1044,12 +1044,14 @@ void linear::alpha_explicit(const kind::f alpha,
 
   VectorXd al0 = field_to_vctr( alpha0 );
 
-  //  VectorXd cp  = field_to_vctr( kind::CHEMPOT ); // + al ;
+  VectorXd cp  = field_to_vctr( kind::CHEMPOT ); // + al ;
 
-  // TODO: contaminates divU, for convenience, but another field is needed
-  laplacian_s( kind::CHEMPOT , kind::DIVU );
+  if(stiff.size()==0) fill_stiff();
+  //  if(mass.size()==0)  fill_mass();
 
-  VectorXd lapl_cp  = field_to_vctr( kind::DIVU ); // + al ;
+  VectorXd lapl_cp = stiff * cp;
+
+  mass_s(lapl_cp);
 
   vctr_to_field(  al0 + b * lapl_cp , alpha );
 

@@ -36,7 +36,7 @@ struct data_kept {
     p= fv->p();
     gradp= fv->gradp();
     vol= fv->vol();
-    force= fv->force();
+//    force= fv->force();
     cp= fv->chempot();
     gcp= fv->gradchempot();
   }
@@ -55,7 +55,7 @@ struct data_kept {
     fv->p.set( p );
     fv->gradp.set( gradp );
     fv->vol.set(vol);
-    fv->force.set( force );
+//    fv->force.set( force );
     fv->chempot.set( cp );
     fv->gradchempot.set( gcp );
   }
