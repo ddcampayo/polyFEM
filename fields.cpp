@@ -225,8 +225,10 @@ void set_alpha_random( Triangulation& T  ) {
 
   boost::mt19937 randomNumbergenerator( time( 0 ) );
 
-  const FT limit = 0.1 ;
+  //  const FT limit = 0.1 ;
 
+  FT limit = simu.v0() ;
+  
   typedef boost::random::uniform_real_distribution< FT > uniform;
 
   uniform distribution( -limit , limit );
@@ -262,10 +264,11 @@ void alpha_set_mean( Triangulation& T , const FT& mean ) {
 
   prev_mean /= NN;
 
+  FT offset = prev_mean - mean ;
   for(F_v_it fv=T.finite_vertices_begin();
       fv!=T.finite_vertices_end();
       fv++)   
-    fv->alpha.set( fv->alpha.val() - prev_mean + mean );
+    fv->alpha.set( fv->alpha.val() - offset  );
 
   return;
 
