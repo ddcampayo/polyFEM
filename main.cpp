@@ -216,7 +216,7 @@ int main() {
 #endif
 
       // comment for no move.-
-      displ=move( Tp , dt2 );
+      //     displ = move( Tp , dt2 );
 
       cout << "Iter " << iter << " , moved avg " << displ << " to half point" << endl;
 
@@ -280,18 +280,17 @@ int main() {
       cout << "Solving PPE" << endl;
 
       // comment for no move.-
-      algebra.PPE( kind::FORCE , 1 , kind:: P ); // Dt set to 1
+      //      algebra.PPE( kind::FORCE , 1 , kind:: P ); // Dt set to 1
 
-      algebra.u_inv_od(kind::U);
+      //      algebra.u_inv_od(kind::U);
 
-      zero_mean_v( Tm , kind::U);
+      //      zero_mean_v( Tm , kind::U);
 
 
-      cout << "Evolving U " << endl;
+      //      cout << "Evolving U " << endl;
 
       // comment for no move.-
-      u_new( Tm , dt2 );
-
+      //      u_new( Tm , dt2 );
       cout << "U evolved " << endl;
 
     } // iter loop
@@ -315,13 +314,12 @@ int main() {
 #endif
 
       // comment for no move.-
-    displ=move( Tp , dt );
+      //displ=move( Tp , dt );
 
 //    update_half_velocity( Tp , false ); 
 
     // comment for no move.-
-
-    update_half_velocity( Tp , is_overdamped ); 
+      //    update_half_velocity( Tp , is_overdamped ); 
 
     //    update_half_alpha( Tm );
 
