@@ -10,6 +10,7 @@
 
 extern sim_pars simu;
 
+
 void linear::save_matrices(void){ 
 
   if(stiff.size()==0) fill_stiff();
@@ -74,11 +75,13 @@ void linear::fill_stiff(void){
 
       int vj=nn->first->idx.val();
 	
-      FT ddelta = -nn->second; // sign fixed here !
+      FT ddelta = nn->second; // wrong sign here ???
 
+      // Aqui con Ada
+      
       //      cout << vi << " , " << vj << "  " << ddelta << endl;
 
-      aa.push_back( triplet(vi,vj,  ddelta ));
+      aa.push_back( triplet(vi,vj,  -ddelta ));
 
       if( (vi!=0) && (vj!=0) ) bb.push_back( triplet(vi - 1 , vj -1 ,  -ddelta ));
 
@@ -491,7 +494,7 @@ void linear::laplace_div(
   //  VectorXd div2 = mass * div1;
   int N=div1.size();
 
-  VectorXd divv = -(div1.tail( N-1 ));
+  VectorXd divv = div1.tail( N-1 );
 
   cout << "rhs vector of size " << divv.rows() << endl;
 
@@ -1042,6 +1045,32 @@ void linear::alpha_explicit(const kind::f alpha,
 
   FT b = D * dt ;
 
+  alpha_modelB( alpha, b , alpha0 ) ;
+  //alpha_modelA( alpha, b , alpha0 ) ;
+
+  return;
+
+}
+  
+void linear::alpha_modelA(const kind::f alpha,
+		  const FT b,
+		  const kind::f alpha0 ) {
+
+  
+  VectorXd al0 = field_to_vctr( alpha0 );
+
+  VectorXd cp  = field_to_vctr( kind::CHEMPOT ); // + al ;
+
+  vctr_to_field(  al0 - b * cp , alpha );
+
+  return;
+}
+
+void linear::alpha_modelB(const kind::f alpha,
+		  const FT b,
+		  const kind::f alpha0 ) {
+
+  
   VectorXd al0 = field_to_vctr( alpha0 );
 
   VectorXd cp  = field_to_vctr( kind::CHEMPOT ); // + al ;

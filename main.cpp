@@ -119,25 +119,25 @@ int main() {
   cout << "Assigning alpha to particles " << endl;
 
   
-#if defined FULL_FULL
-  {
-    Delta(Tp);
-    linear algebra_p(Tp);
-    from_mesh_full( Tm , Tp ,  algebra_p,kind::ALPHA);
-  }
-#elif defined FULL_LUMPED
-  from_mesh_lumped( Tm , Tp , kind::ALPHA);
- #elif defined FLIP
-  from_mesh(Tm , Tp , kind::ALPHA);
- #else
-  from_mesh(Tm , Tp , kind::ALPHA);
-#endif
+// #if defined FULL_FULL
+//   {
+//     Delta(Tp);
+//     linear algebra_p(Tp);
+//     from_mesh_full( Tm , Tp ,  algebra_p,kind::ALPHA);
+//   }
+// #elif defined FULL_LUMPED
+//   from_mesh_lumped( Tm , Tp , kind::ALPHA);
+//  #elif defined FLIP
+//   from_mesh(Tm , Tp , kind::ALPHA);
+//  #else
+//   from_mesh(Tm , Tp , kind::ALPHA);
+// #endif
 
   cout << "Moving info" << endl;
   move_info( Tm );
   move_info( Tp );
 
-    draw(Tm, mesh_file     , true);
+  draw(Tm, mesh_file     , true);
   draw(Tp, particle_file , true);
 
   simu.advance_time();
@@ -190,30 +190,29 @@ int main() {
     for( ; iter<max_iter ; iter++) {
 
 
-      //      cout << "Projecting U from mesh " << endl;
-      cout << "Projecting U , alpha0 from mesh " << endl;
+//       cout << "Projecting U , alpha0 from mesh " << endl;
 
-#if defined FULL_FULL
-      {
-	Delta(Tp);
-	linear algebra_p(Tp);
-	from_mesh_full_v(Tm, Tp, algebra_p , kind::U);
-	from_mesh_full  (Tm, Tp, algebra_p , kind::ALPHA0);
-	from_mesh_full  (Tm, Tp, algebra_p , kind::ALPHA);
-      }
-#elif defined FULL_LUMPED
-      from_mesh_lumped_v(Tm, Tp, kind::U);
-      from_mesh_lumped  (Tm, Tp, kind::ALPHA0);
-      from_mesh_lumped  (Tm, Tp, kind::ALPHA);
-#elif defined FLIP
-      from_mesh_v(Tm, Tp, kind::U);
-      from_mesh  (Tm, Tp, kind::ALPHA0);
-      from_mesh  (Tm, Tp, kind::ALPHA);
-#else
-      from_mesh_v(Tm, Tp, kind::U);
-      from_mesh  (Tm, Tp, kind::ALPHA0);
-      from_mesh  (Tm, Tp, kind::ALPHA);
-#endif
+// #if defined FULL_FULL
+//       {
+// 	Delta(Tp);
+// 	linear algebra_p(Tp);
+// 	from_mesh_full_v(Tm, Tp, algebra_p , kind::U);
+// 	from_mesh_full  (Tm, Tp, algebra_p , kind::ALPHA0);
+// 	from_mesh_full  (Tm, Tp, algebra_p , kind::ALPHA);
+//       }
+// #elif defined FULL_LUMPED
+//       from_mesh_lumped_v(Tm, Tp, kind::U);
+//       from_mesh_lumped  (Tm, Tp, kind::ALPHA0);
+//       from_mesh_lumped  (Tm, Tp, kind::ALPHA);
+// #elif defined FLIP
+//       from_mesh_v(Tm, Tp, kind::U);
+//       from_mesh  (Tm, Tp, kind::ALPHA0);
+//       from_mesh  (Tm, Tp, kind::ALPHA);
+// #else
+//       from_mesh_v(Tm, Tp, kind::U);
+//       from_mesh  (Tm, Tp, kind::ALPHA0);
+//       from_mesh  (Tm, Tp, kind::ALPHA);
+// #endif
 
       // comment for no move.-
       //     displ = move( Tp , dt2 );
@@ -227,25 +226,25 @@ int main() {
 
       if( (displ < max_displ) && (iter !=0) ) break;
 
-      areas(Tp);
-      quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );
+//       areas(Tp);
+//       quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );
       
-      cout << "Proj U0, alpha0 onto mesh " << endl;
+//       cout << "Proj U0, alpha0 onto mesh " << endl;
 
-#if defined FULL
-      onto_mesh_full_v(Tp,Tm,algebra,kind::UOLD);
-      onto_mesh_full  (Tp,Tm,algebra,kind::ALPHA0);
-      onto_mesh_full  (Tp,Tm,algebra,kind::ALPHA);
-#elif defined FLIP
-      flip_volumes(Tp , Tm , simu.FEMm() );
-      onto_mesh_flip_v(Tp,Tm,simu.FEMm(),kind::UOLD);
-      onto_mesh_flip  (Tp,Tm,simu.FEMm(),kind::ALPHA0);
-      onto_mesh_flip  (Tp,Tm,simu.FEMm(),kind::ALPHA);
-#else
-      onto_mesh_delta_v(Tp,Tm,kind::UOLD);
-      onto_mesh_delta  (Tp,Tm,kind::ALPHA0);
-      onto_mesh_delta  (Tp,Tm,kind::ALPHA);
-#endif
+// #if defined FULL
+//       onto_mesh_full_v(Tp,Tm,algebra,kind::UOLD);
+//       onto_mesh_full  (Tp,Tm,algebra,kind::ALPHA0);
+//       onto_mesh_full  (Tp,Tm,algebra,kind::ALPHA);
+// #elif defined FLIP
+//       flip_volumes(Tp , Tm , simu.FEMm() );
+//       onto_mesh_flip_v(Tp,Tm,simu.FEMm(),kind::UOLD);
+//       onto_mesh_flip  (Tp,Tm,simu.FEMm(),kind::ALPHA0);
+//       onto_mesh_flip  (Tp,Tm,simu.FEMm(),kind::ALPHA);
+// #else
+//       onto_mesh_delta_v(Tp,Tm,kind::UOLD);
+//       onto_mesh_delta  (Tp,Tm,kind::ALPHA0);
+//       onto_mesh_delta  (Tp,Tm,kind::ALPHA);
+// #endif
 
       // partly explicit ( unstable ? ):
       cout << "Calculating chem pot explicitely" << endl;
@@ -268,16 +267,15 @@ int main() {
 	algebra.alpha_explicit(kind::ALPHA, dt2 , kind::ALPHA0 );
       }
 
-      //      cout << "Settinf Ustar = force" << endl;
-      cout << "Getting chem pot force" << endl;
+      // cout << "Getting chem pot force" << endl;
 
-      algebra.chem_pot_force();
+      // algebra.chem_pot_force();
 
-      // substract spurious overall movement.-
+      // // substract spurious overall movement.-
       
-      zero_mean_v( Tm , kind::FORCE);
+      // zero_mean_v( Tm , kind::FORCE);
 
-      cout << "Solving PPE" << endl;
+      // cout << "Solving PPE" << endl;
 
       // comment for no move.-
       //      algebra.PPE( kind::FORCE , 1 , kind:: P ); // Dt set to 1
@@ -290,28 +288,28 @@ int main() {
       //      cout << "Evolving U " << endl;
 
       // comment for no move.-
-      //      u_new( Tm , dt2 );
-      cout << "U evolved " << endl;
+      // // NOOO  u_new( Tm , dt2 );
+      //      cout << "U evolved " << endl;
 
     } // iter loop
 
-#if defined FULL_FULL
-      {
-	Delta(Tp);
-	linear algebra_p(Tp);
-	from_mesh_full_v(Tm, Tp, algebra_p , kind::U);
-	from_mesh_full  (Tm, Tp, algebra_p , kind::ALPHA);
-      }
-#elif defined FULL_LUMPED
-      from_mesh_lumped_v(Tm, Tp, kind::U);
-      from_mesh_lumped  (Tm, Tp, kind::ALPHA);
-#elif defined FLIP
-      from_mesh_v(Tm, Tp, kind::U);
-      from_mesh  (Tm, Tp, kind::ALPHA);
-#else
-      from_mesh_v(Tm, Tp, kind::U);
-      from_mesh  (Tm, Tp, kind::ALPHA);
-#endif
+// #if defined FULL_FULL
+//       {
+// 	Delta(Tp);
+// 	linear algebra_p(Tp);
+// 	from_mesh_full_v(Tm, Tp, algebra_p , kind::U);
+// 	from_mesh_full  (Tm, Tp, algebra_p , kind::ALPHA);
+//       }
+// #elif defined FULL_LUMPED
+//       from_mesh_lumped_v(Tm, Tp, kind::U);
+//       from_mesh_lumped  (Tm, Tp, kind::ALPHA);
+// #elif defined FLIP
+//       from_mesh_v(Tm, Tp, kind::U);
+//       from_mesh  (Tm, Tp, kind::ALPHA);
+// #else
+//       from_mesh_v(Tm, Tp, kind::U);
+//       from_mesh  (Tm, Tp, kind::ALPHA);
+// #endif
 
       // comment for no move.-
       //displ=move( Tp , dt );
@@ -321,28 +319,28 @@ int main() {
     // comment for no move.-
       //    update_half_velocity( Tp , is_overdamped ); 
 
-    //    update_half_alpha( Tm );
+    update_half_alpha( Tm );
 
-    areas(Tp);
+//     areas(Tp);
 
-    quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );
+//     quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );
 
-    cout << "Proj U_t+1 , alpha_t+1 onto mesh " << endl;
+//     cout << "Proj U_t+1 , alpha_t+1 onto mesh " << endl;
 
-#if defined FULL
-    onto_mesh_full_v(Tp,Tm,algebra,kind::U);
-    onto_mesh_full  (Tp,Tm,algebra,kind::ALPHA0);
-    onto_mesh_full  (Tp,Tm,algebra,kind::ALPHA);
-#elif defined FLIP
-    flip_volumes(Tp , Tm , simu.FEMm() );
-    onto_mesh_flip_v(Tp,Tm,simu.FEMm(),kind::U);
-    onto_mesh_flip  (Tp,Tm,simu.FEMm(),kind::ALPHA0);
-    onto_mesh_flip  (Tp,Tm,simu.FEMm(),kind::ALPHA);
-#else
-    onto_mesh_delta_v(Tp,Tm,kind::U);
-    onto_mesh_delta  (Tp,Tm,kind::ALPHA);
-    onto_mesh_delta  (Tp,Tm,kind::ALPHA);
-#endif
+// #if defined FULL
+//     onto_mesh_full_v(Tp,Tm,algebra,kind::U);
+//     onto_mesh_full  (Tp,Tm,algebra,kind::ALPHA0);
+//     onto_mesh_full  (Tp,Tm,algebra,kind::ALPHA);
+// #elif defined FLIP
+//     flip_volumes(Tp , Tm , simu.FEMm() );
+//     onto_mesh_flip_v(Tp,Tm,simu.FEMm(),kind::U);
+//     onto_mesh_flip  (Tp,Tm,simu.FEMm(),kind::ALPHA0);
+//     onto_mesh_flip  (Tp,Tm,simu.FEMm(),kind::ALPHA);
+// #else
+//     onto_mesh_delta_v(Tp,Tm,kind::U);
+//     onto_mesh_delta  (Tp,Tm,kind::ALPHA);
+//     onto_mesh_delta  (Tp,Tm,kind::ALPHA);
+// #endif
 
 
     
