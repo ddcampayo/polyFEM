@@ -17,7 +17,7 @@
 //#define EXPLICIT
 
 #include"main.h"
-#include"CH_FFT.h"
+
 
 #include"sim_pars.h"
 
@@ -29,10 +29,10 @@
 
 #include"periodic.h"
 
-const FT LL=32; // length of original domain
-const FT Db=0.04; // diffusion constant
+const FT LL=10; // length of original domain
 
 Iso_rectangle domain(-LL/2, -LL/2, LL/2, LL/2);
+
 
 // TODO: the two triangulations store different things.
 //       specific bases and faces should be implemented for each
@@ -64,9 +64,6 @@ Triangulation Tp(domain); // particles
 Triangulation Tm(domain); // mesh
 
 
-void load_field_on_fft(const Triangulation& T , CH_FFT& fft  );
-void load_vels_from_fft(const CH_FFT& fft , Triangulation& T  );
-
 int main() {
 
 //  CGAL::Timer time;
@@ -93,20 +90,8 @@ int main() {
     number(Tp);
     number(Tm);
   }
-
-  int Nb=sqrt( simu.no_of_particles() + 1e-12);
-
-  // Set up fft, and calculate initial velocities:
   
-  CH_FFT fft( LL , Nb );
 
-  load_field_on_fft( Tm , fft );
-
-  fft.all_fields();
-  
-  load_vels_from_fft( fft, Tm );
-
-  
   // every step
   areas(Tp);
   quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );
@@ -133,7 +118,7 @@ int main() {
   
   cout << "Assigning alpha to particles " << endl;
 
-
+  
 #if defined FULL_FULL
   {
     Delta(Tp);
@@ -148,25 +133,11 @@ int main() {
   from_mesh(Tm , Tp , kind::ALPHA);
 #endif
 
-// #if defined FULL_FULL
-//   {
-//     Delta(Tp);
-//     linear algebra_p(Tp);
-//     from_mesh_full( Tm , Tp ,  algebra_p,kind::ALPHA);
-//   }
-// #elif defined FULL_LUMPED
-//   from_mesh_lumped( Tm , Tp , kind::ALPHA);
-//  #elif defined FLIP
-//   from_mesh(Tm , Tp , kind::ALPHA);
-//  #else
-//   from_mesh(Tm , Tp , kind::ALPHA);
-// #endif
-
   cout << "Moving info" << endl;
   move_info( Tm );
   move_info( Tp );
 
-  draw(Tm, mesh_file     , true);
+    draw(Tm, mesh_file     , true);
   draw(Tp, particle_file , true);
 
   simu.advance_time();
@@ -219,30 +190,33 @@ int main() {
     for( ; iter<max_iter ; iter++) {
 
 
-      //      cout << "Projecting U , alpha0 from mesh " << endl;
-
-//       cout << "Projecting U , alpha0 from mesh " << endl;
+      //      cout << "Projecting U from mesh " << endl;
+      cout << "Projecting U , alpha0 from mesh " << endl;
 
 #if defined FULL_FULL
       {
 	Delta(Tp);
 	linear algebra_p(Tp);
+	from_mesh_full_v(Tm, Tp, algebra_p , kind::U);
 	from_mesh_full  (Tm, Tp, algebra_p , kind::ALPHA0);
 	from_mesh_full  (Tm, Tp, algebra_p , kind::ALPHA);
       }
 #elif defined FULL_LUMPED
+      from_mesh_lumped_v(Tm, Tp, kind::U);
       from_mesh_lumped  (Tm, Tp, kind::ALPHA0);
       from_mesh_lumped  (Tm, Tp, kind::ALPHA);
 #elif defined FLIP
+      from_mesh_v(Tm, Tp, kind::U);
       from_mesh  (Tm, Tp, kind::ALPHA0);
       from_mesh  (Tm, Tp, kind::ALPHA);
 #else
+      from_mesh_v(Tm, Tp, kind::U);
       from_mesh  (Tm, Tp, kind::ALPHA0);
       from_mesh  (Tm, Tp, kind::ALPHA);
 #endif
 
       // comment for no move.-
-      displ = move( Tp , dt2 );
+      displ=move( Tp , dt2 );
 
       cout << "Iter " << iter << " , moved avg " << displ << " to half point" << endl;
 
@@ -255,7 +229,7 @@ int main() {
 
       areas(Tp);
       quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );
-       
+      
       cout << "Proj U0, alpha0 onto mesh " << endl;
 
 #if defined FULL
@@ -273,20 +247,46 @@ int main() {
       onto_mesh_delta  (Tp,Tm,kind::ALPHA);
 #endif
 
-      load_field_on_fft( Tm , fft );
+      // partly explicit ( unstable ? ):
+      cout << "Calculating chem pot explicitely" << endl;
+
+	// inner iter loop
+
+      for( int alpha_it=0 ; alpha_it < 1 ; alpha_it++) { // max_iter ; alpha_it++) {
+
+	cout << "Alpha loop iter " << alpha_it << endl;
+
+	if (iter==0)
+	  algebra.chempot( kind::ALPHA0, kind::CHEMPOT );
+	else
+	  algebra.chempot( kind::ALPHA , kind::CHEMPOT );
+
+	  //	  algebra.chempot( kind::ALPHA , kind::CHEMPOT );
+
+	//	algebra.alpha_inv_cp(kind::ALPHA, dt2 , kind::ALPHA0 );
+
+	algebra.alpha_explicit(kind::ALPHA, dt2 , kind::ALPHA0 );
+      }
+
+      //      cout << "Settinf Ustar = force" << endl;
+      cout << "Getting chem pot force" << endl;
+
+      algebra.chem_pot_force();
+
+      // substract spurious overall movement.-
       
-      fft.all_fields();
+      zero_mean_v( Tm , kind::FORCE);
 
-      FT b = Db*dt2;
+      cout << "Solving PPE" << endl;
 
-      fft.evolve( b );
-      
-      load_vels_from_fft( fft, Tm );
+      // comment for no move.-
+      algebra.PPE( kind::FORCE , 1 , kind:: P ); // Dt set to 1
 
+      algebra.u_inv_od(kind::U);
 
-      // // substract spurious overall movement.-      
+      zero_mean_v( Tm , kind::U);
 
-      //      zero_mean_v( Tm , kind::FORCE);
+      cout << "new U computed " << endl;
 
     } // iter loop
 
@@ -309,28 +309,21 @@ int main() {
 #endif
 
       // comment for no move.-
-      displ=move( Tp , dt );
+    displ=move( Tp , dt );
 
-      //    update_half_velocity( Tp , false ); 
+//    update_half_velocity( Tp , false ); 
 
-      // comment for no move.-
-      //    update_half_velocity( Tp , is_overdamped ); 
+    // comment for no move.-
 
-      update_half_alpha( Tm );
+    update_half_velocity( Tp , is_overdamped ); 
 
+    //    update_half_alpha( Tm );
 
-      areas(Tp);
+    areas(Tp);
 
-      quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );
+    quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );
 
-      cout << "Proj U_t+1 , alpha_t+1 onto mesh " << endl;
-
-     areas(Tp);
-
-     quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );
-
-     cout << "Proj U_t+1 , alpha_t+1 onto mesh " << endl;
-
+    cout << "Proj U_t+1 , alpha_t+1 onto mesh " << endl;
 
 #if defined FULL
     onto_mesh_full_v(Tp,Tm,algebra,kind::U);
@@ -348,6 +341,7 @@ int main() {
 #endif
 
 
+    
     if(simu.current_step()%simu.every()==0) {
       draw(Tm, mesh_file     , true);
       draw(Tp, particle_file , true);
@@ -409,9 +403,6 @@ void create(void) {
 
       points_on_square_grid_2(side/2.0, N, std::back_inserter(points),Creator());;
 
-      //      for(int i = 0 ; i < Nb ; ++i )
-	
-      
       if(simu.perturb()) {
 	CGAL::perturb_points_2(
 			       points.begin(), points.end(),
@@ -425,6 +416,7 @@ void create(void) {
 
     Tp.insert(points.begin(), points.end());
 
+    
     points.clear();
 
     // int Nb = sqrt(N + 1e-12);
@@ -447,10 +439,10 @@ void create(void) {
 
     points_on_square_grid_2(side/2.0, Nm , std::back_inserter(points),Creator());;
 
-    // // TODO: perfectly regular square grids are not too good, in fact
-    // CGAL::perturb_points_2(
-    // 			   points.begin(), points.end(),
-    // 			   0.001* spacing );
+    // TODO: perfectly regular square grids are not too good, in fact
+    CGAL::perturb_points_2(
+    			   points.begin(), points.end(),
+    			   0.001* spacing );
 
     Tm.insert(points.begin(), points.end());
 
@@ -540,100 +532,17 @@ void create(void) {
 }
 
 
-void load_field_on_fft( const Triangulation& T , CH_FFT& fft  ) {
-  for(F_v_it vit=T.vertices_begin();
-      vit != T.vertices_end();
-      vit++) {
-
-    int nx = vit->nx.val();
-    int ny = vit->ny.val();
-
-    // "right" ordering 
-    // int i = ny; //  - Nb /2.0 ;
-    // int j = nx  - Nb /2.0 ;
-
-    // "wrong" ordering
-    int i = nx;
-    int j = ny;
-    
-    FT val =  vit->alpha0.val();
-
-    fft.set_f(i,j, val);
-
-  }
-
-  return;
-}
-
-
-
-void load_vels_from_fft(const CH_FFT& fft , Triangulation& T  ) {
-
-  c_array vx = fft.field_vel_x();
-  c_array vy = fft.field_vel_y();
-
-  for(F_v_it vit=T.vertices_begin();
-      vit != T.vertices_end();
-      vit++) {
-
-    int nx = vit->nx.val();
-    int ny = vit->ny.val();
-
-    // "right" ordering 
-    // int i = ny; //  - Nb /2.0 ;
-    // int j = nx  - Nb /2.0 ;
-
-    // "wrong" ordering
-    int i = nx;
-    int j = ny;
-
-    vit->U.set( Vector_2( real(vx(i,j)) , real(vy(i,j)) ) );
-  }
-
-  return;
-}
-
-
 
 void number(Triangulation& T) {
 
-  int idx=0;
+  int i=0;
 
-  int N=simu.no_of_particles();
-
-  int Nb=sqrt(N + 1e-12);
-    
-  FT spacing=LL/FT(Nb+0);
-  FT side=LL-1*spacing;
-
-  
   for(F_v_it vit=T.vertices_begin();
       vit != T.vertices_end();
       vit++) {
     //    vit->indx.set(i); //or
-    vit->idx = idx;
-
-    FT x = vit->point().x() + side/2.0;
-    FT y = vit->point().y() + side/2.0;
-
-    int i = rint(  FT(Nb) * x / LL );//+ 0.5);
-    int j = rint(  FT(Nb) * y / LL );//+ 0.5);
-
-    //    --i; --j;
-    
-    vit->nx = i;
-    vit->ny = j;
-
-    // cout << idx
-    // 	 << "  " << i
-    //   	 << "  " << j
-    //   	 << "  " << x
-    //   	 << "  " << y
-    // 	 << endl;
-
-
-    ++idx;
-
+    vit->idx=i;
+    ++i;
   }
 
   return;

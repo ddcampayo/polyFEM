@@ -225,7 +225,7 @@ void set_alpha_random( Triangulation& T  ) {
 
   boost::mt19937 randomNumbergenerator( time( 0 ) );
 
-  //  const FT limit = 0.1 ;
+  //const FT limit = 0.1 ;
 
   FT limit = simu.v0() ;
   
