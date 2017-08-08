@@ -129,6 +129,7 @@ int main() {
   
   cout << "Assigning alpha to particles " << endl;
 
+<<<<<<< HEAD
 #if defined FULL_FULL
   {
     Delta(Tp);
@@ -142,6 +143,22 @@ int main() {
  #else
   from_mesh(Tm , Tp , kind::ALPHA);
 #endif
+=======
+  
+// #if defined FULL_FULL
+//   {
+//     Delta(Tp);
+//     linear algebra_p(Tp);
+//     from_mesh_full( Tm , Tp ,  algebra_p,kind::ALPHA);
+//   }
+// #elif defined FULL_LUMPED
+//   from_mesh_lumped( Tm , Tp , kind::ALPHA);
+//  #elif defined FLIP
+//   from_mesh(Tm , Tp , kind::ALPHA);
+//  #else
+//   from_mesh(Tm , Tp , kind::ALPHA);
+// #endif
+>>>>>>> b441b2b4dbd73dd59f1e84f515aeacf6974d9e35
 
   cout << "Moving info" << endl;
   move_info( Tm );
@@ -200,7 +217,11 @@ int main() {
     for( ; iter<max_iter ; iter++) {
 
 
+<<<<<<< HEAD
       //      cout << "Projecting U , alpha0 from mesh " << endl;
+=======
+//       cout << "Projecting U , alpha0 from mesh " << endl;
+>>>>>>> b441b2b4dbd73dd59f1e84f515aeacf6974d9e35
 
 // #if defined FULL_FULL
 //       {
@@ -236,10 +257,17 @@ int main() {
 
       if( (displ < max_displ) && (iter !=0) ) break;
 
+<<<<<<< HEAD
       //      areas(Tp);
       //      quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );
       
       //      cout << "Proj U0, alpha0 onto mesh " << endl;
+=======
+//       areas(Tp);
+//       quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );
+      
+//       cout << "Proj U0, alpha0 onto mesh " << endl;
+>>>>>>> b441b2b4dbd73dd59f1e84f515aeacf6974d9e35
 
 // #if defined FULL
 //       onto_mesh_full_v(Tp,Tm,algebra,kind::UOLD);
@@ -277,16 +305,28 @@ int main() {
 	algebra.alpha_explicit(kind::ALPHA, dt2 , kind::ALPHA0 );
       }
 
+<<<<<<< HEAD
 
       //      cout << "Getting chem pot force" << endl;
       //      algebra.chem_pot_force();
 
+=======
+      // cout << "Getting chem pot force" << endl;
 
-      // substract spurious overall movement.-
+      // algebra.chem_pot_force();
+>>>>>>> b441b2b4dbd73dd59f1e84f515aeacf6974d9e35
+
+      // // substract spurious overall movement.-
       
+<<<<<<< HEAD
       //      zero_mean_v( Tm , kind::FORCE);
 
       //      cout << "Solving PPE" << endl;
+=======
+      // zero_mean_v( Tm , kind::FORCE);
+
+      // cout << "Solving PPE" << endl;
+>>>>>>> b441b2b4dbd73dd59f1e84f515aeacf6974d9e35
 
       // comment for no move.-
       //      algebra.PPE( kind::FORCE , 1 , kind:: P ); // Dt set to 1
@@ -298,7 +338,11 @@ int main() {
       //      cout << "Evolving U " << endl;
 
       // comment for no move.-
+<<<<<<< HEAD
       //      u_new( Tm , dt2 );
+=======
+      // // NOOO  u_new( Tm , dt2 );
+>>>>>>> b441b2b4dbd73dd59f1e84f515aeacf6974d9e35
       //      cout << "U evolved " << endl;
 
     } // iter loop
@@ -329,13 +373,21 @@ int main() {
     // comment for no move.-
       //    update_half_velocity( Tp , is_overdamped ); 
 
-    //    update_half_alpha( Tm );
+    update_half_alpha( Tm );
 
+<<<<<<< HEAD
     // areas(Tp);
 
     // quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );
 
     // cout << "Proj U_t+1 , alpha_t+1 onto mesh " << endl;
+=======
+//     areas(Tp);
+
+//     quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );
+
+//     cout << "Proj U_t+1 , alpha_t+1 onto mesh " << endl;
+>>>>>>> b441b2b4dbd73dd59f1e84f515aeacf6974d9e35
 
 // #if defined FULL
 //     onto_mesh_full_v(Tp,Tm,algebra,kind::U);

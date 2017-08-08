@@ -127,5 +127,13 @@ public:
   void  vctr_to_field(const VectorXd& vv, const kind::f scalarf ) ;
   void vctr_to_vfield(const VectorXd& vv, const kind::f vectorf, const int comp );
 
+  void alpha_modelA(const kind::f alpha,
+		    const FT b,
+		    const kind::f alpha0 ) ;
+
+  void alpha_modelB(const kind::f alpha,
+		    const FT b,
+		    const kind::f alpha0 ) ;
+
 
 };
