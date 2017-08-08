@@ -264,11 +264,6 @@ int main() {
 
 	zero_mean_v( Tp , kind::U);
 	
-	//	cout << "Evolving U " << endl;
-
-	// comment for no move.-
-	//	u_new( Tp , dt2 );
-
 	cout << "U evolved " << endl;
 
     } // iter loop

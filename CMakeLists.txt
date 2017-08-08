@@ -43,6 +43,12 @@ find_library(LAPACK_LIB NAMES lapack)
 
 find_library(BLAS_LIB NAMES blas)
 
+find_library(FFTW_LIB NAMES fftw3)
+find_library(FFTW_OMP_LIB NAMES fftw3_omp)
+
+# -lfftw3 -lfftw3_omp
+
+
 #find_library(SS_LIB NAMES suitesparseconfig)
 
 include_directories( ${CHOLMOD_INCLUDES})
@@ -51,7 +57,9 @@ include_directories( ${CHOLMOD_INCLUDES})
 
 include( CGAL_CreateSingleSourceCGALProgram )
 
-create_single_source_cgal_program("main.cpp" "linear.cpp"   "gradient.cpp"  "nabla.cpp" "quad_coeffs.cpp" "periodic.cpp" "fields.cpp" "Delta.cpp" "move.cpp" "draw.cpp" "onto_from_mesh.cpp" "volumes.cpp" )
+create_single_source_cgal_program("main.cpp" "linear.cpp"   "gradient.cpp"  "nabla.cpp" "quad_coeffs.cpp" "periodic.cpp" "fields.cpp" "Delta.cpp" "move.cpp" "draw.cpp" "onto_from_mesh.cpp" "volumes.cpp" "CH_FFT.cpp" "fftwpp/fftw++.cc" )
+
+target_link_libraries(main ${FFTW_LIB} ${FFTW_OMP_LIB})
 
 #target_link_libraries(main ${CHOLMOD_LIBRARIES} ${LAPACK_LIB} ${BLAS_LIB} ${SS_LIB}) 
 #target_link_libraries(main ${CHOLMOD_LIBRARIES} ${LAPACK_LIB} ${BLAS_LIB} )

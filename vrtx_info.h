@@ -154,6 +154,8 @@ public:
   vector_field force;
 
   field<int> idx;       // an index
+  field<int> nx;       // x index
+  field<int> ny;       // y index
 
   field<bool> moved;       // whether it's moved or not
 

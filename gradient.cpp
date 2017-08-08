@@ -59,7 +59,7 @@ void linear::chempot(const kind::f scalarf, const kind::f chempot) {
 
   //  VectorXd al3 = al.array().pow(3);
 
-  VectorXd al3 = al.array() * al.array().pow(2); // To make sure signs are correct
+  VectorXd al3 = al.array() * al.array().square(); // To make sure signs are correct
 
   VectorXd al_al3 = al3 - al ;  //al.array() * ( -1 + al.array() * al.array() ) ;
 
