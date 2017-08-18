@@ -31,7 +31,7 @@ class CH_FFT {
   uint nx,ny; // size of system
 
   // TODO: read this
-  const static FT L_SD = 1.0;
+  const static FT L_SD = 62.0;
   const static  bool shift=false;
   const static bool quiet=false;
   const size_t align;

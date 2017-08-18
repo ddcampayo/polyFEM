@@ -1045,8 +1045,8 @@ void linear::alpha_explicit(const kind::f alpha,
 
   FT b = D * dt ;
 
-  alpha_modelB( alpha, b , alpha0 ) ;
-  //alpha_modelA( alpha, b , alpha0 ) ;
+  //alpha_modelB( alpha, b , alpha0 ) ;
+  alpha_modelA( alpha, b , alpha0 ) ;
 
   return;
 

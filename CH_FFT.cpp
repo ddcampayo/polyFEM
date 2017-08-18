@@ -474,7 +474,7 @@ void CH_FFT::histogram(const std::string& name,
   // }
 
   std::stringstream  namefile;
-  namefile << "histo_" << name << "_" << time << ".dat";
+  namefile << time << "/histo_" << name << "_" << time << ".dat";
 
   //  cout << "writing on file : " << namefile.str() << endl;
 

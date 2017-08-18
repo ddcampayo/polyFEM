@@ -29,7 +29,7 @@
 
 #include"periodic.h"
 
-const FT LL=32; // length of original domain
+const FT LL=512; // length of original domain
 const FT Db=0.04; // diffusion constant
 
 Iso_rectangle domain(-LL/2, -LL/2, LL/2, LL/2);
@@ -119,10 +119,10 @@ int main() {
 
   cout << "Setting up diff ops " << endl;
 
-  if(simu.create_points()) {
-    nabla(Tm);
-    Delta(Tm);
-  }
+//  if(simu.create_points()) {
+//    nabla(Tm);
+//    Delta(Tm);
+//  }
 
   const std::string mesh_file("mesh.dat");
   const std::string particle_file("particles.dat");
@@ -136,7 +136,7 @@ int main() {
 
 #if defined FULL_FULL
   {
-    Delta(Tp);
+//    Delta(Tp);
     linear algebra_p(Tp);
     from_mesh_full( Tm , Tp ,  algebra_p,kind::ALPHA);
   }
@@ -225,7 +225,7 @@ int main() {
 
 #if defined FULL_FULL
       {
-	Delta(Tp);
+//	Delta(Tp);
 	linear algebra_p(Tp);
 	from_mesh_full  (Tm, Tp, algebra_p , kind::ALPHA0);
 	from_mesh_full  (Tm, Tp, algebra_p , kind::ALPHA);
@@ -292,7 +292,7 @@ int main() {
 
 #if defined FULL_FULL
       {
-	Delta(Tp);
+//	Delta(Tp);
 	linear algebra_p(Tp);
 	from_mesh_full_v(Tm, Tp, algebra_p , kind::U);
 	from_mesh_full  (Tm, Tp, algebra_p , kind::ALPHA);
