@@ -29,7 +29,7 @@
 
 #include"periodic.h"
 
-const FT LL=32; // length of original domain
+const FT LL=512; // length of original domain
 const FT Db=0.04; // diffusion constant
 
 Iso_rectangle domain(-LL/2, -LL/2, LL/2, LL/2);
@@ -368,6 +368,7 @@ int main() {
     if(simu.current_step()%simu.every()==0) {
       draw(Tm, mesh_file     , true);
       draw(Tp, particle_file , true);
+      fft.histogram( "phi", simu.time() , fft.field_fq() );
     }
 
     log_file
