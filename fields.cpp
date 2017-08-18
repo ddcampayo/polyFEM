@@ -214,6 +214,27 @@ void set_alpha_under_cos( Triangulation& T ) {
 
 }
 
+void set_alpha_cos( Triangulation& T  ) {
+
+  FT amp = simu.v0() ;
+  
+  for(F_v_it fv=T.finite_vertices_begin();
+      fv!=T.finite_vertices_end();
+      fv++) {
+    FT x=fv->point().x();
+    FT y=fv->point().y();
+
+
+    fv->alpha.set( amp * field_cos(x) );
+  }
+  
+  alpha_set_mean( T, 0 );
+
+  return;
+
+}
+
+
 #include <ctime>
 
 #include <boost/random/mersenne_twister.hpp>

@@ -1,12 +1,12 @@
 #!/usr/bin/python
 
-LL=10
+LL=32
 
 import pylab as pl
 
 pl.figure(figsize=(8,8))
 
-skip=1000
+skip=1
 begin=0000
 end=1000000
 limits=1
@@ -20,7 +20,7 @@ for n in range(begin,end+skip,skip):
     xm=dtm[:,0]; ym=dtm[:,1];  pm=dtm[:,5];  vxm=dtm[:,8]; vym=dtm[:,9]; alm=dtm[:,4]
 
 #    pl.scatter( xm , ym , c=alm, s=80, vmin= -limits , vmax= limits)
-    pl.scatter( xm , ym , c=alm, s=80 )
+    pl.scatter( xm , ym , c=alm, s=40 )
 
     pl.xlim([ -LL/2 , LL/2 ])
     pl.ylim([ -LL/2 , LL/2 ])

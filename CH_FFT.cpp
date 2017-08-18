@@ -265,13 +265,37 @@ void CH_FFT::random( void )
 
 }
 
+
+void CH_FFT::set_f(const c_array& ff) {
+
+  for(unsigned int i=0; i < nx; ++i)
+    for(unsigned int j=0; j < ny; ++j)
+      fr(i,j) = ff(i,j);
+
+  freq_scramble( fr );
+
+  Forward2_f.fft( fr , f );
+  
+  Forward2_f.Normalize( f );
+
+  freq_scramble( fr );
+
+  return;
+  
+
+}
+
+
 void CH_FFT::init(void)
 {
-  for(uint i=0; i < nx; ++i)
-    //    q_y( i ) = freq_pref * ( nx / 2.0  - FT(i) ) ;
-    q_y( i ) = freq_pref * (  FT(i) - nx /2.0 ) ;
+  for(uint i=0; i < nx; ++i) // {
+    q_y( i ) = freq_pref * ( nx / 2.0  - FT(i) ) ;
+  //q_y( i ) = freq_pref * (  FT(i) - nx /2.0 ) ;
 
-  for(uint j=0; j < ny; ++j)
+  //   cout << i  << "  " <<  q_y( i ) << endl;
+  // }
+
+    for(uint j=0; j < ny; ++j)
     q_x( j ) = freq_pref *  ( FT(j)  - ny /2.0) ;
 
 
@@ -279,9 +303,6 @@ void CH_FFT::init(void)
     for(uint j=0; j < ny; ++j)
       //      FT q_x = freq_pref *  ( FT(j)  - ny /2.0) ;
       q2(i,j) = q_x(j) * q_x(j) + q_y(i) * q_y(i) ;
-
-
-  
   
 }  
   
@@ -474,7 +495,7 @@ void CH_FFT::histogram(const std::string& name,
   // }
 
   std::stringstream  namefile;
-  namefile << time << "/histo_" << name << "_" << time << ".dat";
+  namefile << "histo_" << name << "_" << time << ".dat";
 
   //  cout << "writing on file : " << namefile.str() << endl;
 

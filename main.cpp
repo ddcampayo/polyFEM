@@ -29,7 +29,7 @@
 
 #include"periodic.h"
 
-const FT LL=512; // length of original domain
+const FT LL=32; // length of original domain
 const FT Db=0.04; // diffusion constant
 
 Iso_rectangle domain(-LL/2, -LL/2, LL/2, LL/2);
@@ -64,8 +64,8 @@ Triangulation Tp(domain); // particles
 Triangulation Tm(domain); // mesh
 
 
-void load_field_on_fft(const Triangulation& T , CH_FFT& fft  );
-void load_vels_from_fft(const CH_FFT& fft , Triangulation& T  );
+void load_alpha_on_fft(const Triangulation& T , CH_FFT& fft  );
+void load_fields_from_fft(const CH_FFT& fft , Triangulation& T  );
 
 int main() {
 
@@ -87,7 +87,8 @@ int main() {
     cout << "Creating alpha field " << endl;
     
     set_alpha_random(  Tm ) ;
-
+    //set_alpha_cos( Tm );
+    
     cout << "Numbering particles " << endl;
 
     number(Tp);
@@ -100,12 +101,27 @@ int main() {
   
   CH_FFT fft( LL , Nb );
 
-  load_field_on_fft( Tm , fft );
+  load_alpha_on_fft( Tm , fft );
 
   fft.all_fields();
-  
-  load_vels_from_fft( fft, Tm );
 
+  fft.draw( "phi", 0, fft.field_f() );
+
+  fft.draw( "mu", 0, fft.field_mu() );
+
+  fft.draw( "grad_mu_x", 0, fft.field_grad_mu_x() );
+
+  fft.draw( "grad_mu_y", 0, fft.field_grad_mu_y() );
+
+  fft.draw( "force_x", 0, fft.field_force_x() );
+
+  fft.draw( "force_y", 0, fft.field_force_y() );
+
+  fft.draw( "vel_x", 0, fft.field_vel_x() );
+
+  fft.draw( "vel_y", 0, fft.field_vel_y() );
+  
+  load_fields_from_fft( fft, Tm );
   
   // every step
   areas(Tp);
@@ -119,24 +135,24 @@ int main() {
 
   cout << "Setting up diff ops " << endl;
 
-//  if(simu.create_points()) {
-//    nabla(Tm);
-//    Delta(Tm);
-//  }
+  if(simu.create_points()) {
+    nabla(Tm);
+    Delta(Tm);
+  }
 
   const std::string mesh_file("mesh.dat");
   const std::string particle_file("particles.dat");
 
-  // step 0 draw.-
-    draw(Tm, mesh_file     , true);
-    draw(Tp, particle_file , true);
+  // // step 0 draw.-
+  //   draw(Tm, mesh_file     , true);
+  //   draw(Tp, particle_file , true);
   
   cout << "Assigning alpha to particles " << endl;
 
 
 #if defined FULL_FULL
   {
-//    Delta(Tp);
+    Delta(Tp);
     linear algebra_p(Tp);
     from_mesh_full( Tm , Tp ,  algebra_p,kind::ALPHA);
   }
@@ -169,6 +185,8 @@ int main() {
   draw(Tm, mesh_file     , true);
   draw(Tp, particle_file , true);
 
+  //  return 1;
+  
   simu.advance_time();
   simu.next_step();
 
@@ -225,7 +243,7 @@ int main() {
 
 #if defined FULL_FULL
       {
-//	Delta(Tp);
+	Delta(Tp);
 	linear algebra_p(Tp);
 	from_mesh_full  (Tm, Tp, algebra_p , kind::ALPHA0);
 	from_mesh_full  (Tm, Tp, algebra_p , kind::ALPHA);
@@ -273,17 +291,16 @@ int main() {
       onto_mesh_delta  (Tp,Tm,kind::ALPHA);
 #endif
 
-      load_field_on_fft( Tm , fft );
-      
-      fft.all_fields();
+      load_alpha_on_fft( Tm , fft );
 
+      fft.all_fields();
+  
       FT b = Db*dt2;
 
       fft.evolve( b );
       
-      load_vels_from_fft( fft, Tm );
-
-
+      load_fields_from_fft( fft, Tm );
+  
       // // substract spurious overall movement.-      
 
       //      zero_mean_v( Tm , kind::FORCE);
@@ -292,7 +309,7 @@ int main() {
 
 #if defined FULL_FULL
       {
-//	Delta(Tp);
+	Delta(Tp);
 	linear algebra_p(Tp);
 	from_mesh_full_v(Tm, Tp, algebra_p , kind::U);
 	from_mesh_full  (Tm, Tp, algebra_p , kind::ALPHA);
@@ -540,7 +557,14 @@ void create(void) {
 }
 
 
-void load_field_on_fft( const Triangulation& T , CH_FFT& fft  ) {
+void load_alpha_on_fft( const Triangulation& T , CH_FFT& fft  ) {
+
+  int Nb = fft.Nx();
+
+  size_t align=fft.alignment();
+
+  c_array al( Nb , Nb , align );
+
   for(F_v_it vit=T.vertices_begin();
       vit != T.vertices_end();
       vit++) {
@@ -549,28 +573,34 @@ void load_field_on_fft( const Triangulation& T , CH_FFT& fft  ) {
     int ny = vit->ny.val();
 
     // "right" ordering 
-    // int i = ny; //  - Nb /2.0 ;
-    // int j = nx  - Nb /2.0 ;
+    int i = ( Nb - 1 ) - ny ;
+    int j = nx;
 
     // "wrong" ordering
-    int i = nx;
-    int j = ny;
+    // int i = nx;
+    // int j = ny;
     
-    FT val =  vit->alpha0.val();
+//    FT val =  vit->alpha0.val();
+    FT val =  vit->alpha.val();
 
-    fft.set_f(i,j, val);
+    al(i,j) = val;
 
   }
 
+  fft.set_f( al );
+  
   return;
 }
 
 
 
-void load_vels_from_fft(const CH_FFT& fft , Triangulation& T  ) {
+void load_fields_from_fft(const CH_FFT& fft , Triangulation& T  ) {
+
+  int Nb = fft.Nx();
 
   c_array vx = fft.field_vel_x();
   c_array vy = fft.field_vel_y();
+  c_array al = fft.field_f();
 
   for(F_v_it vit=T.vertices_begin();
       vit != T.vertices_end();
@@ -580,14 +610,18 @@ void load_vels_from_fft(const CH_FFT& fft , Triangulation& T  ) {
     int ny = vit->ny.val();
 
     // "right" ordering 
-    // int i = ny; //  - Nb /2.0 ;
-    // int j = nx  - Nb /2.0 ;
+    int i = ( Nb - 1 ) - ny ;
+    int j = nx;
 
     // "wrong" ordering
-    int i = nx;
-    int j = ny;
+    // int i = nx;
+    // int j = ny;
 
     vit->U.set( Vector_2( real(vx(i,j)) , real(vy(i,j)) ) );
+
+    vit->alpha.set( real( al(i,j) ) );
+
+    //  TODO: return more fields (chem pot, pressure, force, etc)
   }
 
   return;

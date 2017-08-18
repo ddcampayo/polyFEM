@@ -12,11 +12,13 @@ def grid(x, y, z , resX=100, resY=100):
 
 pl.figure(figsize=(8,8))
 
-skip=20
+skip=1
 #path='timings_full/'
 path='./'
 
-for n in range(0,400+skip,skip):
+LL=32.0
+
+for n in range(0,2000000+skip,skip):
     pl.clf()
  #   dtm=pl.loadtxt(path+str(n)+'/particles.dat')
     dtm=pl.loadtxt(path+str(n)+'/mesh.dat')
@@ -26,9 +28,9 @@ for n in range(0,400+skip,skip):
 #    dt2=pl.loadtxt(path+str(n)+'/mesh.dat')
     X, Y, Z = grid(xm, ym, alm)
 
-    pl.contourf( X,Y,Z,[-1,0.45,0.55,2])
+    pl.contourf( X,Y,Z,[-0.2,-0.1,0,0.1,0.2])
 
-    pl.xlim([-0.7,0.7])
-    pl.ylim([-0.7,0.7])
+    pl.xlim([-LL/2.0 , LL/2.0 ])
+    pl.ylim([-LL/2.0 , LL/2.0 ])
 #    pl.colorbar(ticks=[0.45,0.55])
     pl.savefig('snap'+str(n/skip))

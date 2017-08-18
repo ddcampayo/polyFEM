@@ -31,7 +31,7 @@ class CH_FFT {
   uint nx,ny; // size of system
 
   // TODO: read this
-  const static FT L_SD = 62.0;
+  const static FT L_SD = 1.0;
   const static  bool shift=false;
   const static bool quiet=false;
   const size_t align;
@@ -46,7 +46,7 @@ class CH_FFT {
 
  CH_FFT(const FT L_, const uint nnx) :
   L(L_), nx(nnx), ny(nnx),
-    freq_pref(2*M_PI / L),
+    freq_pref( 2 * M_PI / L ),
     align(sizeof(Complex)),
     fr( nx,ny,align ),
     f( nx,ny,align ),
@@ -109,6 +109,8 @@ class CH_FFT {
     return;
   }
 
+  void set_f(const c_array& ); 
+  
   c_array field_f() const {return fr;}
   c_array field_fq() const {return f;}
   c_array field_mu() const {return mu_r;}
@@ -119,6 +121,8 @@ class CH_FFT {
   c_array field_vel_x() const {return v_x_r;}
   c_array field_vel_y() const {return v_y_r;}
 
+  int Nx() const {return nx;}
+  size_t alignment() const {return align;}
 
  private:
 
