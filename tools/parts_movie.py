@@ -6,7 +6,7 @@ import pylab as pl
 
 pl.figure(figsize=(8,8))
 
-skip=10
+skip=1
 begin=0000
 end=1000000
 limits=1

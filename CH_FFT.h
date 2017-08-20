@@ -31,7 +31,8 @@ class CH_FFT {
   uint nx,ny; // size of system
 
   // TODO: read this
-  const static FT L_SD = 6.25;
+//  const static FT L_SD = 62.5;  // realistic value
+  const static FT L_SD = 1.25;  // hydro regime
   const static  bool shift=false;
   const static bool quiet=false;
   const size_t align;

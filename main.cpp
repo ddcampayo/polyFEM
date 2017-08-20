@@ -368,12 +368,12 @@ int main() {
     if(simu.current_step()%simu.every()==0) {
       draw(Tm, mesh_file     , true);
       draw(Tp, particle_file , true);
-      fft.histogram( "phi", simu.time() , fft.field_fq() );
+      fft.histogram( "phi", simu.current_step() , fft.field_fq() );
     }
 
     log_file
       << simu.current_step() << "  "
-      <<  simu.time() << "  " ;
+      << simu.time() << "  " ;
 
     // integrals( Tp , log_file);     log_file << "  ";
     // fidelity(  Tp , log_file );    log_file << endl;

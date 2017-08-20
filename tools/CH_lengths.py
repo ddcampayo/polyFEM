@@ -1,15 +1,15 @@
 #!/usr/bin/python
 from scipy import integrate
 
-LL=128
-NN=512
+#LL=128
+#NN=512
 
 import pylab as pl
 
 pl.figure(figsize=(8,8))
 
-skip=100
-begin=0000
+skip=1
+begin=0
 end=100000
 limits=1
 #path='timings_full/'
@@ -19,7 +19,8 @@ path='./'
 
 for n in range(begin,end+skip,skip):
     pl.clf()
-    dt=pl.loadtxt('histo_phi_'+str(n)+'.dat')
+#    dt=pl.loadtxt(str(n)+'/histo_phi_'+str(n)+'.dat')
+    dt=pl.loadtxt(str(n)+'/histo_phi.dat')
 
     qq=dt[:,0]
     ff=dt[:,1]
