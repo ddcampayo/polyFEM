@@ -29,7 +29,7 @@
 
 #include"periodic.h"
 
-const FT LL=128; // length of original domain
+const FT LL=64; // length of original domain
 const FT Db=0.04; // diffusion constant
 
 Iso_rectangle domain(-LL/2, -LL/2, LL/2, LL/2);
