@@ -3,6 +3,12 @@
 // plus, correction to quadratic consistency
 // periodic boundary conditions
 
+// Cahn-Hilliard solver, overdamped regime, reduced units
+// check "D" in linear::chempot_inv for (I think) the only
+// reduced parameter
+
+// projected to and from mesh
+
 #include <CGAL/Timer.h>
 
 // write out matrices
@@ -11,6 +17,7 @@
 //#define EXPLICIT
 
 #include"main.h"
+#include"CH_FFT.h"
 
 #include"sim_pars.h"
 
@@ -22,10 +29,10 @@
 
 #include"periodic.h"
 
-const FT LL=10; // length of original domain
+const FT LL=128; // length of original domain
+const FT Db=0.04; // diffusion constant
 
 Iso_rectangle domain(-LL/2, -LL/2, LL/2, LL/2);
-
 
 // TODO: the two triangulations store different things.
 //       specific bases and faces should be implemented for each
@@ -48,8 +55,17 @@ sim_pars simu;
 
 #include"onto_from_mesh.h"
 
+
+
+//const Eigen::IOFormat OctaveFmt(Eigen::StreamPrecision, 0, ", ", ";\n", "", "", "[", "];");
+
+
 Triangulation Tp(domain); // particles
 Triangulation Tm(domain); // mesh
+
+
+void load_alpha_on_fft(const Triangulation& T , CH_FFT& fft  );
+void load_fields_from_fft(const CH_FFT& fft , Triangulation& T  );
 
 int main() {
 
@@ -70,16 +86,43 @@ int main() {
 
     cout << "Creating alpha field " << endl;
     
-    //    set_alpha_random(  Tp ) ; // better take it from mesh
     set_alpha_random(  Tm ) ;
-
+    //set_alpha_cos( Tm );
+    
     cout << "Numbering particles " << endl;
 
     number(Tp);
     number(Tm);
   }
 
+  int Nb=sqrt( simu.no_of_particles() + 1e-12);
 
+  // Set up fft, and calculate initial velocities:
+  
+  CH_FFT fft( LL , Nb );
+
+  load_alpha_on_fft( Tm , fft );
+
+  fft.all_fields();
+
+  fft.draw( "phi", 0, fft.field_f() );
+
+  fft.draw( "mu", 0, fft.field_mu() );
+
+  fft.draw( "grad_mu_x", 0, fft.field_grad_mu_x() );
+
+  fft.draw( "grad_mu_y", 0, fft.field_grad_mu_y() );
+
+  fft.draw( "force_x", 0, fft.field_force_x() );
+
+  fft.draw( "force_y", 0, fft.field_force_y() );
+
+  fft.draw( "vel_x", 0, fft.field_vel_x() );
+
+  fft.draw( "vel_y", 0, fft.field_vel_y() );
+  
+  load_fields_from_fft( fft, Tm );
+  
   // every step
   areas(Tp);
   quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );
@@ -100,12 +143,13 @@ int main() {
   const std::string mesh_file("mesh.dat");
   const std::string particle_file("particles.dat");
 
-  // step 0 draw.-
-  //  draw(Tm, mesh_file     , true);
+  // // step 0 draw.-
+  //   draw(Tm, mesh_file     , true);
   //   draw(Tp, particle_file , true);
   
   cout << "Assigning alpha to particles " << endl;
- 
+
+
 #if defined FULL_FULL
   {
     Delta(Tp);
@@ -120,58 +164,29 @@ int main() {
   from_mesh(Tm , Tp , kind::ALPHA);
 #endif
 
+// #if defined FULL_FULL
+//   {
+//     Delta(Tp);
+//     linear algebra_p(Tp);
+//     from_mesh_full( Tm , Tp ,  algebra_p,kind::ALPHA);
+//   }
+// #elif defined FULL_LUMPED
+//   from_mesh_lumped( Tm , Tp , kind::ALPHA);
+//  #elif defined FLIP
+//   from_mesh(Tm , Tp , kind::ALPHA);
+//  #else
+//   from_mesh(Tm , Tp , kind::ALPHA);
+// #endif
+
   cout << "Moving info" << endl;
   move_info( Tm );
   move_info( Tp );
 
-  // algebra.chempot( kind::ALPHA , kind::CHEMPOT );
-  // algebra.alpha_inv_cp(kind::ALPHA, simu.dt()/2.0 , kind::ALPHA0 );
-
-  // draw(Tm, mesh_file     , true);
-  // draw(Tp, particle_file , true);
-
- 
-  // /// Prev test begin
-  //cout << "Calculating Lapl U" << endl;
-  //algebra.laplacian_v(kind::UOLD,kind::LAPLU);
-
-  //FT dt=simu.dt();
-
-  //cout << "Calculating Ustar implicitely" << endl;
-	  //algebra.ustar_inv(kind::USTAR,  dt , kind::UOLD, false);
-
-  //cout << "Solving PPE" << endl;
-  //algebra.PPE( kind::USTAR, dt, kind:: P );
-
-  //cout << "Calculating grad p" << endl;
-  //algebra.gradient(kind::P, kind::GRADP);
-  //algebra.mass_s(kind::DIVU);
-
-  
-//draw();
-//  return 1;
-
-   /// Prev test end
-
-#ifdef WRITE
-  algebra.save_matrices();
-#endif
-
-      // areas(Tp);
-      // quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );
-
-      // nabla(Tp);
-      // Delta(Tp);
-
-
-      // linear algebra(Tp);
-
-      // cout << "Calculating grad alpha" << endl;
-      // algebra.gradient(kind::ALPHA, kind::GRADALPHA);
-
   draw(Tm, mesh_file     , true);
   draw(Tp, particle_file , true);
 
+  //  return 1;
+  
   simu.advance_time();
   simu.next_step();
 
@@ -207,8 +222,8 @@ int main() {
     FT min_displ=1e10;
     int min_iter=0;
 
-    const int max_iter  = 10; //10;
-    const FT  max_displ = 1e-8; // < 0 : disable
+    const int max_iter=1; //10;
+    const FT  max_displ=  1e-8; // < 0 : disable
 
 //  leapfrog, special first step.-
 //    if(simu.current_step() == 1) dt2 *= 0.5;
@@ -218,48 +233,34 @@ int main() {
     move_info(Tm);
     move_info(Tp);
 
-//     cout << "Proj alpha onto mesh " << endl;
-
-//       //onto_mesh_lumped();
-// #if defined FULL
-//     onto_mesh_full( Tp , Tm , algebra, kind::ALPHA);
-// #elif defined FLIP
-//     flip_volumes(Tp , Tm , simu.FEMm() );
-//     onto_mesh_flip(Tp,Tm,simu.FEMm(),kind::ALPHA);
-// #else
-//     onto_mesh_delta(Tp,Tm,kind::ALPHA);
-// #endif
-  
     // iter loop
     for( ; iter<max_iter ; iter++) {
 
-      //      cout << "Projecting U from mesh " << endl;
-      cout << "Projecting U , alpha0 from mesh " << endl;
+
+      //      cout << "Projecting U , alpha0 from mesh " << endl;
+
+//       cout << "Projecting U , alpha0 from mesh " << endl;
 
 #if defined FULL_FULL
       {
 	Delta(Tp);
 	linear algebra_p(Tp);
-	from_mesh_full_v(Tm, Tp, algebra_p , kind::U);
 	from_mesh_full  (Tm, Tp, algebra_p , kind::ALPHA0);
 	from_mesh_full  (Tm, Tp, algebra_p , kind::ALPHA);
       }
 #elif defined FULL_LUMPED
-      from_mesh_lumped_v(Tm, Tp, kind::U);
       from_mesh_lumped  (Tm, Tp, kind::ALPHA0);
       from_mesh_lumped  (Tm, Tp, kind::ALPHA);
 #elif defined FLIP
-      from_mesh_v(Tm, Tp, kind::U);
       from_mesh  (Tm, Tp, kind::ALPHA0);
       from_mesh  (Tm, Tp, kind::ALPHA);
 #else
-      from_mesh_v(Tm, Tp, kind::U);
       from_mesh  (Tm, Tp, kind::ALPHA0);
       from_mesh  (Tm, Tp, kind::ALPHA);
 #endif
-      
+
       // comment for no move.-
-      displ=move( Tp , dt2 );
+      displ = move( Tp , dt2 );
 
       cout << "Iter " << iter << " , moved avg " << displ << " to half point" << endl;
 
@@ -272,7 +273,7 @@ int main() {
 
       areas(Tp);
       quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );
-      
+       
       cout << "Proj U0, alpha0 onto mesh " << endl;
 
 #if defined FULL
@@ -290,91 +291,19 @@ int main() {
       onto_mesh_delta  (Tp,Tm,kind::ALPHA);
 #endif
 
-     
-//  Reynolds number discrimination
+      load_alpha_on_fft( Tm , fft );
 
-// #ifdef EXPLICIT
+      fft.all_fields();
+  
+      FT b = Db*dt2;
 
-// 	cout << "Calculating Ustar explicitely" << endl;
+      fft.evolve( b );
+      
+      load_fields_from_fft( fft, Tm );
+  
+      // // substract spurious overall movement.-      
 
-// 	algebra.laplacian_v(kind::UOLD,kind::LAPLU);
-
-// 	u_star(Tp, dt2 , false );
-
-// #else
-
-//	cout << "Calculating chem pot" << endl;
-
-//	algebra.chempot(kind::ALPHA, kind::CHEMPOT);
-
-//      cout << "Calculating alpha implicitely" << endl;
-      //
-
-      // partly explicit ( unstable ? ):
-      cout << "Calculating chem pot explicitely" << endl;
-
-      // inner iter loop
-
-      for( int alpha_it=0 ; alpha_it < 1 ; alpha_it++) { // max_iter ; alpha_it++) {
-
-	cout << "Alpha loop iter " << alpha_it << endl;
-	if (iter==0)
-	  algebra.chempot( kind::ALPHA0, kind::CHEMPOT );
-	else
-	  algebra.chempot( kind::ALPHA , kind::CHEMPOT );
-	
-      //	algebra.chempot( kind::ALPHA , kind::CHEMPOT );
-	algebra.alpha_inv_cp(kind::ALPHA, dt2 , kind::ALPHA0 );
-
-      }
-
-
-	//	algebra.gradient(kind::ALPHA, kind::ALPHA0); // ???
-	
-	// // iterative, fully implicit (does not converge):
-	
-	// int alpha_it=0;
-	
-	//     // inner iter loop
-	// for( ; alpha_it < 10 ; alpha_it++) { // max_iter ; alpha_it++) {
-
-	//   cout << "Alpha loop iter " << alpha_it << endl;
-	  
-	//   algebra.alpha_inv_cp2(kind::ALPHA, dt2 , kind::ALPHA0 );
-    
-	//   cout << "Calculating chem pot implicitely" << endl;
-	//   algebra.chempot_inv(kind::ALPHA, dt2 , kind::ALPHA0 );
-	// }
-	// //	draw(Tp, particle_file , true);
-	
-	cout << "Calculating Ustar implicitely" << endl;
-
-	//	algebra.ustar_inv(kind::USTAR,  dt2 , kind::UOLD, false , false);
-
-	// comment for no move.-
-	algebra.ustar_inv_cp(kind::USTAR,  dt2 , kind::UOLD, is_overdamped , false);
-
-	// substract spurious overall movement.-
-	
-	zero_mean_v( Tp , kind::USTAR);
-
-	//#endif
-
-	cout << "Solving PPE" << endl;
-
-	// comment for no move.-
-	algebra.PPE( kind::USTAR, dt2 , kind:: P );
-
-	cout << "Calculating grad p" << endl;
-	// comment for no move.-
-	algebra.gradient(kind::P, kind::GRADP);
-
-	cout << "Evolving U " << endl;
-
-	// comment for no move.-
-	u_new( Tm , dt2 );
-
-	cout << "U evolved " << endl;
+      //      zero_mean_v( Tm , kind::FORCE);
 
     } // iter loop
 
@@ -397,20 +326,28 @@ int main() {
 #endif
 
       // comment for no move.-
-    displ=move( Tp , dt );
-    
-//    update_half_velocity( Tp , false ); 
+      displ=move( Tp , dt );
 
-    // comment for no move.-
-    update_half_velocity( Tp , is_overdamped ); 
+      //    update_half_velocity( Tp , false ); 
 
-    update_half_alpha( Tp );  // ??????
+      // comment for no move.-
+      //    update_half_velocity( Tp , is_overdamped ); 
 
-    areas(Tp);
+      update_half_alpha( Tm );
 
-    quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );
 
-    cout << "Proj U_t+1 , alpha_t+1 onto mesh " << endl;
+      areas(Tp);
+
+      quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );
+
+      cout << "Proj U_t+1 , alpha_t+1 onto mesh " << endl;
+
+     areas(Tp);
+
+     quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );
+
+     cout << "Proj U_t+1 , alpha_t+1 onto mesh " << endl;
+
 
 #if defined FULL
     onto_mesh_full_v(Tp,Tm,algebra,kind::U);
@@ -427,15 +364,16 @@ int main() {
     onto_mesh_delta  (Tp,Tm,kind::ALPHA);
 #endif
 
-    
+
     if(simu.current_step()%simu.every()==0) {
       draw(Tm, mesh_file     , true);
       draw(Tp, particle_file , true);
+      fft.histogram( "phi", simu.current_step() , fft.field_fq() );
     }
 
     log_file
       << simu.current_step() << "  "
-      <<  simu.time() << "  " ;
+      << simu.time() << "  " ;
 
     // integrals( Tp , log_file);     log_file << "  ";
     // fidelity(  Tp , log_file );    log_file << endl;
@@ -489,6 +427,9 @@ void create(void) {
 
       points_on_square_grid_2(side/2.0, N, std::back_inserter(points),Creator());;
 
+      //      for(int i = 0 ; i < Nb ; ++i )
+	
+      
       if(simu.perturb()) {
 	CGAL::perturb_points_2(
 			       points.begin(), points.end(),
@@ -502,7 +443,6 @@ void create(void) {
 
     Tp.insert(points.begin(), points.end());
 
-    
     points.clear();
 
     // int Nb = sqrt(N + 1e-12);
@@ -525,13 +465,15 @@ void create(void) {
 
     points_on_square_grid_2(side/2.0, Nm , std::back_inserter(points),Creator());;
 
-    // TODO: perfectly regular square grids are not too good, in fact
-    CGAL::perturb_points_2(
-    			   points.begin(), points.end(),
-    			   0.001* spacing );
+    // // TODO: perfectly regular square grids are not too good, in fact
+    // CGAL::perturb_points_2(
+    // 			   points.begin(), points.end(),
+    // 			   0.001* spacing );
 
     Tm.insert(points.begin(), points.end());
 
+
+    
 
   } else {
 
@@ -616,17 +558,117 @@ void create(void) {
 }
 
 
+void load_alpha_on_fft( const Triangulation& T , CH_FFT& fft  ) {
 
-void number(Triangulation& T) {
+  int Nb = fft.Nx();
 
-  int i=0;
+  size_t align=fft.alignment();
+
+  c_array al( Nb , Nb , align );
 
   for(F_v_it vit=T.vertices_begin();
       vit != T.vertices_end();
       vit++) {
+
+    int nx = vit->nx.val();
+    int ny = vit->ny.val();
+
+    // "right" ordering 
+    int i = ( Nb - 1 ) - ny ;
+    int j = nx;
+
+    // "wrong" ordering
+    // int i = nx;
+    // int j = ny;
+    
+//    FT val =  vit->alpha0.val();
+    FT val =  vit->alpha.val();
+
+    al(i,j) = val;
+
+  }
+
+  fft.set_f( al );
+  
+  return;
+}
+
+
+
+void load_fields_from_fft(const CH_FFT& fft , Triangulation& T  ) {
+
+  int Nb = fft.Nx();
+
+  c_array vx = fft.field_vel_x();
+  c_array vy = fft.field_vel_y();
+  c_array al = fft.field_f();
+
+  for(F_v_it vit=T.vertices_begin();
+      vit != T.vertices_end();
+      vit++) {
+
+    int nx = vit->nx.val();
+    int ny = vit->ny.val();
+
+    // "right" ordering 
+    int i = ( Nb - 1 ) - ny ;
+    int j = nx;
+
+    // "wrong" ordering
+    // int i = nx;
+    // int j = ny;
+
+    vit->U.set( Vector_2( real(vx(i,j)) , real(vy(i,j)) ) );
+
+    vit->alpha.set( real( al(i,j) ) );
+
+    //  TODO: return more fields (chem pot, pressure, force, etc)
+  }
+
+  return;
+}
+
+
+
+void number(Triangulation& T) {
+
+  int idx=0;
+
+  int N=simu.no_of_particles();
+
+  int Nb=sqrt(N + 1e-12);
+    
+  FT spacing=LL/FT(Nb+0);
+  FT side=LL-1*spacing;
+
+  
+  for(F_v_it vit=T.vertices_begin();
+      vit != T.vertices_end();
+      vit++) {
     //    vit->indx.set(i); //or
-    vit->idx=i;
-    ++i;
+    vit->idx = idx;
+
+    FT x = vit->point().x() + side/2.0;
+    FT y = vit->point().y() + side/2.0;
+
+    int i = rint(  FT(Nb) * x / LL );//+ 0.5);
+    int j = rint(  FT(Nb) * y / LL );//+ 0.5);
+
+    //    --i; --j;
+    
+    vit->nx = i;
+    vit->ny = j;
+
+    // cout << idx
+    // 	 << "  " << i
+    //   	 << "  " << j
+    //   	 << "  " << x
+    //   	 << "  " << y
+    // 	 << endl;
+
+
+    ++idx;
+
   }
 
   return;

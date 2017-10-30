@@ -32,7 +32,7 @@ class CH_FFT {
 
   // TODO: read this
 //  const static FT L_SD = 62;  // realistic value
-  const static FT L_SD = 0.25;  // hydro regime
+  const static FT L_SD = 1.25;  // hydro regime
   const static  bool shift=false;
   const static bool quiet=false;
   const size_t align;

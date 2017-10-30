@@ -19,8 +19,10 @@ import pylab as pl
 
 #pl.figure(figsize=(8,8))
 
-Dt=0.5
-skip=10
+#Dt=0.5
+
+Dt=5
+skip=5
 begin=skip
 end=100000
 limits=1
