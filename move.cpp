@@ -62,6 +62,8 @@ struct data_kept {
 
 };
 
+
+
 FT move(Triangulation& Tp, const FT dt ) {
 
   vector<data_kept> prev;
@@ -166,8 +168,10 @@ void u_new(Triangulation& T, const FT dt ) {
     // relaxation mixing .-
     FT alpha=simu.alpha();
     Vector_2 U0=fv->U() ;
-    fv->U.set( alpha*U0+ (1-alpha)*U );
-
+    Vector_2 U_mix = alpha*U0+ (1-alpha)*U ;
+    fv->U.set( U_mix );
+    fv->Delta_U.set(  U_mix - fv->Uold.val()  );
+    
   }
 
   return;

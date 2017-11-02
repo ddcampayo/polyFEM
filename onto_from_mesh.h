@@ -16,3 +16,7 @@ void from_mesh_lumped( Triangulation& Tfrom, Triangulation& Tto,const kind::f sc
 void from_mesh_lumped_v( Triangulation& Tfrom, Triangulation& Tto,const kind::f vectorf);
 
 void flip_volumes(Triangulation& Tpart, Triangulation& Tmesh, bool FEM);
+
+void incr_v(Triangulation& T, const kind::f vectorfrom,const kind::f vectorincr, const kind::f vectorto) ;
+void reset_v(Triangulation& T, const kind::f vectorf);
+

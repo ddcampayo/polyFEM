@@ -37,7 +37,7 @@ Vector_2 {
 
 namespace kind {
   enum f {P , PSTAR, VOL , GRADP , LAPLP , 
-	  U, USTAR, UOLD, DIVU, LAPLU, ALPHA, ALPHA0, CHEMPOT ,
+	  U, USTAR, DELTAU, UOLD, DIVU, LAPLU, ALPHA, ALPHA0, CHEMPOT ,
 	  GRADALPHA , GRADCHEMPOT , FORCE};
 };
 
@@ -139,6 +139,7 @@ public:
   
   vector_field U;
   vector_field Uold;
+  vector_field Delta_U;
   vector_field Ustar;
   vector_field disp;
 
@@ -173,6 +174,7 @@ public:
     laplp.reset();
     U.reset();
     Uold.reset();
+    Delta_U.reset();
     Ustar.reset();
     divU.reset();
     laplU.reset();
@@ -216,6 +218,9 @@ public:
       return laplU;
     else if(a==kind::FORCE)
       return force;
+    else if(a==kind::DELTAU)
+      return Delta_U;
+
   }
  
 

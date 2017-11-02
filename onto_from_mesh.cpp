@@ -18,6 +18,7 @@ FT vect_prod(const Vector_2& v1 , const Vector_2& v2 ) {
 
 #include"onto_from_mesh.h"
 
+// local util functions.-
 
 void lumped_full_common(Triangulation& Tfrom, Triangulation& Tto, const kind::f scalarf);
 void lumped_full_common_v(Triangulation& Tfrom, Triangulation& Tto, const kind::f vectorf);
@@ -33,6 +34,35 @@ void lumped_full_common_centroid_v(const kind::f vectorf);
 void FEM_hs(const Face_handle& fc, const Point& p0,
 	    std::vector<Vertex_handle>& v,
 	    std::vector<FT>& hh    );
+
+
+
+void reset_v(Triangulation& T, const kind::f vectorf) {
+
+  for(F_v_it vit=T.vertices_begin();
+      vit != T.vertices_end();
+      vit++) {
+    vit->vf(vectorf).reset();
+  }
+
+  return;
+}
+
+void incr_v(Triangulation& T, const kind::f vectorfrom,const kind::f vectorincr, const kind::f vectorto) {
+
+  for(F_v_it vit=T.vertices_begin();
+      vit != T.vertices_end();
+      vit++) {
+    Vector_2  v_from    = vit->vf(vectorfrom).val();
+    Vector_2  Delta_v = vit->vf(vectorincr).val();
+    
+    vit->vf(vectorto).set(  v_from + Delta_v  );
+  }
+
+  return;
+}
+
+
 
 
 void from_mesh_full( Triangulation& Tfrom, Triangulation& Tto, linear& algebra_p, const kind::f scalarf) {
