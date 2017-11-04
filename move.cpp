@@ -70,6 +70,8 @@ FT move(Triangulation& Tp, const FT dt ) {
 
   FT dd2=0;
 
+  bool first=false;  // debug
+
   for(F_v_it fv=Tp.finite_vertices_begin();
       fv!=Tp.finite_vertices_end();
       fv++) {
@@ -88,7 +90,22 @@ FT move(Triangulation& Tp, const FT dt ) {
     Point rnew= r0 + disp;
 
     Vector_2 disp2 = per_vect(rnew,rnow);
-    dd2 += sqrt(disp2.squared_length())/simu.h();
+
+    FT rel_disp = sqrt( disp2.squared_length() ) / simu.h();
+
+    if(first) {
+     cout
+       << "r0 " << r0 << "  "
+       << "rnow " << rnow << "  "
+       << "rnew " << rnew << "  "
+       << "disp2 " << disp2 << "  "
+       << " idx " << fv->idx() << " "
+       << "rel_disp " << rel_disp
+       << endl ;
+     first=false;
+    }
+
+    dd2 += rel_disp;
 
     //    cout << "New position: " << r0 ;
 
@@ -169,6 +186,7 @@ void u_new(Triangulation& T, const FT dt ) {
     FT alpha=simu.alpha();
     Vector_2 U0=fv->U() ;
     Vector_2 U_mix = alpha*U0+ (1-alpha)*U ;
+
     fv->U.set( U_mix );
     fv->Delta_U.set(  U_mix - fv->Uold.val()  );
     

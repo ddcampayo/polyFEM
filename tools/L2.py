@@ -6,7 +6,7 @@ import numpy as np
 from numpy import pi
 
 Dt=0.01
-nu=0.001
+nu=0.01
 LL=1
 
 for line in open("simu.cfg"):
@@ -25,12 +25,13 @@ for dir_step in dirs :
 
 	step = int(dir_step)
 
-	time=Dt*step # + Dt/1
+	time=Dt*step #+ Dt/2.0
 
 	A = np.exp( -8 * pi**2 * nu * time)
 
-	dt = np.loadtxt(dir_step+'/particles.dat')
-	#dt = np.loadtxt(dir_step+'/mesh.dat')
+#        print A
+	dt = np.loadtxt(dir_step+'/particles.dat', dtype = np.float64)
+	#dt = np.loadtxt(dir_step+'/mesh.dat', dtype = np.float64)
 #        x=dt[:,18]
 #        y=dt[:,19]
 
@@ -41,17 +42,21 @@ for dir_step in dirs :
 	vy=dt[:,9]
 
         vol=dt[:,3]
-
+#        vol=1
 
 	fx=  A*np.sin(2*pi*x / LL)*np.cos(2*pi*y / LL)
 	fy=- A*np.cos(2*pi*x / LL)*np.sin(2*pi*y / LL)
 
 	ddx=(vx-fx)**2
 	ddy=(vy-fy)**2
+#	ddx=np.fabs(vx-fx)
+#	ddy=np.fabs(vy-fy)
 
 	dd= vol * (ddx+ddy)
 
 	ff= vol * (fx**2 + fy**2)
+
+#	ff= vol * (np.fabs(fx) + np.fabs(fy) )
 
 	print " %g  %g " % (
 	time ,

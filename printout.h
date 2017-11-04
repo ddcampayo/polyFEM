@@ -1,4 +1,4 @@
-    main_data
+    main_data << std::setprecision (15) 
       << p.x() << "  "            //  0
       << p.y() << "    "          //  1
       << vit->idx.val() << "  "   //  2
