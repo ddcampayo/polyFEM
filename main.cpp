@@ -35,8 +35,8 @@ sim_pars simu;
 // stuff only used here:
 
 //#define FULL
-#define FULL_FULL
-//#define FULL_LUMPED
+//#define FULL_FULL
+#define FULL_LUMPED
 //#define FLIP
 
 ///////////
