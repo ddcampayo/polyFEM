@@ -359,7 +359,7 @@ void create(void) {
       points.reserve(N);
 
       CGAL::Random_points_in_square_2<Point,Creator> g(LL/2.0-0.0001);
-      CGAL::cp11::copy_n( g, N, std::back_inserter(points));
+      CGAL::cpp11::copy_n( g, N, std::back_inserter(points));
 
       cout << N << "  particles placed at random" << endl;
     } else {
