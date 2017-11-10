@@ -21,7 +21,7 @@ find_package(CGAL QUIET COMPONENTS Core )
 include( ${CGAL_USE_FILE} )
 
 #set(EIGEN3_INCLUDE_DIR "/usr/local/include/eigen")
-set(EIGEN3_INCLUDE_DIR "/usr/local/include/eigen3")
+#set(EIGEN3_INCLUDE_DIR "/usr/local/include/eigen3")
 
 find_package(Eigen3) 
 
@@ -47,7 +47,6 @@ find_library(FFTW_LIB NAMES fftw3)
 find_library(FFTW_OMP_LIB NAMES fftw3_omp)
 
 # -lfftw3 -lfftw3_omp
-
 
 #find_library(SS_LIB NAMES suitesparseconfig)
 
