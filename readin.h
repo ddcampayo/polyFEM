@@ -65,4 +65,3 @@ main_data >> ff;
 // gradchempot  23 & 24
 main_data >> x;
 main_data >> y;
-

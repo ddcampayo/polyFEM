@@ -472,9 +472,6 @@ void create(void) {
 
     Tm.insert(points.begin(), points.end());
 
-
-    
-
   } else {
 
     int N=simu.no_of_particles();
@@ -486,11 +483,6 @@ void create(void) {
     std::ifstream main_data;
     main_data.open(part_file );
 
-    if(main_data.fail()){
-      cout << "part file not found "  << endl;
-      abort();
-    }
-    
     for(int i=0;i<N;i++) {
       FT x,y;
       main_data >> x;
@@ -506,6 +498,32 @@ void create(void) {
     }
   
     cout << "particles' data read" << endl;
+
+    main_data.close();
+
+    char mesh_file[]="mesh.dat";
+
+    cout << "reading from file : " << mesh_file << endl;
+
+    main_data.open(mesh_file );
+
+    int Nm=simu.no_of_nodes();
+
+    for(int i=0;i<Nm;i++) {
+      FT x,y;
+      main_data >> x;
+      main_data >> y;
+
+      //      cout << x << "  " << y << endl;
+
+      Vertex_handle vh=Tm.insert(Point(x,y));
+
+#include"readin.h"
+
+
+    }
+  
+    cout << "mesh data read" << endl;
 
     main_data.close();
 
