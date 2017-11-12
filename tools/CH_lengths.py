@@ -63,7 +63,7 @@ for dir_step in dirs[1:] :
  L1 = 2 * pi /  q1
 
 #    print n,q1,L1
- print time , L1
+ print (time , L1 )
 
 #    pl.plot( n,q1)
 
