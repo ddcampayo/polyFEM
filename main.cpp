@@ -135,10 +135,10 @@ int main() {
 
   cout << "Setting up diff ops " << endl;
 
-  if(simu.create_points()) {
-    nabla(Tm);
-    Delta(Tm);
-  }
+  //  if(simu.create_points()) {
+  nabla(Tm);
+  Delta(Tm);
+    //  }
 
   const std::string mesh_file("mesh.dat");
   const std::string particle_file("particles.dat");
