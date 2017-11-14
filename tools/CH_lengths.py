@@ -7,7 +7,7 @@ import sys
 
 from numpy import pi
 
-LL=128
+LL=32
 
 Dt=0.01
 
@@ -21,7 +21,6 @@ dirs=glob.glob('[0-9]*')
 
 dirs.sort( key = float )
 
-
 if len(sys.argv) == 1:
    exp= 1.0
 else:
@@ -30,7 +29,6 @@ else:
 i_exp = 1.0/exp
 
 import pylab as pl
-
 
 for dir_step in dirs[1:] :
 

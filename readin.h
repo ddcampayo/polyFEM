@@ -11,7 +11,6 @@ FT ff;
 main_data >> ff;
 vh->vol.set(ff);
 
-
 // alpha 4
 main_data >> ff;
 vh->alpha.set(ff);
@@ -29,6 +28,8 @@ main_data >> y;
 main_data >> x;
 main_data >> y;
 vh->U.set(Vector_2(x,y));
+
+// cout << x << "  " << y << endl;
 
 // div U , 10
 main_data >> ff;
@@ -65,3 +66,14 @@ main_data >> ff;
 // gradchempot  23 & 24
 main_data >> x;
 main_data >> y;
+
+
+// indices 25 & 26
+
+int jj;
+
+main_data >> ii;
+main_data >> jj;
+
+vh->nx.set( ii );
+vh->ny.set( jj );

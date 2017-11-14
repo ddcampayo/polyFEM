@@ -29,7 +29,7 @@
 
 #include"periodic.h"
 
-const FT LL=128; // length of original domain
+const FT LL=32; // length of original domain
 const FT Db=0.04; // diffusion constant
 
 Iso_rectangle domain(-LL/2, -LL/2, LL/2, LL/2);
@@ -335,7 +335,6 @@ int main() {
 
       update_half_alpha( Tm );
 
-
       areas(Tp);
 
       quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );
@@ -516,7 +515,7 @@ void create(void) {
       main_data >> y;
 
       //      cout << x << "  " << y << endl;
-
+      
       Vertex_handle vh=Tm.insert(Point(x,y));
 
 #include"readin.h"
