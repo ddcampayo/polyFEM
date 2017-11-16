@@ -29,7 +29,7 @@
 
 #include"periodic.h"
 
-const FT LL=32; // length of original domain
+const FT LL=128; // length of original domain
 const FT Db=0.04; // diffusion constant
 
 Iso_rectangle domain(-LL/2, -LL/2, LL/2, LL/2);
@@ -135,11 +135,10 @@ int main() {
 
   cout << "Setting up diff ops " << endl;
 
-  // Are these two needed at all?
-  //  if(simu.create_points()) {
-  nabla(Tm);
-  Delta(Tm);
-    //  }
+  if(simu.create_points()) {
+    nabla(Tm);
+    Delta(Tm);
+  }
 
   const std::string mesh_file("mesh.dat");
   const std::string particle_file("particles.dat");
@@ -327,21 +326,28 @@ int main() {
 #endif
 
       // comment for no move.-
-
       displ=move( Tp , dt );
 
-      update_half_velocity( Tp , false );
+      //    update_half_velocity( Tp , false ); 
 
       // comment for no move.-
       //    update_half_velocity( Tp , is_overdamped ); 
 
       update_half_alpha( Tm );
 
+
       areas(Tp);
 
       quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );
 
       cout << "Proj U_t+1 , alpha_t+1 onto mesh " << endl;
+
+     areas(Tp);
+
+     quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );
+
+     cout << "Proj U_t+1 , alpha_t+1 onto mesh " << endl;
+
 
 #if defined FULL
     onto_mesh_full_v(Tp,Tm,algebra,kind::U);
@@ -510,7 +516,7 @@ void create(void) {
       main_data >> y;
 
       //      cout << x << "  " << y << endl;
-      
+
       Vertex_handle vh=Tm.insert(Point(x,y));
 
 #include"readin.h"
