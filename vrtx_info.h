@@ -35,6 +35,21 @@ Vector_2 {
 };
 
 
+/// Alt, older compilers (search for "autoVector" )
+
+//template<class K>
+//class autoVector_2 : public CGAL::Vector_2<K> {
+//
+// public:
+// autoVector_2() : CGAL::Vector_2<K>(CGAL::NULL_VECTOR) {}
+// autoVector_2(const CGAL::Vector_2<K>& v) : CGAL::Vector_2<K>(v) {}
+//};
+
+
+
+
+
+
 namespace kind {
   enum f {P , PSTAR, VOL , GRADP , LAPLP , 
 	  U, USTAR, DELTAU, UOLD, DIVU, LAPLU, ALPHA, ALPHA0, CHEMPOT ,
@@ -59,6 +74,11 @@ public:
 
   typedef std::map<Vertex_handle,      FT>      scalar_link; 
   typedef std::map<Vertex_handle,autoVector_2>  vector_link; 
+  /// Alt:
+  // typedef std::map<Vertex_handle,autoVector_2<K> >  vector_link; 
+
+
+
   //  typedef std::map<int,int> vector_link; 
 
 
@@ -126,6 +146,9 @@ public:
 
   typedef field<FT>            scalar_field;
   typedef field<autoVector_2>  vector_field; // TODO: make this autoVector_2
+  // Alt:
+  //typedef field<autoVector_2<K> >  vector_field; // TODO: make this autoVector_2
+
   typedef field<Point>         point_field; // TODO: make this autoVector_2
   scalar_field p;          //scalar field (e.g pressure)
   scalar_field pstar;
