@@ -570,9 +570,8 @@ void load_alpha_on_fft( const Triangulation& T , CH_FFT& fft  ) {
     // int i = nx;
     // int j = ny;
     
-    //    FT val =  vit->alpha0.val();
-
-    FT val =  vit->alpha.val();
+    FT val =  vit->alpha0.val();
+    //FT val =  vit->alpha.val();
 
     al(i,j) = val;
 
