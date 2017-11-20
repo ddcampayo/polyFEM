@@ -99,8 +99,6 @@ int main() {
 
   // Set up fft, and calculate initial velocities:
   
-  move_info( Tm );
-
   CH_FFT fft( LL , Nb );
 
   load_alpha_on_fft( Tm , fft );
@@ -137,10 +135,9 @@ int main() {
 
   cout << "Setting up diff ops " << endl;
 
-  // TODO: Are these two needed at all?
+  // Are these two needed at all?
   //  if(simu.create_points()) {
-  //  nabla(Tm);
-  // TODO, they is, too clear why
+  nabla(Tm);
   Delta(Tm);
     //  }
 
@@ -226,7 +223,7 @@ int main() {
     FT min_displ=1e10;
     int min_iter=0;
 
-    const int max_iter=5; //10;
+    const int max_iter=1; //10;
     const FT  max_displ=  1e-8; // < 0 : disable
 
 //  leapfrog, special first step.-
@@ -239,6 +236,29 @@ int main() {
 
     // iter loop
     for( ; iter<max_iter ; iter++) {
+
+
+      //      cout << "Projecting U , alpha0 from mesh " << endl;
+
+//       cout << "Projecting U , alpha0 from mesh " << endl;
+
+#if defined FULL_FULL
+      {
+	Delta(Tp);
+	linear algebra_p(Tp);
+	from_mesh_full  (Tm, Tp, algebra_p , kind::ALPHA0);
+	from_mesh_full  (Tm, Tp, algebra_p , kind::ALPHA);
+      }
+#elif defined FULL_LUMPED
+      from_mesh_lumped  (Tm, Tp, kind::ALPHA0);
+      from_mesh_lumped  (Tm, Tp, kind::ALPHA);
+#elif defined FLIP
+      from_mesh  (Tm, Tp, kind::ALPHA0);
+      from_mesh  (Tm, Tp, kind::ALPHA);
+#else
+      from_mesh  (Tm, Tp, kind::ALPHA0);
+      from_mesh  (Tm, Tp, kind::ALPHA);
+#endif
 
       // comment for no move.-
       displ = move( Tp , dt2 );
@@ -258,11 +278,17 @@ int main() {
       cout << "Proj U0, alpha0 onto mesh " << endl;
 
 #if defined FULL
+      onto_mesh_full_v(Tp,Tm,algebra,kind::UOLD);
+      onto_mesh_full  (Tp,Tm,algebra,kind::ALPHA0);
       onto_mesh_full  (Tp,Tm,algebra,kind::ALPHA);
 #elif defined FLIP
       flip_volumes(Tp , Tm , simu.FEMm() );
+      onto_mesh_flip_v(Tp,Tm,simu.FEMm(),kind::UOLD);
+      onto_mesh_flip  (Tp,Tm,simu.FEMm(),kind::ALPHA0);
       onto_mesh_flip  (Tp,Tm,simu.FEMm(),kind::ALPHA);
 #else
+      onto_mesh_delta_v(Tp,Tm,kind::UOLD);
+      onto_mesh_delta  (Tp,Tm,kind::ALPHA0);
       onto_mesh_delta  (Tp,Tm,kind::ALPHA);
 #endif
 
@@ -275,65 +301,63 @@ int main() {
       fft.evolve( b );
       
       load_fields_from_fft( fft, Tm );
-
-
-      cout << "Proj U, alpha from mesh " << endl;
-      
-#if defined FULL_FULL
-      {
-	Delta(Tp);
-	linear algebra_p(Tp);
-	from_mesh_full_v(Tm, Tp, algebra_p , kind::U);
-	from_mesh_full( Tm , Tp ,  algebra_p,kind::ALPHA);
-      }
-#elif defined FULL_LUMPED
-      from_mesh_lumped( Tm , Tp , kind::ALPHA);
-      from_mesh_lumped_v(Tm, Tp, kind::U);
-#elif defined FLIP
-      from_mesh(Tm , Tp , kind::ALPHA);
-      from_mesh_v(Tm, Tp, kind::U);
-#else
-      from_mesh(Tm , Tp , kind::ALPHA);
-      from_mesh_v(Tm, Tp, kind::U);
-#endif
-
-      
+  
       // // substract spurious overall movement.-      
 
       //      zero_mean_v( Tm , kind::FORCE);
 
     } // iter loop
 
+#if defined FULL_FULL
+      {
+	Delta(Tp);
+	linear algebra_p(Tp);
+	from_mesh_full_v(Tm, Tp, algebra_p , kind::U);
+	from_mesh_full  (Tm, Tp, algebra_p , kind::ALPHA);
+      }
+#elif defined FULL_LUMPED
+      from_mesh_lumped_v(Tm, Tp, kind::U);
+      from_mesh_lumped  (Tm, Tp, kind::ALPHA);
+#elif defined FLIP
+      from_mesh_v(Tm, Tp, kind::U);
+      from_mesh  (Tm, Tp, kind::ALPHA);
+#else
+      from_mesh_v(Tm, Tp, kind::U);
+      from_mesh  (Tm, Tp, kind::ALPHA);
+#endif
+
       // comment for no move.-
 
-    displ=move( Tp , dt );
+      displ=move( Tp , dt );
 
-    update_half_velocity( Tp , false );
+      update_half_velocity( Tp , false );
 
       // comment for no move.-
       //    update_half_velocity( Tp , is_overdamped ); 
 
-    update_half_alpha( Tp );
+      update_half_alpha( Tm );
 
-    areas(Tp);
+      areas(Tp);
 
-    quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );
+      quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );
 
-    // this, for the looks basically .-
-    
-    cout << "Proj U_t+1 , alpha_t+1 onto mesh " << endl;
+      cout << "Proj U_t+1 , alpha_t+1 onto mesh " << endl;
 
 #if defined FULL
     onto_mesh_full_v(Tp,Tm,algebra,kind::U);
+    onto_mesh_full  (Tp,Tm,algebra,kind::ALPHA0);
     onto_mesh_full  (Tp,Tm,algebra,kind::ALPHA);
 #elif defined FLIP
     flip_volumes(Tp , Tm , simu.FEMm() );
     onto_mesh_flip_v(Tp,Tm,simu.FEMm(),kind::U);
+    onto_mesh_flip  (Tp,Tm,simu.FEMm(),kind::ALPHA0);
     onto_mesh_flip  (Tp,Tm,simu.FEMm(),kind::ALPHA);
 #else
     onto_mesh_delta_v(Tp,Tm,kind::U);
     onto_mesh_delta  (Tp,Tm,kind::ALPHA);
+    onto_mesh_delta  (Tp,Tm,kind::ALPHA);
 #endif
+
 
     if(simu.current_step()%simu.every()==0) {
       draw(Tm, mesh_file     , true);
@@ -570,8 +594,8 @@ void load_alpha_on_fft( const Triangulation& T , CH_FFT& fft  ) {
     // int i = nx;
     // int j = ny;
     
-    FT val =  vit->alpha0.val();
-    //FT val =  vit->alpha.val();
+//    FT val =  vit->alpha0.val();
+    FT val =  vit->alpha.val();
 
     al(i,j) = val;
 
