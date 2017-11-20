@@ -217,35 +217,9 @@ int main() {
 
     
     // FLIP idea: set initial increment to null
-    reset_v( Tm , kind::DELTAU);
+    //    reset_v( Tm , kind::DELTAU);
     
     for( ; iter<max_iter ; iter++) {
-
-      cout << "Proj Delta U from mesh " << endl;
-
-      // FLIP idea: tranfer velocity _increment_ to particles
-      
-#if defined FULL_FULL
-      {
-	Delta(Tp);
-	linear algebra_p(Tp);
-	from_mesh_full_v(Tm, Tp, algebra_p , kind::DELTAU);
-	//	from_mesh_full_v(Tm, Tp, algebra_p , kind::UOLD);
-      }
-#elif defined FULL_LUMPED
-      from_mesh_lumped_v(Tm, Tp, kind::DELTAU);
-      //      from_mesh_lumped_v(Tm, Tp, kind::UOLD);
-#elif defined FLIP
-      from_mesh_v(Tm, Tp, kind::DELTAU);
-      //      from_mesh_v(Tm, Tp, kind::UOLD);
-#else
-      from_mesh_v(Tm, Tp, kind::DELTAU);
-      //      from_mesh_v(Tm, Tp, kind::UOLD);
-#endif
-
-      // FLIP idea: apply velocity _increment_ to particles
-
-      incr_v( Tp ,  kind::UOLD , kind::DELTAU , kind::U );
 
       zero_mean_v( Tp, kind::U);
       displ=move( Tp , dt2 );
@@ -293,6 +267,33 @@ int main() {
 
     //      u_new( dt );
       u_new( Tm , dt2 );
+
+
+      cout << "Proj Delta U from mesh " << endl;
+
+      // FLIP idea: tranfer velocity _increment_ to particles
+      
+#if defined FULL_FULL
+      {
+	Delta(Tp);
+	linear algebra_p(Tp);
+	from_mesh_full_v(Tm, Tp, algebra_p , kind::DELTAU);
+	//	from_mesh_full_v(Tm, Tp, algebra_p , kind::UOLD);
+      }
+#elif defined FULL_LUMPED
+      from_mesh_lumped_v(Tm, Tp, kind::DELTAU);
+      //      from_mesh_lumped_v(Tm, Tp, kind::UOLD);
+#elif defined FLIP
+      from_mesh_v(Tm, Tp, kind::DELTAU);
+      //      from_mesh_v(Tm, Tp, kind::UOLD);
+#else
+      from_mesh_v(Tm, Tp, kind::DELTAU);
+      //      from_mesh_v(Tm, Tp, kind::UOLD);
+#endif
+
+      // FLIP idea: apply velocity _increment_ to particles
+
+      incr_v( Tp ,  kind::UOLD , kind::DELTAU , kind::U );
 
     }
 
