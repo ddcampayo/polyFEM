@@ -224,7 +224,7 @@ int main() {
       zero_mean_v( Tp, kind::U);
       displ=move( Tp , dt2 );
 
-      cout << "Iter " << iter << " , moved avg " << displ << " to half point" << endl;
+      cout << "Moved avg " << displ << " to half point" << endl;
 
       areas(Tp);
       quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );
@@ -361,7 +361,7 @@ void create(void) {
       points.reserve(N);
 
       CGAL::Random_points_in_square_2<Point,Creator> g(LL/2.0-0.0001);
-      CGAL::cpp11::copy_n( g, N, std::back_inserter(points));
+      CGAL::copy_n( g, N, std::back_inserter(points));
 
       cout << N << "  particles placed at random" << endl;
     } else {
