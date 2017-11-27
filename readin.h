@@ -29,7 +29,7 @@ main_data >> x;
 main_data >> y;
 vh->U.set(Vector_2(x,y));
 
- cout << "U : " << x << "  " << y << endl;
+// cout << "U : " << x << "  " << y << endl;
 
 // div U , 10
 main_data >> ff;
