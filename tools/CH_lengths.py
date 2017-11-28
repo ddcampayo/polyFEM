@@ -7,7 +7,7 @@ import sys
 
 from numpy import pi
 
-LL=32
+#LL=32
 
 Dt=0.01
 

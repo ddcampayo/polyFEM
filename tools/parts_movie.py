@@ -2,33 +2,48 @@
 
 LL=32.0
 
+
+for line in open("simu.cfg"):
+ if "step" in line:
+  Dt=float(line.split()[1])
+# if "every" in line:
+#  skip=int(line.split()[1])
+
 import pylab as pl
 
 pl.figure(figsize=(8,8))
 
-skip=20
-begin=00
-end=10000
-limits=1
-#path='timings_full/'
-path='./'
+import glob
 
-for n in range(begin,end+skip,skip):
+dirs=glob.glob('[0-9]*')
+
+dirs.sort( key = float )
+
+import pylab as pl
+
+for dir_step in dirs[0:] :
+
+    step = int(dir_step)
+
+    time=Dt*step #+ Dt/2.0
     pl.clf()
-    dtm=pl.loadtxt(path+str(n)+'/particles.dat')
-#    dtm=pl.loadtxt(path+str(n)+'/mesh.dat')
-    xm=dtm[:,0]; ym=dtm[:,1];  pm=dtm[:,5];  vxm=dtm[:,8]; vym=dtm[:,9]; alm=dtm[:,4]
 
-#    pl.scatter( xm , ym , c=alm, s=80, vmin= -limits , vmax= limits)
+    dtm=pl.loadtxt(str(step)+'/particles.dat')
+    #    dtm=pl.loadtxt(path+str(n)+'/mesh.dat')
+
+    xm=dtm[:,0]; ym=dtm[:,1];  pm=dtm[:,5];
+    vxm=dtm[:,8]; vym=dtm[:,9]; alm=dtm[:,4]
+
+    #    pl.scatter( xm , ym , c=alm, s=80, vmin= -limits , vmax= limits)
     pl.scatter( xm , ym , c=alm, s=640/LL , cmap= pl.cm.bwr , linewidths=0 )
 
     pl.xlim([ -LL/2 , LL/2 ])
     pl.ylim([ -LL/2 , LL/2 ])
     pl.colorbar()
-#    pl.colorbar(ticks=[0.45,0.55])
-#    pl.savefig('parts'+str(n/skip)  )
+    #    pl.colorbar(ticks=[0.45,0.55])
+    #    pl.savefig('parts'+str(n/skip)  )
 
-    pl.savefig('parts'+str(n).zfill(5) )
+    pl.savefig('parts'+str(step).zfill(5) )
 
 #  pl.scatter( xm , ym , c=alm, s=20*LL/64.0 , linewidths=0 , cmap= pl.get_cmap(name="binary"))
 
