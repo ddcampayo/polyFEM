@@ -241,6 +241,7 @@ int main() {
     for( ; iter<max_iter ; iter++) {
 
       // comment for no move.-
+      cout << "Moving half step " << endl;
       displ = move( Tp , dt2 );
 
       cout << "Iter " << iter << " , moved avg " << displ << " to half point" << endl;
@@ -255,15 +256,15 @@ int main() {
       areas(Tp);
       quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );
        
-      cout << "Proj U0, alpha0 onto mesh " << endl;
+      cout << "Proj alpha0 onto mesh " << endl;
 
 #if defined FULL
-      onto_mesh_full  (Tp,Tm,algebra,kind::ALPHA);
+      onto_mesh_full (Tp,Tm,algebra,kind::ALPHA0);
 #elif defined FLIP
-      flip_volumes(Tp , Tm , simu.FEMm() );
-      onto_mesh_flip  (Tp,Tm,simu.FEMm(),kind::ALPHA);
+      flip_volumes   (Tp , Tm , simu.FEMm() );
+      onto_mesh_flip (Tp,Tm,simu.FEMm(),kind::ALPHA0);
 #else
-      onto_mesh_delta  (Tp,Tm,kind::ALPHA);
+      onto_mesh_delta(Tp,Tm,kind::ALPHA0);
 #endif
 
       load_alpha_on_fft( Tm , fft );
@@ -276,34 +277,47 @@ int main() {
       
       load_fields_from_fft( fft, Tm );
 
-      cout << "Proj U, alpha from mesh " << endl;
+      cout << "Proj U from mesh " << endl;
       
 #if defined FULL_FULL
       {
 	Delta(Tp);
 	linear algebra_p(Tp);
 	from_mesh_full_v(Tm, Tp, algebra_p , kind::U);
-	from_mesh_full( Tm , Tp ,  algebra_p,kind::ALPHA);
       }
 #elif defined FULL_LUMPED
-      from_mesh_lumped( Tm , Tp , kind::ALPHA);
       from_mesh_lumped_v(Tm, Tp, kind::U);
 #elif defined FLIP
-      from_mesh(Tm , Tp , kind::ALPHA);
       from_mesh_v(Tm, Tp, kind::U);
 #else
-      from_mesh(Tm , Tp , kind::ALPHA);
       from_mesh_v(Tm, Tp, kind::U);
 #endif
 
-      
       // // substract spurious overall movement.-      
 
       //      zero_mean_v( Tm , kind::FORCE);
 
     } // iter loop
 
+    cout << "Proj from mesh " << endl;
+    
+#if defined FULL_FULL
+      {
+	Delta(Tp);
+	linear algebra_p(Tp);
+	from_mesh_full(Tm, Tp, algebra_p , kind::ALPHA);
+      }
+#elif defined FULL_LUMPED
+      from_mesh_lumped_v(Tm, Tp, kind::ALPHA);
+#elif defined FLIP
+      from_mesh_v(Tm, Tp, kind::ALPHA);
+#else
+      from_mesh_v(Tm, Tp, kind::ALPHA);
+#endif
+    
       // comment for no move.-
+
+    cout << "Moving whole step " << endl;
 
     displ=move( Tp , dt );
 
