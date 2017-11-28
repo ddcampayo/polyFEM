@@ -63,7 +63,7 @@ Triangulation Tp(domain); // particles
 Triangulation Tm(domain); // mesh
 
 
-void load_alpha_on_fft(const Triangulation& T , CH_FFT& fft  );
+void load_alpha0_on_fft(const Triangulation& T , CH_FFT& fft  );
 void load_fields_from_fft(const CH_FFT& fft , Triangulation& T  );
 
 int main() {
@@ -102,7 +102,7 @@ int main() {
 
   CH_FFT fft( LL , Nb );
 
-  load_alpha_on_fft( Tm , fft );
+  load_alpha0_on_fft( Tm , fft );
 
   fft.all_fields();
 
@@ -236,8 +236,8 @@ int main() {
     move_info(Tp);
 
     // iter loop
-    for( ; iter<max_iter ; iter++) {
-
+    for( ; ; iter++) {
+      
       // comment for no move.-
       cout << "Moving half step " << endl;
       displ = move( Tp , dt2 );
@@ -252,20 +252,28 @@ int main() {
 	min_iter=iter;
       }
 
-      if( (displ < max_displ) && (iter !=0) ) break;
+      if( (displ < max_displ) && (iter !=0) )  {
+	cout << "Convergence in  " << iter << " iterations " << endl;
+	break;
+      }
 
-//       cout << "Proj alpha0 onto mesh " << endl;
+      if(  iter == max_iter-1 )  {
+	cout << "Exceeded  " << iter-1 << " iterations " << endl;
+	break;
+      }
 
-// #if defined FULL
-//       onto_mesh_full (Tp,Tm,algebra,kind::ALPHA0);
-// #elif defined FLIP
-//       flip_volumes   (Tp , Tm , simu.FEMm() );
-//       onto_mesh_flip (Tp,Tm,simu.FEMm(),kind::ALPHA0);
-// #else
-//       onto_mesh_delta(Tp,Tm,kind::ALPHA0);
-// #endif
+      cout << "Proj alpha0 onto mesh " << endl;
 
-      load_alpha_on_fft( Tm , fft );
+#if defined FULL
+      onto_mesh_full (Tp,Tm,algebra,kind::ALPHA0);
+#elif defined FLIP
+      flip_volumes   (Tp , Tm , simu.FEMm() );
+      onto_mesh_flip (Tp,Tm,simu.FEMm(),kind::ALPHA0);
+#else
+      onto_mesh_delta(Tp,Tm,kind::ALPHA0);
+#endif
+
+      load_alpha0_on_fft( Tm , fft );
 
       fft.all_fields();
   
@@ -282,6 +290,7 @@ int main() {
 	Delta(Tp);
 	linear algebra_p(Tp);
 	from_mesh_full_v(Tm, Tp, algebra_p , kind::U);
+	//	from_mesh_full(Tm, Tp, algebra_p , kind::ALPHA);
       }
 #elif defined FULL_LUMPED
       from_mesh_lumped_v(Tm, Tp, kind::U);
@@ -291,6 +300,7 @@ int main() {
       from_mesh_v(Tm, Tp, kind::U);
 #endif
 
+      
       // // substract spurious overall movement.-      
 
       //      zero_mean_v( Tm , kind::FORCE);
@@ -558,7 +568,7 @@ void create(void) {
 }
 
 
-void load_alpha_on_fft( const Triangulation& T , CH_FFT& fft  ) {
+void load_alpha0_on_fft( const Triangulation& T , CH_FFT& fft  ) {
 
   int Nb = fft.Nx();
 
@@ -618,7 +628,7 @@ void load_fields_from_fft(const CH_FFT& fft , Triangulation& T  ) {
     // int i = nx;
     // int j = ny;
 
-    vit->U.set( Vector_2( real(vx(i,j)) , real(vy(i,j)) ) );
+    vit->U.set( Vector_2( real( vx(i,j) ) , real( vy(i,j) ) ) );
 
     vit->alpha.set( real( al(i,j) ) );
 
