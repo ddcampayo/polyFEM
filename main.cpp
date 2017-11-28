@@ -235,19 +235,6 @@ int main() {
     move_info(Tm);
     move_info(Tp);
 
-#if defined FULL_FULL
-      {
-	Delta(Tp);
-	linear algebra_p(Tp);
-	from_mesh_full_v(Tm, Tp, algebra_p , kind::U);
-      }
-#elif defined FULL_LUMPED
-      from_mesh_lumped_v(Tm, Tp, kind::U);
-#elif defined FLIP
-      from_mesh_v(Tm, Tp, kind::U);
-#else
-      from_mesh_v(Tm, Tp, kind::U);
-#endif
     
     // iter loop
     for( ; ; iter++) {
