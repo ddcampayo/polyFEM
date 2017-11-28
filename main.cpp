@@ -56,7 +56,6 @@ sim_pars simu;
 #include"onto_from_mesh.h"
 
 
-
 //const Eigen::IOFormat OctaveFmt(Eigen::StreamPrecision, 0, ", ", ";\n", "", "", "[", "];");
 
 
@@ -153,12 +152,11 @@ int main() {
   
   cout << "Assigning alpha to particles " << endl;
 
-
 #if defined FULL_FULL
   {
     Delta(Tp);
     linear algebra_p(Tp);
-    from_mesh_full( Tm , Tp ,  algebra_p,kind::ALPHA);
+    from_mesh_full( Tm , Tp ,  algebra_p , kind::ALPHA);
   }
 #elif defined FULL_LUMPED
   from_mesh_lumped( Tm , Tp , kind::ALPHA);
@@ -244,6 +242,9 @@ int main() {
       cout << "Moving half step " << endl;
       displ = move( Tp , dt2 );
 
+      areas(Tp);
+      quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );
+       
       cout << "Iter " << iter << " , moved avg " << displ << " to half point" << endl;
 
       if( displ < min_displ) {
@@ -253,29 +254,26 @@ int main() {
 
       if( (displ < max_displ) && (iter !=0) ) break;
 
-      areas(Tp);
-      quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );
-       
-      cout << "Proj alpha0 onto mesh " << endl;
+//       cout << "Proj alpha0 onto mesh " << endl;
 
-#if defined FULL
-      onto_mesh_full (Tp,Tm,algebra,kind::ALPHA0);
-#elif defined FLIP
-      flip_volumes   (Tp , Tm , simu.FEMm() );
-      onto_mesh_flip (Tp,Tm,simu.FEMm(),kind::ALPHA0);
-#else
-      onto_mesh_delta(Tp,Tm,kind::ALPHA0);
-#endif
+// #if defined FULL
+//       onto_mesh_full (Tp,Tm,algebra,kind::ALPHA0);
+// #elif defined FLIP
+//       flip_volumes   (Tp , Tm , simu.FEMm() );
+//       onto_mesh_flip (Tp,Tm,simu.FEMm(),kind::ALPHA0);
+// #else
+//       onto_mesh_delta(Tp,Tm,kind::ALPHA0);
+// #endif
 
       load_alpha_on_fft( Tm , fft );
 
       fft.all_fields();
   
-      FT b = Db*dt2;
+      FT b = Db * dt2;
 
       fft.evolve( b );
       
-      load_fields_from_fft( fft, Tm );
+      load_fields_from_fft( fft , Tm );
 
       cout << "Proj U from mesh " << endl;
       
@@ -308,11 +306,11 @@ int main() {
 	from_mesh_full(Tm, Tp, algebra_p , kind::ALPHA);
       }
 #elif defined FULL_LUMPED
-      from_mesh_lumped_v(Tm, Tp, kind::ALPHA);
+      from_mesh_lumped(Tm, Tp, kind::ALPHA);
 #elif defined FLIP
-      from_mesh_v(Tm, Tp, kind::ALPHA);
+      from_mesh(Tm, Tp, kind::ALPHA);
 #else
-      from_mesh_v(Tm, Tp, kind::ALPHA);
+      from_mesh(Tm, Tp, kind::ALPHA);
 #endif
     
       // comment for no move.-
