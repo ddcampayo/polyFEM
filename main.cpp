@@ -299,7 +299,7 @@ int main() {
 
     } // iter loop
 
-    cout << "Proj from mesh " << endl;
+    cout << "Proj alpha from mesh " << endl;
     
 #if defined FULL_FULL
       {
