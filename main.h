@@ -99,7 +99,7 @@ void prune(std::vector<Vertex_handle>& v);
 void set_fields_Zalesak(void);
 void set_vels(void);
 void curvature(void) ;
-FT move(Triangulation& T, FT) ;
+FT move(Triangulation& T, FT, FT& ) ;
 void move_info(Triangulation& T) ;
 void u_star(Triangulation& T, FT, bool) ;
 void u_new(Triangulation& T, const FT) ;

@@ -240,7 +240,9 @@ int main() {
       
       // comment for no move.-
       cout << "Moving half step " << endl;
-      displ = move( Tp , dt2 );
+      FT d0;
+      
+      displ = move( Tp , dt2 , d0 );
 
       areas(Tp);
       quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );
@@ -325,10 +327,18 @@ int main() {
     
       // comment for no move.-
 
-    cout << "Moving whole step " << endl;
+    cout << "Moving whole step: relative ";
 
-    displ=move( Tp , dt );
+    FT d0;
+    
+    displ=move( Tp , dt , d0 );
 
+    cout
+      <<  displ << " from half point, "
+      <<  d0    << " from previous point"
+      << endl;
+
+    
     update_half_velocity( Tp , false );
 
       // comment for no move.-

@@ -64,7 +64,7 @@ struct data_kept {
 
 
 
-FT move(Triangulation& Tp, const FT dt ) {
+FT move(Triangulation& Tp, const FT dt , FT& dd0 ) {
 
   vector<data_kept> prev;
 
@@ -91,7 +91,9 @@ FT move(Triangulation& Tp, const FT dt ) {
 
     Vector_2 disp2 = per_vect(rnew,rnow);
 
-    FT rel_disp = sqrt( disp2.squared_length() ) / simu.h();
+    FT rel_disp = sqrt(disp2.squared_length() ) / simu.h();
+
+    FT rel_disp0= sqrt( disp.squared_length() ) / simu.h();
 
     if(first) {
      cout
@@ -107,6 +109,8 @@ FT move(Triangulation& Tp, const FT dt ) {
 
     dd2 += rel_disp;
 
+    dd0 += rel_disp0;
+
     //    cout << "New position: " << r0 ;
 
     data.pos = per_point( rnew );
@@ -119,6 +123,7 @@ FT move(Triangulation& Tp, const FT dt ) {
 
 //  cout << "relative displacement " << sqrt(dd2)/simu.no_of_points()/simu.h()  << endl ;
   dd2 /= simu.no_of_particles();
+  dd20 /= simu.no_of_particles();
 
   //  cout << "relative displacement " << dd2 << endl ;
 
