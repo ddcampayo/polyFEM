@@ -235,19 +235,37 @@ int main() {
     move_info(Tm);
     move_info(Tp);
 
+#if defined FULL_FULL
+      {
+	Delta(Tp);
+	linear algebra_p(Tp);
+	from_mesh_full_v(Tm, Tp, algebra_p , kind::U);
+      }
+#elif defined FULL_LUMPED
+      from_mesh_lumped_v(Tm, Tp, kind::U);
+#elif defined FLIP
+      from_mesh_v(Tm, Tp, kind::U);
+#else
+      from_mesh_v(Tm, Tp, kind::U);
+#endif
+    
     // iter loop
     for( ; ; iter++) {
       
       // comment for no move.-
       cout << "Moving half step " << endl;
       FT d0;
-      
+
       displ = move( Tp , dt2 , d0 );
 
       areas(Tp);
       quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );
        
-      cout << "Iter " << iter << " , moved avg " << displ << " to half point" << endl;
+      cout
+	<< "Iter " << iter
+	<< " , moved avg " << d0 << " to half point, "
+	<< displ << " from previous"
+	<< endl;
 
       if( displ < min_displ) {
 	min_displ=displ;
@@ -292,7 +310,6 @@ int main() {
 	Delta(Tp);
 	linear algebra_p(Tp);
 	from_mesh_full_v(Tm, Tp, algebra_p , kind::U);
-	//	from_mesh_full(Tm, Tp, algebra_p , kind::ALPHA);
       }
 #elif defined FULL_LUMPED
       from_mesh_lumped_v(Tm, Tp, kind::U);
@@ -337,12 +354,10 @@ int main() {
       <<  displ << " from half point, "
       <<  d0    << " from previous point"
       << endl;
-
     
-    update_half_velocity( Tp , false );
-
       // comment for no move.-
-      //    update_half_velocity( Tp , is_overdamped ); 
+
+    update_half_velocity( Tp , is_overdamped ); 
 
     update_half_alpha( Tp );
 
@@ -365,7 +380,7 @@ int main() {
     onto_mesh_delta_v(Tp,Tm,kind::U);
     onto_mesh_delta  (Tp,Tm,kind::ALPHA);
 #endif
-
+    
     if(simu.current_step()%simu.every()==0) {
       draw(Tm, mesh_file     , true);
       draw(Tp, particle_file , true);

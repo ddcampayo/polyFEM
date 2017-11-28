@@ -123,7 +123,7 @@ FT move(Triangulation& Tp, const FT dt , FT& dd0 ) {
 
 //  cout << "relative displacement " << sqrt(dd2)/simu.no_of_points()/simu.h()  << endl ;
   dd2 /= simu.no_of_particles();
-  dd20 /= simu.no_of_particles();
+  dd0 /= simu.no_of_particles();
 
   //  cout << "relative displacement " << dd2 << endl ;
 

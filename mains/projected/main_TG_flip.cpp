@@ -222,7 +222,10 @@ int main() {
     for( ; iter<max_iter ; iter++) {
 
       zero_mean_v( Tp, kind::U);
-      displ=move( Tp , dt2 );
+
+      FT d0;
+
+      displ = move( Tp , dt2 , d0 );
 
       cout << "Iter " << iter << " , moved avg " << displ << " to half point" << endl;
 
@@ -298,7 +301,10 @@ int main() {
     }
 
     zero_mean_v( Tp, kind::U);
-    displ=move( Tp , dt );
+
+    FT d0;
+
+    displ = move( Tp , dt , d0 );
 
     update_half_velocity( Tp , false ); 
 //    update_half_velocity( Tm , false ); 
