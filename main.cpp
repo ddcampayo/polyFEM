@@ -625,6 +625,13 @@ void load_fields_from_fft(const CH_FFT& fft , Triangulation& T  ) {
   c_array vy = fft.field_vel_y();
   c_array al = fft.field_f();
 
+  c_array mu = fft.field_mu();
+  
+  c_array gmx = fft.field_grad_mu_x();
+  c_array gmy = fft.field_grad_mu_y();
+  c_array fx = fft.field_force_x();
+  c_array fy = fft.field_force_y();
+  
   for(F_v_it vit=T.vertices_begin();
       vit != T.vertices_end();
       vit++) {
@@ -640,9 +647,14 @@ void load_fields_from_fft(const CH_FFT& fft , Triangulation& T  ) {
     // int i = nx;
     // int j = ny;
 
-    vit->U.set( Vector_2( real( vx(i,j) ) , real( vy(i,j) ) ) );
-
     vit->alpha.set( real( al(i,j) ) );
+
+    vit->chempot.set( real( mu(i,j) ) );
+
+    vit->U.set          ( Vector_2( real( vx(i,j) ) , real( vy(i,j) ) ) );
+    vit->force.set      ( Vector_2( real( fx(i,j) ) , real( fy(i,j) ) ) );
+    vit->gradchempot.set( Vector_2( real(gmx(i,j) ) , real(gmy(i,j) ) ) );
+
 
     //  TODO: return more fields (chem pot, pressure, force, etc)
   }
