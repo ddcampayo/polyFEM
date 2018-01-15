@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-LL=32.0
+LL=64.0
 
 
 for line in open("simu.cfg"):
