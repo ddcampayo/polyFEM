@@ -55,6 +55,8 @@ class CH_FFT {
     f3( nx,ny,align ),
     mu_r( nx,ny,align ),
     mu( nx,ny,align ),
+    press_r( nx,ny,align ),
+    press( nx,ny,align ),
     grad_mu_x_r( nx,ny,align ),
     grad_mu_x( nx,ny,align ),
     grad_mu_y_r( nx,ny,align ),
@@ -98,6 +100,9 @@ class CH_FFT {
   void printout_x(const std::string& name, const unsigned int nx);
   void random( void );
   void all_fields(void);
+  void all_fields_NS(const FT&);
+  void vel_fields_NS(void);
+  void p_fields( const FT& ) ;
   void mu_fields(void);
   void force_fields(void);
   void vel_fields(void);
@@ -111,10 +116,12 @@ class CH_FFT {
   }
 
   void set_f(const c_array& ); 
+  void set_u(const c_array& , const c_array& );
   
   c_array field_f() const {return fr;}
   c_array field_fq() const {return f;}
   c_array field_mu() const {return mu_r;}
+  c_array field_p() const {return press_r;}
   c_array field_grad_mu_x() const {return grad_mu_x_r;}
   c_array field_grad_mu_y() const {return grad_mu_y_r;}
   c_array field_force_x() const {return force_x_r;}
@@ -152,6 +159,9 @@ class CH_FFT {
   c_array f3r;
   c_array f3;
 
+  c_array press_r;
+  c_array press;
+
   c_array mu_r;
   c_array mu;
 
@@ -166,7 +176,6 @@ class CH_FFT {
 
   c_array force_y_r;
   c_array force_y;
-
   
   c_array v_x_r;
   c_array v_x;

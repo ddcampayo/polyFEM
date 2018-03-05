@@ -41,6 +41,33 @@ void set_forces_Kolmo(Triangulation& T) {
   return;
 }
 
+void set_fields_cos(Triangulation& T) {
+
+  for(F_v_it vit=T.finite_vertices_begin();
+      vit != T.finite_vertices_end();
+      vit++) {
+
+    FT x=vit->point().x();
+    FT y=vit->point().y();
+
+    vit->rold.set( vit->point() );
+
+//    vit->p.set( field_quad(x,y) );
+//    vit->p.set( (field_cos(2*x) + field_cos(2*y))/4.0 ) ;
+//    vit->alpha.set( field_r(x,y) ) ;
+    vit->alpha.set( field_sin(x) * field_sin(y) ) ;
+    vit->U.set( Vector_2( field_cos(x) , 0 ));
+//    vit->U.set( Vector_2( field_sin(x) , 0 ));
+    vit->Uold.set( vit->U.val() );
+
+  }
+
+  return;
+
+}
+
+
+
 
 void set_fields_TG(Triangulation& T) {
 

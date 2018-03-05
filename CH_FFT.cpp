@@ -286,6 +286,40 @@ void CH_FFT::set_f(const c_array& ff) {
 }
 
 
+void CH_FFT::set_u(const c_array& ux, const c_array& uy ) {
+
+  for(unsigned int i=0; i < nx; ++i)
+    for(unsigned int j=0; j < ny; ++j)
+      v_x_r(i,j) = ux(i,j);
+
+  freq_scramble( v_x_r );
+
+  Forward2_f.fft( v_x_r , v_x );
+  
+  Forward2_f.Normalize( v_x );
+
+  freq_scramble( v_x_r );
+
+  for(unsigned int i=0; i < nx; ++i)
+    for(unsigned int j=0; j < ny; ++j)
+      v_y_r(i,j) = uy(i,j);
+
+  freq_scramble( v_y_r );
+
+  Forward2_f.fft( v_y_r , v_y );
+  
+  Forward2_f.Normalize( v_y );
+
+  freq_scramble( v_y_r );
+
+  return;
+  
+
+}
+
+
+
+
 void CH_FFT::init(void)
 {
   for(uint i=0; i < nx; ++i) // {
@@ -371,6 +405,7 @@ void CH_FFT::force_fields(void)
   freq_scramble( force_y_r );
 }
 
+
 void CH_FFT::vel_fields(void)
 {
   for(uint i=0; i < nx; i++)
@@ -408,6 +443,89 @@ void CH_FFT::vel_fields(void)
 
   return;
 }
+
+
+
+void CH_FFT::p_fields( const FT& aa ) {
+
+  const Complex mimI( 0 , -1 );
+  
+  for(uint i=0; i < nx; i++)
+    for(uint j=0; j < ny; j++) {
+      FT qq2= q2(i,j);
+      FT den = qq2 * ( 1 + aa * qq2 );
+
+      if( den < 1e-16) {
+	press(i,j) = 0;
+	continue;
+      }
+
+      // readability.-
+      FT qqx= q_x(j);
+      FT qqy= q_y(i);
+
+      Complex vx= v_x(i,j);
+      Complex vy= v_y(i,j);
+
+      Complex q_dot_v=  qqx * vx + qqy * vy ;
+
+      //	Complex q_dot_F_over_q2=  q_dot_F / qq2;
+	
+      press(i,j) =  mimI * q_dot_v / den ;
+    }
+
+  Backward2_vx.fft( press , press_r );
+  freq_scramble( press_r );
+
+  return;
+}
+
+
+
+void CH_FFT::vel_fields_NS( void )
+{
+
+  const Complex mimI( 0 , -1 );
+
+  for(uint i=0; i < nx; i++)
+    for(uint j=0; j < ny; j++) {
+      FT qq2= q2(i,j);
+
+      if( qq2 < 1e-16) {
+	v_x(i,j) = 0;
+	v_y(i,j) = 0;
+	continue;
+      }
+
+      // readability.-
+      FT qqx= q_x(j);
+      FT qqy= q_y(i);
+
+      Complex p = press(i,j);
+
+	
+      v_x(i,j) +=  mimI * qqx * p ;
+      v_y(i,j) +=  mimI * qqy * p ;
+    }
+
+  Backward2_vx.fft( v_x , v_x_r );
+  freq_scramble( v_x_r );
+
+  
+  Backward2_vy.fft( v_y , v_y_r );
+  freq_scramble( v_y_r );
+
+  return;
+}
+
+
+void CH_FFT::all_fields_NS(const FT& aa ) {
+  p_fields( aa );
+  vel_fields_NS();
+
+  return;
+}
+
 
 
 void CH_FFT::all_fields(void) {

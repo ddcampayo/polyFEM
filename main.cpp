@@ -3,23 +3,8 @@
 // plus, correction to quadratic consistency
 // periodic boundary conditions
 
-// Cahn-Hilliard solver, overdamped regime, reduced units
-
-
-// 
-// Parameters:
-// "Db" below, a reduced diffusion parameter for the CH equation
-// The SD length in CH_FFT.h: e.g "static constexpr FT L_SD = 62.5;"
-
-// LL below: length of the system
-// max_displ: maximum average displacement for convergence of iterative
-// mid-point move
-
-// projected to and from mesh
-
-// Jan 2018 version. This is the one used for an article on
-// segregation in biomembranes (work initiated at the U of W, Seattle Wa
-
+// Solves NS equation for an incompressible
+// fluid in Fourier space
 
 
 #include <CGAL/Timer.h>
@@ -42,8 +27,7 @@
 
 #include"periodic.h"
 
-const FT LL=32; // length of original domain
-const FT Db=0.04; // diffusion constant
+const FT LL=1; // length of original domain
 
 Iso_rectangle domain(-LL/2, -LL/2, LL/2, LL/2);
 
@@ -51,7 +35,6 @@ Iso_rectangle domain(-LL/2, -LL/2, LL/2, LL/2);
 //       specific bases and faces should be implemented for each
 
 sim_pars simu;
-
 
 //#define FULL
 #define FULL_FULL
@@ -75,8 +58,7 @@ sim_pars simu;
 Triangulation Tp(domain); // particles
 Triangulation Tm(domain); // mesh
 
-
-void load_alpha0_on_fft(const Triangulation& T , CH_FFT& fft  );
+void load_fields_on_fft(const Triangulation& T , CH_FFT& fft  );
 void load_fields_from_fft(const CH_FFT& fft , Triangulation& T  );
 
 int main() {
@@ -96,11 +78,13 @@ int main() {
     //    set_alpha_circle( Tp , 2);
     //    set_alpha_under_cos(  Tp ) ;
 
-    cout << "Creating alpha field " << endl;
+
     
-    set_alpha_random(  Tm ) ;
-    //set_alpha_cos( Tm );
-    
+    cout << "Creating velocity field " << endl;
+
+    //    set_fields_TG( Tm ) ;
+    set_fields_cos( Tm ) ;
+        
     cout << "Numbering particles " << endl;
 
     number(Tp);
@@ -115,21 +99,17 @@ int main() {
 
   CH_FFT fft( LL , Nb );
 
-  load_alpha0_on_fft( Tm , fft );
+  load_fields_on_fft( Tm , fft );
 
-  fft.all_fields();
+  FT dt=simu.dt();
+
+  FT mu=simu.mu();
+  
+  fft.all_fields_NS( dt * mu );
 
   fft.draw( "phi", 0, fft.field_f() );
 
-  fft.draw( "mu", 0, fft.field_mu() );
-
-  fft.draw( "grad_mu_x", 0, fft.field_grad_mu_x() );
-
-  fft.draw( "grad_mu_y", 0, fft.field_grad_mu_y() );
-
-  fft.draw( "force_x", 0, fft.field_force_x() );
-
-  fft.draw( "force_y", 0, fft.field_force_y() );
+  fft.draw( "press", 0, fft.field_p() );
 
   fft.draw( "vel_x", 0, fft.field_vel_x() );
 
@@ -163,20 +143,20 @@ int main() {
   //   draw(Tm, mesh_file     , true);
   //   draw(Tp, particle_file , true);
   
-  cout << "Assigning alpha to particles " << endl;
+  cout << "Assigning velocities to particles " << endl;
 
 #if defined FULL_FULL
   {
     Delta(Tp);
     linear algebra_p(Tp);
-    from_mesh_full( Tm , Tp ,  algebra_p , kind::ALPHA);
+    from_mesh_full_v( Tm , Tp ,  algebra_p , kind::U);
   }
 #elif defined FULL_LUMPED
-  from_mesh_lumped( Tm , Tp , kind::ALPHA);
+  from_mesh_lumped_v( Tm , Tp , kind::U);
  #elif defined FLIP
-  from_mesh(Tm , Tp , kind::ALPHA);
+  from_mesh_v(Tm , Tp , kind::U);
  #else
-  from_mesh(Tm , Tp , kind::ALPHA);
+  from_mesh_v(Tm , Tp , kind::U);
 #endif
 
 // #if defined FULL_FULL
@@ -200,7 +180,7 @@ int main() {
   draw(Tm, mesh_file     , true);
   draw(Tp, particle_file , true);
 
-  //  return 1;
+  return 1;
   
   simu.advance_time();
   simu.next_step();
@@ -293,11 +273,11 @@ int main() {
       onto_mesh_delta(Tp,Tm,kind::ALPHA0);
 #endif
 
-      load_alpha0_on_fft( Tm , fft );
-
+      load_fields_on_fft( Tm , fft );
+     
       fft.all_fields();
   
-      FT b = Db * dt2;
+      FT b = mu * dt2;
 
       fft.evolve( b );
       
@@ -593,13 +573,14 @@ void create(void) {
 }
 
 
-void load_alpha0_on_fft( const Triangulation& T , CH_FFT& fft  ) {
+void load_fields_on_fft( const Triangulation& T , CH_FFT& fft  ) {
 
   int Nb = fft.Nx();
 
   size_t align=fft.alignment();
 
-  c_array al( Nb , Nb , align );
+  c_array ux( Nb , Nb , align );
+  c_array uy( Nb , Nb , align );
 
   for(F_v_it vit=T.vertices_begin();
       vit != T.vertices_end();
@@ -616,14 +597,15 @@ void load_alpha0_on_fft( const Triangulation& T , CH_FFT& fft  ) {
     // int i = nx;
     // int j = ny;
     
-    FT val =  vit->alpha0.val();
+    Vector_2 vv =  vit->U.val();
     //FT val =  vit->alpha.val();
 
-    al(i,j) = val;
+    ux(i,j) = vv.x();
+    uy(i,j) = vv.y();
 
   }
 
-  fft.set_f( al );
+  fft.set_u( ux , uy );
   
   return;
 }
@@ -636,15 +618,11 @@ void load_fields_from_fft(const CH_FFT& fft , Triangulation& T  ) {
 
   c_array vx = fft.field_vel_x();
   c_array vy = fft.field_vel_y();
+
   c_array al = fft.field_f();
 
-  c_array mu = fft.field_mu();
-  
-  c_array gmx = fft.field_grad_mu_x();
-  c_array gmy = fft.field_grad_mu_y();
-  c_array fx = fft.field_force_x();
-  c_array fy = fft.field_force_y();
-  
+  c_array pp = fft.field_p();
+
   for(F_v_it vit=T.vertices_begin();
       vit != T.vertices_end();
       vit++) {
@@ -661,13 +639,12 @@ void load_fields_from_fft(const CH_FFT& fft , Triangulation& T  ) {
     // int j = ny;
 
     vit->alpha.set( real( al(i,j) ) );
+    vit->p.set( real( pp(i,j) ) );
 
-    vit->chempot.set( real( mu(i,j) ) );
-
+    // TODO:  PiC trick here !!
+    
     vit->U.set          ( Vector_2( real( vx(i,j) ) , real( vy(i,j) ) ) );
-    vit->force.set      ( Vector_2( real( fx(i,j) ) , real( fy(i,j) ) ) );
-    vit->gradchempot.set( Vector_2( real(gmx(i,j) ) , real(gmy(i,j) ) ) );
-
+ 
 
     //  TODO: return more fields (chem pot, pressure, force, etc)
   }
