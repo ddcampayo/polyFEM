@@ -1,4 +1,7 @@
 #!/usr/bin/python
+
+# A test of the velocity field of a TG vortices simulation
+
 import glob
 
 import numpy as np

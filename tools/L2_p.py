@@ -1,4 +1,7 @@
 #!/usr/bin/python
+
+# A test of the pressure field of a TG vortices simulation
+
 import glob
 
 import numpy as np
@@ -29,6 +32,9 @@ for dir_step in dirs :
 
 	A = np.exp( -16 * pi**2 * nu * time)
 
+	# depending on the form of the PPE.-
+	A = Dt/2.0 * A
+
 #	dt = np.loadtxt(dir_step+'/particles.dat')
 	dt = np.loadtxt(dir_step+'/mesh.dat')
 	x=dt[:,0]
@@ -38,20 +44,18 @@ for dir_step in dirs :
 	p=dt[:,5]
 
 	p0=  A/4*(np.cos(4*pi*x/LL)+np.cos(4*pi*y/LL))
-        p_off= p0[0] - p[0]
+	p_off = p0[0] - p[0]  # -"pee off" -"I beg your pardon?"
 
 #        p0 -=  p_off
 
-        p=p-np.average(p)
-        p0=p0-np.average(p0)
+	p=p-np.average(p)
+	p0=p0-np.average(p0)
 
 	dd=(1.0*p-p0)**2
 
 	ff= p0**2
 
 #	print " %g  %g %i" % (
-	print " %g  %g " % (
-	time ,
-	(np.sum( dd )  / np.sum( ff ))**1
-	)
+
+	print ( ' %g %g ' % ( time , np.sum( dd )  / np.sum( ff )**1 ) )
 
