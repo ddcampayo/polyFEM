@@ -82,8 +82,8 @@ int main() {
     
     cout << "Creating velocity field " << endl;
 
-    //    set_fields_TG( Tm ) ;
-    set_fields_cos( Tm ) ;
+    set_fields_TG( Tm ) ;
+    //set_fields_cos( Tm ) ;
         
     cout << "Numbering particles " << endl;
 
@@ -180,7 +180,7 @@ int main() {
   draw(Tm, mesh_file     , true);
   draw(Tp, particle_file , true);
 
-  return 1;
+  // return 1;
   
   simu.advance_time();
   simu.next_step();
@@ -262,28 +262,28 @@ int main() {
 	break;
       }
 
-      cout << "Proj alpha0 onto mesh " << endl;
+      cout << "Proj advected U0 velocities onto mesh " << endl;
 
 #if defined FULL
-      onto_mesh_full (Tp,Tm,algebra,kind::ALPHA0);
+      onto_mesh_full_v(Tp,Tm,algebra,kind::UOLD);
 #elif defined FLIP
       flip_volumes   (Tp , Tm , simu.FEMm() );
-      onto_mesh_flip (Tp,Tm,simu.FEMm(),kind::ALPHA0);
+      onto_mesh_flip_v(Tp,Tm,simu.FEMm(),kind::UOLD);
 #else
-      onto_mesh_delta(Tp,Tm,kind::ALPHA0);
+      onto_mesh_delta_v(Tp,Tm,kind::UOLD);
 #endif
 
       load_fields_on_fft( Tm , fft );
-     
-      fft.all_fields();
-  
-      FT b = mu * dt2;
 
-      fft.evolve( b );
+      FT b = mu * dt2;
+     
+      fft.all_fields_NS( b );
+  
+//      fft.evolve( b );
       
       load_fields_from_fft( fft , Tm );
 
-      cout << "Proj U from mesh " << endl;
+      cout << "Proj U from mesh onto particles" << endl;
       
 #if defined FULL_FULL
       {
@@ -306,22 +306,26 @@ int main() {
 
     } // iter loop
 
-    cout << "Proj alpha from mesh " << endl;
+    cout << "Proj final U , alpha from mesh " << endl;
     
 #if defined FULL_FULL
       {
 	Delta(Tp);
 	linear algebra_p(Tp);
 	from_mesh_full(Tm, Tp, algebra_p , kind::ALPHA);
+	from_mesh_full_v(Tm, Tp, algebra_p , kind::U);
       }
 #elif defined FULL_LUMPED
       from_mesh_lumped(Tm, Tp, kind::ALPHA);
+      from_mesh_lumped_v(Tm, Tp, kind::U);
 #elif defined FLIP
       from_mesh(Tm, Tp, kind::ALPHA);
+      from_mesh_v(Tm, Tp, kind::U);
 #else
+      from_mesh_v(Tm, Tp, kind::U);
       from_mesh(Tm, Tp, kind::ALPHA);
 #endif
-    
+
       // comment for no move.-
 
     cout << "Moving whole step: relative ";
