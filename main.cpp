@@ -217,7 +217,7 @@ int main() {
     FT min_displ=1e10;
     int min_iter=0;
 
-    const int max_iter=5; //10;
+    const int max_iter=8; //10;
     const FT  max_displ=  1e-8; // < 0 : disable
 
 //  leapfrog, special first step.-

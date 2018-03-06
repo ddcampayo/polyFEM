@@ -481,7 +481,7 @@ void CH_FFT::p_fields( const FT& aa ) {
 }
 
 
-
+// not to be trusted
 void CH_FFT::vel_fields_NS( void )
 {
 
@@ -503,7 +503,7 @@ void CH_FFT::vel_fields_NS( void )
 
       Complex p = press(i,j);
 
-	
+      // wrong! it should be v = u^* + mimI q p	
       v_x(i,j) +=  mimI * qqx * p ;
       v_y(i,j) +=  mimI * qqy * p ;
     }
@@ -520,9 +520,55 @@ void CH_FFT::vel_fields_NS( void )
 
 
 void CH_FFT::all_fields_NS(const FT& aa ) {
-  p_fields( aa );
-  vel_fields_NS();
 
+  // p_fields( aa );
+  // vel_fields_NS();
+
+  const Complex mimI( 0 , -1 );
+  
+  for(uint i=0; i < nx; i++)
+    for(uint j=0; j < ny; j++) {
+      FT qq2= q2(i,j);
+      FT den1 =  1 + aa * qq2 ;
+      FT den2 = qq2 * den1;
+
+      if( den2 < 1e-16) {
+	press(i,j) = 0;
+	v_x(i,j) = 0;
+	v_y(i,j) = 0;
+
+	continue;
+      }
+
+      // readability.-
+      FT qqx = q_x(j);
+      FT qqy = q_y(i);
+
+      Complex vx = v_x(i,j);
+      Complex vy = v_y(i,j);
+
+      Complex q_dot_v =  qqx * vx + qqy * vy ;
+
+      //	Complex q_dot_F_over_q2=  q_dot_F / qq2;
+      Complex ip = q_dot_v / den2 ;
+
+      press(i,j) = mimI * ip; 
+
+      v_x(i,j) = vx / den1 - qqx * ip ;
+      v_y(i,j) = vy / den1 - qqy * ip ;
+
+    }
+
+  Backward2_vx.fft( press , press_r );
+  freq_scramble( press_r );
+
+  Backward2_vx.fft( v_x , v_x_r );
+  freq_scramble( v_x_r );
+
+    Backward2_vy.fft( v_y , v_y_r );
+  freq_scramble( v_y_r );
+
+  
   return;
 }
 

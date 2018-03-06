@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-LL=64.0
+LL=1.0
 
 
 for line in open("simu.cfg"):
@@ -34,8 +34,10 @@ for dir_step in dirs[0:] :
     xm=dtm[:,0]; ym=dtm[:,1];  pm=dtm[:,5];
     vxm=dtm[:,8]; vym=dtm[:,9]; alm=dtm[:,4]
 
+    vel=vxm**2+vym**2
+
     #    pl.scatter( xm , ym , c=alm, s=80, vmin= -limits , vmax= limits)
-    pl.scatter( xm , ym , c=alm, s=640/LL , cmap= pl.cm.bwr , linewidths=0 )
+    pl.scatter( xm , ym , c=vel, s=80/LL , cmap= pl.cm.bwr , linewidths=0 )
 
     pl.xlim([ -LL/2 , LL/2 ])
     pl.ylim([ -LL/2 , LL/2 ])
