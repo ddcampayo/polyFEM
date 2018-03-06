@@ -96,13 +96,13 @@ int main() {
   // Set up fft, and calculate initial velocities:
   
   move_info( Tm );
+  move_info( Tp );
 
   CH_FFT fft( LL , Nb );
 
   load_fields_on_fft( Tm , fft );
 
   FT dt=simu.dt();
-
   FT mu=simu.mu();
   
   fft.all_fields_NS( dt * mu );
@@ -227,7 +227,6 @@ int main() {
 
     move_info(Tm);
     move_info(Tp);
-
     
     // iter loop
     for( ; ; iter++) {
@@ -601,7 +600,7 @@ void load_fields_on_fft( const Triangulation& T , CH_FFT& fft  ) {
     // int i = nx;
     // int j = ny;
     
-    Vector_2 vv =  vit->U.val();
+    Vector_2 vv =  vit->Uold.val();
     //FT val =  vit->alpha.val();
 
     ux(i,j) = vv.x();
