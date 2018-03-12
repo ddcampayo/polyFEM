@@ -282,21 +282,23 @@ int main() {
       
       load_fields_from_fft( fft , Tm );
 
-      cout << "Proj U from mesh onto particles" << endl;
+      cout << "Proj Delta U from mesh onto particles" << endl;
       
 #if defined FULL_FULL
       {
 	Delta(Tp);
 	linear algebra_p(Tp);
-	from_mesh_full_v(Tm, Tp, algebra_p , kind::U);
+	from_mesh_full_v(Tm, Tp, algebra_p , kind::DELTAU);
       }
 #elif defined FULL_LUMPED
-      from_mesh_lumped_v(Tm, Tp, kind::U);
+      from_mesh_lumped_v(Tm, Tp, kind::DELTAU);
 #elif defined FLIP
-      from_mesh_v(Tm, Tp, kind::U);
+      from_mesh_v(Tm, Tp, kind::DELTAU);
 #else
-      from_mesh_v(Tm, Tp, kind::U);
+      from_mesh_v(Tm, Tp, kind::DELTAU);
 #endif
+
+      incr_v( Tp ,  kind::UOLD , kind::DELTAU , kind::U );
 
       
       // // substract spurious overall movement.-      
@@ -305,27 +307,6 @@ int main() {
 
     } // iter loop
 
-    cout << "Proj final U , alpha from mesh " << endl;
-    
-#if defined FULL_FULL
-      {
-	Delta(Tp);
-	linear algebra_p(Tp);
-	from_mesh_full(Tm, Tp, algebra_p , kind::ALPHA);
-	from_mesh_full_v(Tm, Tp, algebra_p , kind::U);
-      }
-#elif defined FULL_LUMPED
-      from_mesh_lumped(Tm, Tp, kind::ALPHA);
-      from_mesh_lumped_v(Tm, Tp, kind::U);
-#elif defined FLIP
-      from_mesh(Tm, Tp, kind::ALPHA);
-      from_mesh_v(Tm, Tp, kind::U);
-#else
-      from_mesh_v(Tm, Tp, kind::U);
-      from_mesh(Tm, Tp, kind::ALPHA);
-#endif
-
-      // comment for no move.-
 
     cout << "Moving whole step: relative ";
 
@@ -646,9 +627,8 @@ void load_fields_from_fft(const CH_FFT& fft , Triangulation& T  ) {
 
     // TODO:  PiC trick here !!
     
-    vit->U.set          ( Vector_2( real( vx(i,j) ) , real( vy(i,j) ) ) );
+    vit->Delta_U.set( Vector_2( real( vx(i,j) ) , real( vy(i,j) ) ) );
  
-
     //  TODO: return more fields (chem pot, pressure, force, etc)
   }
 

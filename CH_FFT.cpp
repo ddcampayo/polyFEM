@@ -554,8 +554,10 @@ void CH_FFT::all_fields_NS(const FT& aa ) {
 
       press(i,j) = mimI * ip; 
 
-      v_x(i,j) = vx / den1 - qqx * ip ;
-      v_y(i,j) = vy / den1 - qqy * ip ;
+      // Only _increments_ are computed (FLIP idea)
+      
+      v_x(i,j) = vx / den1 - qqx * ip - vx ;
+      v_y(i,j) = vy / den1 - qqy * ip - vy;
 
     }
 

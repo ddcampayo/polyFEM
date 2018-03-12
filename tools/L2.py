@@ -46,9 +46,9 @@ for dir_step in dirs :
         vx=dt[:,8]
         vy=dt[:,9]
 
-        #       vol=dt[:,3]
+        vol=dt[:,3]
 
-        vol=1
+        # vol=1
 
         fx=  A*np.sin(2*pi*x / LL)*np.cos(2*pi*y / LL)
         fy=- A*np.cos(2*pi*x / LL)*np.sin(2*pi*y / LL)
@@ -67,5 +67,5 @@ for dir_step in dirs :
 #       ff= vol * (np.fabs(fx) + np.fabs(fy) )
 
 
-        print ( ' %g %g ' % ( time , np.sum( dd )  / np.sum( ff )**1 ) )
+        print ( ' %g %g ' % ( time , ( np.sum( dd )  / np.sum( ff ) )**0.5 ) )
 
