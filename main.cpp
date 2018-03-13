@@ -299,7 +299,6 @@ int main() {
 #endif
 
       incr_v( Tp ,  kind::UOLD , kind::DELTAU , kind::U );
-
       
       // // substract spurious overall movement.-      
 
@@ -344,7 +343,10 @@ int main() {
     onto_mesh_delta_v(Tp,Tm,kind::U);
     onto_mesh_delta  (Tp,Tm,kind::ALPHA);
 #endif
-    
+
+    move_info( Tm );
+    move_info( Tp );
+
     if(simu.current_step()%simu.every()==0) {
       draw(Tm, mesh_file     , true);
       draw(Tp, particle_file , true);
