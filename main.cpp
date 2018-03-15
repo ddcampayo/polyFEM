@@ -282,23 +282,50 @@ int main() {
       
       load_fields_from_fft( fft , Tm );
 
-      cout << "Proj Delta U from mesh onto particles" << endl;
+// Search "FLIPincr" in CH_FFT.cpp to change accordingly!
+// EITHER:
+// FLIP idea: project only increments
+      
+//       cout << "Proj Delta U from mesh onto particles" << endl;
+      
+// #if defined FULL_FULL
+//       {
+// 	Delta(Tp);
+// 	linear algebra_p(Tp);
+// 	from_mesh_full_v(Tm, Tp, algebra_p , kind::DELTAU);
+//       }
+// #elif defined FULL_LUMPED
+//       from_mesh_lumped_v(Tm, Tp, kind::DELTAU);
+// #elif defined FLIP
+//       from_mesh_v(Tm, Tp, kind::DELTAU);
+// #else
+//       from_mesh_v(Tm, Tp, kind::DELTAU);
+// #endif
+
+//       incr_v( Tp ,  kind::UOLD , kind::DELTAU , kind::U );
+
+
+// OR:
+// project the whole velocity
+      
+      cout << "Proj U from mesh onto particles" << endl;
       
 #if defined FULL_FULL
       {
 	Delta(Tp);
 	linear algebra_p(Tp);
-	from_mesh_full_v(Tm, Tp, algebra_p , kind::DELTAU);
+	from_mesh_full_v(Tm, Tp, algebra_p , kind::U);
       }
 #elif defined FULL_LUMPED
-      from_mesh_lumped_v(Tm, Tp, kind::DELTAU);
+      from_mesh_lumped_v(Tm, Tp, kind::U);
 #elif defined FLIP
-      from_mesh_v(Tm, Tp, kind::DELTAU);
+      from_mesh_v(Tm, Tp, kind::U);
 #else
-      from_mesh_v(Tm, Tp, kind::DELTAU);
+      from_mesh_v(Tm, Tp, kind::U);
 #endif
 
-      incr_v( Tp ,  kind::UOLD , kind::DELTAU , kind::U );
+      
+
       
       // // substract spurious overall movement.-      
 
@@ -627,10 +654,12 @@ void load_fields_from_fft(const CH_FFT& fft , Triangulation& T  ) {
     vit->alpha.set( real( al(i,j) ) );
     vit->p.set( real( pp(i,j) ) );
 
-    // TODO:  PiC trick here !!
-    
-    vit->Delta_U.set( Vector_2( real( vx(i,j) ) , real( vy(i,j) ) ) );
- 
+    // FLIPincr trick
+    //    vit->Delta_U.set( Vector_2( real( vx(i,j) ) , real( vy(i,j) ) ) );
+
+    // whole velocity
+    vit->U.set( Vector_2( real( vx(i,j) ) , real( vy(i,j) ) ) );
+
     //  TODO: return more fields (chem pot, pressure, force, etc)
   }
 
