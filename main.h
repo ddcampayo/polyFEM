@@ -87,7 +87,6 @@ const Iterator_type unique_cover=Triangulation::UNIQUE_COVER_DOMAIN;
 
 typedef CGAL::Periodic_2_offset_2 Offset;
 
-void create(void);
 void draw(Triangulation& T,  const std::string file_name , const bool setup ) ;
 void number(Triangulation& T);
 void quad_coeffs( Triangulation& T , bool ) ;

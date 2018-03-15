@@ -556,13 +556,13 @@ void CH_FFT::all_fields_NS(const FT& aa ) {
 
       // EITHER:
       // Only _increments_ are computed (FLIPincr idea)
-      // v_x(i,j) = vx / den1 - qqx * ip - vx ;
-      // v_y(i,j) = vy / den1 - qqy * ip - vy;
+      v_x(i,j) = vx / den1 - qqx * ip - vx ;
+      v_y(i,j) = vy / den1 - qqy * ip - vy;
 
       // OR:
       // The whole velocity is returned
-      v_x(i,j) = vx / den1 - qqx * ip;
-      v_y(i,j) = vy / den1 - qqy * ip;
+      //v_x(i,j) = vx / den1 - qqx * ip;
+      //v_y(i,j) = vy / den1 - qqy * ip;
 
       
     }

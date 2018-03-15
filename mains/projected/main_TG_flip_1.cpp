@@ -1,4 +1,3 @@
-// with mass matrix, and all
 // plus, correction to quadratic consistency
 // periodic boundary conditions
 
@@ -32,6 +31,7 @@ sim_pars simu;
 //const Eigen::IOFormat OctaveFmt(Eigen::StreamPrecision, 0, ", ", ";\n", "", "", "[", "];");
 
 
+// with mass matrix, and all
 // stuff only used here:
 
 //#define FULL

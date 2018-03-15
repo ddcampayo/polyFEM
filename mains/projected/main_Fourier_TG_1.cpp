@@ -6,7 +6,6 @@
 // Solves NS equation for an incompressible
 // fluid in Fourier space
 
-// particle re-creation!
 
 #include <CGAL/Timer.h>
 
@@ -32,7 +31,6 @@ const FT LL=1; // length of original domain
 
 Iso_rectangle domain(-LL/2, -LL/2, LL/2, LL/2);
 
-
 // TODO: the two triangulations store different things.
 //       specific bases and faces should be implemented for each
 
@@ -57,13 +55,11 @@ sim_pars simu;
 //const Eigen::IOFormat OctaveFmt(Eigen::StreamPrecision, 0, ", ", ";\n", "", "", "[", "];");
 
 
-//Triangulation Tp(domain); // particles
+Triangulation Tp(domain); // particles
 Triangulation Tm(domain); // mesh
 
 void load_fields_on_fft(const Triangulation& T , CH_FFT& fft  );
 void load_fields_from_fft(const CH_FFT& fft , Triangulation& T  );
-void create(Triangulation&);
-
 
 int main() {
 
@@ -75,7 +71,7 @@ int main() {
 
   simu.read();
 
-  create(Tm);
+  create();
   
   if(simu.create_points()) {
 
@@ -89,8 +85,9 @@ int main() {
     set_fields_TG( Tm ) ;
     //set_fields_cos( Tm ) ;
         
-    cout << "Numbering mesh " << endl;
+    cout << "Numbering particles " << endl;
 
+    number(Tp);
     number(Tm);
   }
 
@@ -99,6 +96,7 @@ int main() {
   // Set up fft, and calculate initial velocities:
   
   move_info( Tm );
+  move_info( Tp );
 
   CH_FFT fft( LL , Nb );
 
@@ -119,6 +117,10 @@ int main() {
   
   load_fields_from_fft( fft, Tm );
   
+  // every step
+  areas(Tp);
+  quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );
+
   // just once!
   linear algebra(Tm);
 
@@ -130,7 +132,7 @@ int main() {
   // TODO: Are these two needed at all?
   //  if(simu.create_points()) {
   //  nabla(Tm);
-  // TODO, they are, not too clear why
+  // TODO, they is, too clear why
   Delta(Tm);
     //  }
 
@@ -141,6 +143,21 @@ int main() {
   //   draw(Tm, mesh_file     , true);
   //   draw(Tp, particle_file , true);
   
+  cout << "Assigning velocities to particles " << endl;
+
+#if defined FULL_FULL
+  {
+    Delta(Tp);
+    linear algebra_p(Tp);
+    from_mesh_full_v( Tm , Tp ,  algebra_p , kind::U);
+  }
+#elif defined FULL_LUMPED
+  from_mesh_lumped_v( Tm , Tp , kind::U);
+ #elif defined FLIP
+  from_mesh_v(Tm , Tp , kind::U);
+ #else
+  from_mesh_v(Tm , Tp , kind::U);
+#endif
 
 // #if defined FULL_FULL
 //   {
@@ -158,8 +175,10 @@ int main() {
 
   cout << "Moving info" << endl;
   move_info( Tm );
+  move_info( Tp );
 
   draw(Tm, mesh_file     , true);
+  draw(Tp, particle_file , true);
 
   // return 1;
   
@@ -207,30 +226,6 @@ int main() {
 //    dt2 *= 0.5;
 
     move_info(Tm);
-
-  // TODO: map Tm onto Tp
-  // every step
-  Triangulation Tp(domain); // particles
-  create(Tp);
-  areas(Tp);
-  quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );
-
-  cout << "Assigning velocities to particles " << endl;
-
-#if defined FULL_FULL
-  {
-    Delta(Tp);
-    linear algebra_p(Tp);
-    from_mesh_full_v( Tm , Tp ,  algebra_p , kind::U);
-  }
-#elif defined FULL_LUMPED
-  from_mesh_lumped_v( Tm , Tp , kind::U);
- #elif defined FLIP
-  from_mesh_v(Tm , Tp , kind::U);
- #else
-  from_mesh_v(Tm , Tp , kind::U);
-#endif
-
     move_info(Tp);
     
     // iter loop
@@ -407,7 +402,7 @@ int main() {
 
 
 
-void create(Triangulation& Tp) {
+void create(void) {
 
   int N=simu.no_of_particles();
   std::vector<Point> points;
@@ -454,13 +449,139 @@ void create(Triangulation& Tp) {
 
     }
 
-   }
-
     cout << "Inserting" << endl;
 
     Tp.insert(points.begin(), points.end());
 
-    return;
+    points.clear();
+
+    // int Nb = sqrt(N + 1e-12);
+    // int nm = Nb* simu.mesh_factor() + 1 ;
+    // int Nm = nm * nm;
+
+    int Nm=simu.no_of_nodes();
+
+    int nm=sqrt(Nm + 1e-12);
+
+    Nm= nm * nm;
+
+    simu.set_no_of_nodes(Nm);
+
+    points.reserve(Nm);
+    cout << Nm << " mesh on square lattice" << endl;
+
+    FT spacing=LL/FT( nm +0);
+    FT side=LL-1*spacing;
+
+    points_on_square_grid_2(side/2.0, Nm , std::back_inserter(points),Creator());;
+
+    // // TODO: perfectly regular square grids are not too good, in fact
+    // CGAL::perturb_points_2(
+    // 			   points.begin(), points.end(),
+    // 			   0.001* spacing );
+
+    Tm.insert(points.begin(), points.end());
+
+  } else {
+
+    int N=simu.no_of_particles();
+
+    char part_file[]="particles.dat";
+
+    cout << "reading from file : " << part_file << endl;
+
+    std::ifstream main_data;
+    main_data.open(part_file );
+
+    for(int i=0;i<N;i++) {
+      FT x,y;
+      main_data >> x;
+      main_data >> y;
+
+      //      cout << x << "  " << y << endl;
+
+      Vertex_handle vh=Tp.insert(Point(x,y));
+
+#include"readin.h"
+
+
+    }
+  
+    cout << "particles' data read" << endl;
+
+    main_data.close();
+
+    char mesh_file[]="mesh.dat";
+
+    cout << "reading from file : " << mesh_file << endl;
+
+    main_data.open(mesh_file );
+
+    int Nm=simu.no_of_nodes();
+
+    for(int i=0;i<Nm;i++) {
+      FT x,y;
+      main_data >> x;
+      main_data >> y;
+
+      //      cout << x << "  " << y << endl;
+      
+      Vertex_handle vh=Tm.insert(Point(x,y));
+
+#include"readin.h"
+
+
+    }
+  
+    cout << "mesh data read" << endl;
+
+    main_data.close();
+
+  }
+
+  // straight from the manual.-
+
+  Triangulation::Covering_sheets cs = Tp.number_of_sheets();
+
+  cout << "Original covering (particles): " << cs[0] << ' ' << cs[1] << endl;
+
+//  return ;
+  
+  Tp.convert_to_1_sheeted_covering();
+
+  cs = Tp.number_of_sheets();
+
+  cout << "Current covering (particles): " << cs[0] << ' ' << cs[1] << endl;
+
+
+  return ;
+
+  if ( Tp.is_triangulation_in_1_sheet() ) // = true
+    {
+      bool is_extensible = Tp.is_extensible_triangulation_in_1_sheet_h1()
+	|| Tp.is_extensible_triangulation_in_1_sheet_h2(); // = false
+      Tp.convert_to_1_sheeted_covering();
+      cs = Tp.number_of_sheets();
+      cout << "Current covering: " << cs[0] << ' ' << cs[1] << endl;
+      if ( is_extensible ) // = false
+	cout << "It is safe to change the triangulation here." << endl;
+      else {
+	cout << "It is NOT safe to change the triangulation here!" << endl;
+	abort();
+      }
+      //      T.convert_to_9_sheeted_covering();
+      //      cs = T.number_of_sheets();
+      //      cout << "Current covering: " << cs[0] << ' ' << cs[1] << endl;
+    } else {
+	cout << "Triangulation not on one sheet!" << endl;
+	abort();    
+  }
+
+
+  //  cout << "It is (again) safe to modify the triangulation." << endl;
+
+
+  return ;
 
 }
 
