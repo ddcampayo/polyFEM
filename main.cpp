@@ -63,6 +63,7 @@ Triangulation Tm(domain); // mesh
 void load_fields_on_fft(const Triangulation& T , CH_FFT& fft  );
 void load_fields_from_fft(const CH_FFT& fft , Triangulation& T  );
 void create(Triangulation&);
+void clone(const Triangulation&,Triangulation&);
 
 
 int main() {
@@ -209,17 +210,17 @@ int main() {
   // TODO: map Tm onto Tp
   // every step
     Triangulation Tp(domain); // particles
-    create(Tp);
-    number(Tp);
+    clone(Tm,Tp);
 
-    areas(Tp);
-    quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );
+    //    number(Tp);
+    //    areas(Tp);
+    //quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );
 
-    cout << "Assigning velocities to particles " << endl;
+    //cout << "Assigning velocities to particles " << endl;
 
-    from_mesh_v(Tm , Tp , kind::U);
+    //from_mesh_v(Tm , Tp , kind::U);
 
-    move_info(Tp);
+    //move_info(Tp);
 
 
     // iter loop
@@ -230,6 +231,8 @@ int main() {
       FT d0;
 
       displ = move( Tp , dt2 , d0 );
+
+      //      cout << "Moved half step " << endl;
 
       areas(Tp);
       quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );
@@ -392,6 +395,29 @@ int main() {
   return 0;
 
 }
+
+void clone(const Triangulation& Tfrom,Triangulation& Tto) {
+
+  for(F_v_it vit=Tfrom.vertices_begin();
+      vit != Tfrom.vertices_end();
+      vit++) {
+
+    Periodic_point pp=Tfrom.periodic_point(vit);
+    Point p=Tfrom.point(pp);
+
+    Vertex_handle fv=Tto.insert( p );
+
+    fv->rold.set( p );
+
+
+    fv->U.set( vit->U.val() );
+    fv->Uold.set( vit->U.val() );
+    fv->idx.set( vit->idx.val() );
+
+  }      
+  
+}
+
 
 
 
