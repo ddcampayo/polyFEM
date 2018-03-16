@@ -161,8 +161,6 @@ int main() {
 
   draw(Tm, mesh_file     , true);
 
-  // return 1;
-  
   simu.advance_time();
   simu.next_step();
 
@@ -210,29 +208,20 @@ int main() {
 
   // TODO: map Tm onto Tp
   // every step
-  Triangulation Tp(domain); // particles
-  create(Tp);
-  areas(Tp);
-  quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );
+    Triangulation Tp(domain); // particles
+    create(Tp);
+    number(Tp);
 
-  cout << "Assigning velocities to particles " << endl;
+    areas(Tp);
+    quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );
 
-#if defined FULL_FULL
-  {
-    Delta(Tp);
-    linear algebra_p(Tp);
-    from_mesh_full_v( Tm , Tp ,  algebra_p , kind::U);
-  }
-#elif defined FULL_LUMPED
-  from_mesh_lumped_v( Tm , Tp , kind::U);
- #elif defined FLIP
-  from_mesh_v(Tm , Tp , kind::U);
- #else
-  from_mesh_v(Tm , Tp , kind::U);
-#endif
+    cout << "Assigning velocities to particles " << endl;
+
+    from_mesh_v(Tm , Tp , kind::U);
 
     move_info(Tp);
-    
+
+
     // iter loop
     for( ; ; iter++) {
       
@@ -357,7 +346,6 @@ int main() {
     update_half_alpha( Tp );
 
     areas(Tp);
-
     quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );
 
     // this, for the looks basically .-
