@@ -28,8 +28,7 @@ for dir_step in dirs :
 
         step = int(dir_step)
 
-        time=Dt*step #+ Dt/2.0
-
+        time=Dt*step # + Dt/1.0
         
         A = np.exp( -8 * pi**2 * nu * time)
 
@@ -46,12 +45,15 @@ for dir_step in dirs :
         vx=dt[:,8]
         vy=dt[:,9]
 
+#        vx=dt[:,15]
+#        vy=dt[:,16]
+        
         vol=dt[:,3]
 
         # vol=1
 
-        fx=  A*np.sin(2*pi*x / LL)*np.cos(2*pi*y / LL)
-        fy=- A*np.cos(2*pi*x / LL)*np.sin(2*pi*y / LL)
+        fx=  A*np.sin( 2*pi * x / LL )*np.cos( 2*pi * y / LL)
+        fy=- A*np.cos( 2*pi * x / LL )*np.sin( 2*pi * y / LL)
 
         ddx=(vx-fx)**2
         ddy=(vy-fy)**2
