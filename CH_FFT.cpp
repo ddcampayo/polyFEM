@@ -548,14 +548,25 @@ void CH_FFT::all_fields_NS(const FT& aa ) {
       Complex vx = v_x(i,j);
       Complex vy = v_y(i,j);
 
-      FT den1 =  1 + aa * qq2 ;
+      // semi-implicit approach,  u^* = u_0  + vu Lapl(u^*)
+      //
+      //FT den1 =  1 + aa * qq2 ;
 
-      Complex vstar_x = vx / den1;
-      Complex vstar_y = vy / den1;
+      //Complex vstar_x = vx / den1;
+      //Complex vstar_y = vy / den1;
 
-      Complex q_dot_vstar =  qqx * vstar_x + qqy * vstar_y ;
+
+
+      // explicit approach,  u^* = u_0  + vu Lapl(u0)
+
+      FT num1 =  1 - aa * qq2 ;
+
+      Complex vstar_x = num1 * vx ;
+      Complex vstar_y = num1 * vy ;
 
       //	Complex q_dot_F_over_q2=  q_dot_F / qq2;
+
+      Complex q_dot_vstar =  qqx * vstar_x + qqy * vstar_y ;
       Complex ip = q_dot_vstar / qq2 ;
 
       press(i,j) = mimI * ip; 
