@@ -279,7 +279,8 @@ int main() {
       
       load_fields_from_fft( fft , Tm );
 
-// Search "FLIPincr" in CH_FFT.cpp to change accordingly!
+// It used to be: search "FLIPincr" in CH_FFT.cpp to change accordingly!
+// That's NOT needed anymore in latest versions
 // EITHER:
 // FLIP idea: project only increments
       
@@ -548,9 +549,12 @@ void load_fields_from_fft(const CH_FFT& fft , Triangulation& T  ) {
 
     vit->alpha.set( real( al(i,j) ) );
     vit->p.set( real( pp(i,j) ) );
+    
+    Vector_2 v1( real( vx(i,j) ) , real( vy(i,j) ) );
+    Vector_2 v0 =  vit->Uold.val();
 
     // FLIPincr trick
-    vit->Delta_U.set( Vector_2( real( vx(i,j) ) , real( vy(i,j) ) ) );
+    vit->Delta_U.set( v1 - v0 );
 
     // whole velocity
     // vit->U.set( Vector_2( real( vx(i,j) ) , real( vy(i,j) ) ) );
