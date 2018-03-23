@@ -529,16 +529,17 @@ void CH_FFT::all_fields_NS(const FT& aa ) {
   for(uint i=0; i < nx; i++)
     for(uint j=0; j < ny; j++) {
       FT qq2= q2(i,j);
-      FT den1 =  1 + aa * qq2 ;
-      FT den2 = qq2 * den1;
 
-      if( den2 < 1e-16) {
+      if( qq2 < 1e-16) {
 	press(i,j) = 0;
 	v_x(i,j) = 0;
 	v_y(i,j) = 0;
 
 	continue;
       }
+
+
+      // FT den2 = qq2 * den1;
 
       // readability.-
       FT qqx = q_x(j);
@@ -547,10 +548,15 @@ void CH_FFT::all_fields_NS(const FT& aa ) {
       Complex vx = v_x(i,j);
       Complex vy = v_y(i,j);
 
-      Complex q_dot_v =  qqx * vx + qqy * vy ;
+      FT den1 =  1 + aa * qq2 ;
+
+      Complex vstar_x = vx / den1;
+      Complex vstar_y = vy / den1;
+
+      Complex q_dot_vstar =  qqx * vstar_x + qqy * vstar_y ;
 
       //	Complex q_dot_F_over_q2=  q_dot_F / qq2;
-      Complex ip = q_dot_v / den2 ;
+      Complex ip = q_dot_vstar / qq2 ;
 
       press(i,j) = mimI * ip; 
 
@@ -561,8 +567,8 @@ void CH_FFT::all_fields_NS(const FT& aa ) {
 
       // OR:
       // The whole velocity is returned
-      v_x(i,j) = vx / den1 - qqx * ip;
-      v_y(i,j) = vy / den1 - qqy * ip;
+      v_x(i,j) = vstar_x - qqx * ip;
+      v_y(i,j) = vstar_y - qqy * ip;
 
       
     }
