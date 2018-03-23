@@ -488,8 +488,12 @@ void load_fields_on_fft( const Triangulation& T , CH_FFT& fft  ) {
 
   size_t align=fft.alignment();
 
-  c_array ux( Nb , Nb , align );
-  c_array uy( Nb , Nb , align );
+  c_array u0x( Nb , Nb , align );
+  c_array u0y( Nb , Nb , align );
+
+  // fully implicit
+  c_array uux( Nb , Nb , align );
+  c_array uuy( Nb , Nb , align );
 
   for(F_v_it vit=T.vertices_begin();
       vit != T.vertices_end();
@@ -506,15 +510,30 @@ void load_fields_on_fft( const Triangulation& T , CH_FFT& fft  ) {
     // int i = nx;
     // int j = ny;
     
-    Vector_2 vv =  vit->Uold.val();
+    Vector_2 v0 =  vit->Uold.val();
+    u0x(i,j) = v0.x();
+    u0y(i,j) = v0.y();
+
+
+    // fully implicit
+    Vector_2 vv =  vit->U.val();
+    uux(i,j) = vv.x();
+    uuy(i,j) = vv.y();
+
+
     //FT val =  vit->alpha.val();
 
-    ux(i,j) = vv.x();
-    uy(i,j) = vv.y();
+
 
   }
 
-  fft.set_u( ux , uy );
+  fft.set_u( u0x , u0y );
+  fft.set_u( u0x , u0y );
+
+  // fully implicit
+  // hack force field to store current velocity
+  fft.set_force( uux , uuy );
+  fft.set_force( uux , uuy );
   
   return;
 }

@@ -286,6 +286,7 @@ void CH_FFT::set_f(const c_array& ff) {
 }
 
 
+
 void CH_FFT::set_u(const c_array& ux, const c_array& uy ) {
 
   for(unsigned int i=0; i < nx; ++i)
@@ -318,6 +319,36 @@ void CH_FFT::set_u(const c_array& ux, const c_array& uy ) {
 }
 
 
+void CH_FFT::set_force(const c_array& ux, const c_array& uy ) {
+
+  for(unsigned int i=0; i < nx; ++i)
+    for(unsigned int j=0; j < ny; ++j)
+      force_x_r(i,j) = ux(i,j);
+
+  freq_scramble( force_x_r );
+
+  Forward2_f.fft( force_x_r , force_x );
+  
+  Forward2_f.Normalize( force_x );
+
+  freq_scramble( force_x_r );
+
+  for(unsigned int i=0; i < nx; ++i)
+    for(unsigned int j=0; j < ny; ++j)
+      force_y_r(i,j) = uy(i,j);
+
+  freq_scramble( force_y_r );
+
+  Forward2_f.fft( force_y_r , force_y );
+  
+  Forward2_f.Normalize( force_y );
+
+  freq_scramble( force_y_r );
+
+  return;
+  
+
+}
 
 
 void CH_FFT::init(void)
@@ -563,6 +594,10 @@ void CH_FFT::all_fields_NS(const FT& aa ) {
 
       Complex vstar_x = num1 * vx ;
       Complex vstar_y = num1 * vy ;
+
+
+
+
 
       //	Complex q_dot_F_over_q2=  q_dot_F / qq2;
 

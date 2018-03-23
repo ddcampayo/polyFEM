@@ -117,6 +117,7 @@ class CH_FFT {
 
   void set_f(const c_array& ); 
   void set_u(const c_array& , const c_array& );
+  void set_force(const c_array& , const c_array& );
   
   c_array field_f() const {return fr;}
   c_array field_fq() const {return f;}
