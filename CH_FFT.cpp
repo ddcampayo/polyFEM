@@ -578,34 +578,34 @@ void CH_FFT::all_fields_NS(const FT& aa ) {
 
 
       // semi-implicit approach,  u^* = u_0  + vu Lapl(u^*)
-      //
-      // FT den1 = 1/ ( 1 + aa * qq2 ) ;
-      // Complex vx = v_x(i,j);
-      // Complex vy = v_y(i,j);
-      // Complex vstar_x = vx / den1 ;
-      // Complex vstar_y = vy / den1 ;
+      // This is the most stable
+      FT den1 =  1 + aa * qq2 ;
+      Complex vx = v_x(i,j);
+      Complex vy = v_y(i,j);
+      Complex vstar_x = vx / den1 ;
+      Complex vstar_y = vy / den1 ;
 
 
       // explicit approach,  u^* = u_0  + vu Lapl(u0)
 
-      //      FT num1 =  1 - aa * qq2 ;
-      // Complex vx = v_x(i,j);
-      // Complex vy = v_y(i,j);
+     // FT num1 =  1 - aa * qq2 ;
+     // Complex vx = v_x(i,j);
+     // Complex vy = v_y(i,j);
 
-      // Complex vstar_x = num1 * vx ;
-      // Complex vstar_y = num1 * vy ;
+     // Complex vstar_x = num1 * vx ;
+     // Complex vstar_y = num1 * vy ;
 
       
       // fully implicit approach,  u^* = u_0  + vu Lapl(u)
       //
-      Complex v0x = v_x(i,j);
-      Complex v0y = v_y(i,j);
+//      Complex v0x = v_x(i,j);
+//      Complex v0y = v_y(i,j);
 
-      Complex vx = force_x(i,j);
-      Complex vy = force_y(i,j);
+//      Complex vx = force_x(i,j);
+//      Complex vy = force_y(i,j);
       
-      Complex vstar_x = v0x - aa * qq2 * vx ;
-      Complex vstar_y = v0y - aa * qq2 * vy ;
+//      Complex vstar_x = v0x - aa * qq2 * vx ;
+//      Complex vstar_y = v0y - aa * qq2 * vy ;
 
       //	Complex q_dot_F_over_q2=  q_dot_F / qq2;
 
