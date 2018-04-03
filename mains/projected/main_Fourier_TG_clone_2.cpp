@@ -38,8 +38,8 @@ Iso_rectangle domain(-LL/2, -LL/2, LL/2, LL/2);
 
 sim_pars simu;
 
-#define FULL
-//#define FULL_FULL
+//#define FULL
+#define FULL_FULL
 //#define FULL_LUMPED
 //#define FLIP
 
