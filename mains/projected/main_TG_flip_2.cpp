@@ -57,7 +57,7 @@ sim_pars simu;
 Triangulation Tp(domain); // particles
 Triangulation Tm(domain); // mesh
 
-void create(Triangulation&);
+void create(Triangulation&, bool perturb = false );
 
 int main() {
 
@@ -69,8 +69,8 @@ int main() {
 
   simu.read();
 
-  create(Tm);
-  create(Tp);
+  create(Tm, false ); // the mesh must never be perturbed away from a lattice
+  create(Tp, simu.perturb() ) ; // particles may
 
   if(simu.create_points()) {
     set_fields_TG(Tp);
@@ -379,7 +379,7 @@ int main() {
 
 
 
-void create(Triangulation& Tp) {
+void create(Triangulation& Tp, bool perturb ) {
 
   int N=simu.no_of_particles();
   std::vector<Point> points;
@@ -417,7 +417,7 @@ void create(Triangulation& Tp) {
       //      for(int i = 0 ; i < Nb ; ++i )
 	
       
-      if(simu.perturb()) {
+      if(perturb) {
 	CGAL::perturb_points_2(
 			       points.begin(), points.end(),
 			       simu.pert_rel()* spacing );//,Creator());
