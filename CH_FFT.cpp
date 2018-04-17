@@ -134,9 +134,8 @@ void CH_FFT::freq_scramble( c_array& f)
 void CH_FFT::draw(const std::string& name, const int time, const c_array& ff ) {
 
   std::stringstream  namefile;
-  namefile << "field_" << name << "_" << time << ".dat";
-
-  //  cout << "writing on file : " << namefile.str() << endl;
+  namefile << simu.current_step() << '/' <<
+    "field_" << name << ".dat";
 
   std::ofstream main_data;
 

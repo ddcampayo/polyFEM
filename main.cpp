@@ -1,18 +1,25 @@
+// polyFEM
+// with mass matrix, and all
 // plus, correction to quadratic consistency
 // periodic boundary conditions
 
-// particle re-creation!
+// Solves NS equation for an incompressible
+// fluid in Fourier space
 
+// particle re-creation!
 
 #include <CGAL/Timer.h>
 
 // write out matrices
 //#define WRITE
 
-//  #define EXPLICIT
+//#define EXPLICIT
 
 #include"main.h"
+#include"CH_FFT.h"
+
 #include"sim_pars.h"
+
 #include"linear.h"
 
 #include"fields.h"
@@ -31,19 +38,10 @@ Iso_rectangle domain(-LL/2, -LL/2, LL/2, LL/2);
 
 sim_pars simu;
 
-//const Eigen::IOFormat OctaveFmt(Eigen::StreamPrecision, 0, ", ", ";\n", "", "", "[", "];");
-
-
-// with mass matrix, and all
-// stuff only used here:
-
 //#define FULL
 #define FULL_FULL
 //#define FULL_LUMPED
 //#define FLIP
-
-///////////
-
 
 #ifdef FULL_FULL
 #define FULL
@@ -53,11 +51,17 @@ sim_pars simu;
 #define FULL
 #endif
 
-
 #include"onto_from_mesh.h"
 
+
+//const Eigen::IOFormat OctaveFmt(Eigen::StreamPrecision, 0, ", ", ";\n", "", "", "[", "];");
+
+
+//Triangulation Tp(domain); // particles
 Triangulation Tm(domain); // mesh
 
+void load_fields_on_fft(const Triangulation& T , CH_FFT& fft  );
+void load_fields_from_fft(const CH_FFT& fft , Triangulation& T  );
 void create(Triangulation&);
 void clone(const Triangulation&,Triangulation&);
 
@@ -72,33 +76,92 @@ int main() {
 
   simu.read();
 
-  create( Tm );
-
+  create(Tm);
+  
   if(simu.create_points()) {
-    set_fields_TG(Tm);
+
+    //    set_alpha_circle( Tp , 2);
+    //    set_alpha_under_cos(  Tp ) ;
+
+
+    
+    cout << "Creating velocity field " << endl;
+
+    set_fields_TG( Tm ) ;
+    //set_fields_cos( Tm ) ;
+        
+    cout << "Numbering mesh " << endl;
+
     number(Tm);
   }
 
+  int Nb=sqrt( simu.no_of_particles() + 1e-12);
 
+  // Set up fft, and calculate initial velocities:
+  
+  move_info( Tm );
 
+  CH_FFT fft( LL , Nb );
+
+  load_fields_on_fft( Tm , fft );
+
+  FT dt=simu.dt();
+  FT mu=simu.mu();
+  
+  fft.all_fields_NS( dt * mu );
+
+  fft.draw( "phi", 0, fft.field_f() );
+
+  fft.draw( "press", 0, fft.field_p() );
+
+  fft.draw( "vel_x", 0, fft.field_vel_x() );
+
+  fft.draw( "vel_y", 0, fft.field_vel_y() );
+  
+  load_fields_from_fft( fft, Tm );
+  
   // just once!
   linear algebra(Tm);
 
   areas(Tm);
   quad_coeffs(Tm , simu.FEMm() ); volumes(Tm, simu.FEMm() );
 
-  if(simu.create_points()) {
-    nabla(Tm);
-    Delta(Tm);
-  }
-  
-  move_info(Tm);
+  cout << "Setting up diff ops " << endl;
+
+  // TODO: Are these two needed at all?
+  //  if(simu.create_points()) {
+  //  nabla(Tm);
+  // TODO, they are, not too clear why
+  Delta(Tm);
+    //  }
 
   const std::string mesh_file("mesh.dat");
   const std::string particle_file("particles.dat");
 
-  draw(Tm, mesh_file     , true);
+  // // step 0 draw.-
+  //   draw(Tm, mesh_file     , true);
+  //   draw(Tp, particle_file , true);
   
+
+// #if defined FULL_FULL
+//   {
+//     Delta(Tp);
+//     linear algebra_p(Tp);
+//     from_mesh_full( Tm , Tp ,  algebra_p,kind::ALPHA);
+//   }
+// #elif defined FULL_LUMPED
+//   from_mesh_lumped( Tm , Tp , kind::ALPHA);
+//  #elif defined FLIP
+//   from_mesh(Tm , Tp , kind::ALPHA);
+//  #else
+//   from_mesh(Tm , Tp , kind::ALPHA);
+// #endif
+
+  cout << "Moving info" << endl;
+  move_info( Tm );
+
+  draw(Tm, mesh_file     , true);
+
   simu.advance_time();
   simu.next_step();
 
@@ -111,6 +174,8 @@ int main() {
   std::ofstream log_file;
 
   log_file.open("main.log");
+
+  bool is_overdamped = ( simu.mu() > 1 ) ; // high or low Re
 
   for(;
       simu.current_step() <= simu.Nsteps();
@@ -132,8 +197,8 @@ int main() {
     FT min_displ=1e10;
     int min_iter=0;
 
-    const int max_iter=10;
-    const FT  max_displ= 1e-8; // < 0 : disable
+    const int max_iter=8; //10;
+    const FT  max_displ=  1e-8; // < 0 : disable
 
 //  leapfrog, special first step.-
 //    if(simu.current_step() == 1) dt2 *= 0.5;
@@ -142,17 +207,25 @@ int main() {
 
     move_info(Tm);
 
+  // TODO: map Tm onto Tp
+  // every step
     Triangulation Tp(domain); // particles
     clone(Tm,Tp);
-    
-    // FLIP idea: set initial increment to null
-    //    reset_v( Tm , kind::DELTAU);
-    
-    for( ; iter<max_iter ; iter++) {
 
-      zero_mean_v( Tp, kind::U);
+    //    number(Tp);
+    //    areas(Tp);
+    //quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );
+
+    //cout << "Assigning velocities to particles " << endl;
+
+    //from_mesh_v(Tm , Tp , kind::U);
+
+    //move_info(Tp);
 
 
+    // iter loop
+    for( ; ; iter++) {
+      
       // comment for no move.-
       cout << "Moving half step " << endl;
       FT d0;
@@ -170,76 +243,97 @@ int main() {
 	<< displ << " from previous"
 	<< endl;
 
-      
       if( displ < min_displ) {
 	min_displ=displ;
 	min_iter=iter;
       }
 
-      cout << "iter " << iter << "  ; relative displacement:  " << displ << endl;
+      if( (displ < max_displ) && (iter !=0) )  {
+	cout << "Convergence in  " << iter << " iterations " << endl;
+	break;
+      }
 
-      if(displ < max_displ) break;
+      if(  iter == max_iter-1 )  {
+	cout << "Exceeded  " << iter-1 << " iterations " << endl;
+	break;
+      }
 
-      cout << "Proj U0 onto mesh " << endl;
+      cout << "Proj advected U0 velocities onto mesh " << endl;
 
 #if defined FULL
       onto_mesh_full_v(Tp,Tm,algebra,kind::UOLD);
 #elif defined FLIP
-      flip_volumes(Tp , Tm , simu.FEMm() );
+      flip_volumes   (Tp , Tm , simu.FEMm() );
       onto_mesh_flip_v(Tp,Tm,simu.FEMm(),kind::UOLD);
 #else
       onto_mesh_delta_v(Tp,Tm,kind::UOLD);
 #endif
 
-      //      Tm.transfer_v(
+      load_fields_on_fft( Tm , fft );
 
-      cout << "Calculating Ustar implicitely" << endl;
-
-      algebra.ustar_inv(kind::USTAR,  dt2 , kind::UOLD,  false, false);
-//      algebra.ustar_inv(kind::USTAR,  0 , kind::UOLD,  false, false);
+      FT b = mu * dt2;
+     
+      fft.all_fields_NS( b );
+  
+//      fft.evolve( b );
       
-      cout << "Solving PPE" << endl;
+      load_fields_from_fft( fft , Tm );
+
+// It used to be: search "FLIPincr" in CH_FFT.cpp to change accordingly!
+// That's NOT needed anymore in latest versions
+// EITHER:
+// FLIP idea: project only increments
       
-      algebra.PPE( kind::USTAR, dt2 , kind:: P );
-
-      cout << "Calculating grad p" << endl;
-      algebra.gradient(kind::P, kind::GRADP);
-
-      cout << "Evolving U " << endl;
-
-    //      u_new( dt );
-      u_new( Tm , dt2 );
-
-
-      cout << "Proj Delta U from mesh " << endl;
-
-      // FLIP idea: tranfer velocity _increment_ to particles
+       cout << "Proj Delta U from mesh onto particles" << endl;
       
-#if defined FULL_FULL
-      {
-	Delta(Tp);
-	linear algebra_p(Tp);
-	from_mesh_full_v(Tm, Tp, algebra_p , kind::DELTAU);
-	//	from_mesh_full_v(Tm, Tp, algebra_p , kind::UOLD);
-      }
-#elif defined FULL_LUMPED
-      from_mesh_lumped_v(Tm, Tp, kind::DELTAU);
-      //      from_mesh_lumped_v(Tm, Tp, kind::UOLD);
-#elif defined FLIP
-      from_mesh_v(Tm, Tp, kind::DELTAU);
-      //      from_mesh_v(Tm, Tp, kind::UOLD);
-#else
-      from_mesh_v(Tm, Tp, kind::DELTAU);
-      //      from_mesh_v(Tm, Tp, kind::UOLD);
-#endif
+ #if defined FULL_FULL
+       {
+ 	Delta(Tp);
+ 	linear algebra_p(Tp);
+ 	from_mesh_full_v(Tm, Tp, algebra_p , kind::DELTAU);
+       }
+ #elif defined FULL_LUMPED
+       from_mesh_lumped_v(Tm, Tp, kind::DELTAU);
+ #elif defined FLIP
+       from_mesh_v(Tm, Tp, kind::DELTAU);
+ #else
+       from_mesh_v(Tm, Tp, kind::DELTAU);
+ #endif
 
-      // FLIP idea: apply velocity _increment_ to particles
+       incr_v( Tp ,  kind::UOLD , kind::DELTAU , kind::U );
 
-      incr_v( Tp ,  kind::UOLD , kind::DELTAU , kind::U );
 
-    }
+// OR:
+// project the whole velocity
+      
+//      cout << "Proj U from mesh onto particles" << endl;
+//      
+//#if defined FULL_FULL
+//      {
+//	Delta(Tp);
+//	linear algebra_p(Tp);
+//	from_mesh_full_v(Tm, Tp, algebra_p , kind::U);
+//      }
+//#elif defined FULL_LUMPED
+//      from_mesh_lumped_v(Tm, Tp, kind::U);
+//#elif defined FLIP
+//      from_mesh_v(Tm, Tp, kind::U);
+//#else
+//      from_mesh_v(Tm, Tp, kind::U);
+//#endif
 
-    zero_mean_v( Tp, kind::U);
+      
+
+      
+      // // substract spurious overall movement.-      
+
+      //      zero_mean_v( Tm , kind::FORCE);
+
+    } // iter loop
+
+    cout << "Writing acceleration FT " << endl;
+    
+    fft.draw( "accel", 0 , fft.field_f() );
 
     cout << "Moving whole step: relative ";
 
@@ -254,50 +348,48 @@ int main() {
     
       // comment for no move.-
 
-    update_half_velocity( Tp , false ); 
+    update_half_velocity( Tp , is_overdamped ); 
 
-    //    update_half_velocity( Tm , false ); 
-
-    zero_mean_v( Tp, kind::U);
+    update_half_alpha( Tp );
 
     areas(Tp);
-
     quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );
 
-    cout << "Proj U_t+1 onto mesh " << endl;
+    // this, for the looks basically .-
+    
+    cout << "Proj U_t+1 , alpha_t+1 onto mesh " << endl;
 
 #if defined FULL
     onto_mesh_full_v(Tp,Tm,algebra,kind::U);
+    onto_mesh_full  (Tp,Tm,algebra,kind::ALPHA);
 #elif defined FLIP
     flip_volumes(Tp , Tm , simu.FEMm() );
     onto_mesh_flip_v(Tp,Tm,simu.FEMm(),kind::U);
+    onto_mesh_flip  (Tp,Tm,simu.FEMm(),kind::ALPHA);
 #else
     onto_mesh_delta_v(Tp,Tm,kind::U);
+    onto_mesh_delta  (Tp,Tm,kind::ALPHA);
 #endif
 
-    
-    
+    if(simu.current_step()%simu.every()==0) {
+      draw(Tm, mesh_file     , true);
+      draw(Tp, particle_file , true);
+      //      fft.histogram( "phi", simu.current_step() , fft.field_fq() );
+    }
+
     move_info( Tm );
     move_info( Tp );
-
-    if(simu.current_step()%simu.every()==0)
-      {
-	draw(Tm, mesh_file     , true);
-	draw(Tp, particle_file , false);
-      }
-
+    
     log_file
       << simu.current_step() << "  "
-      <<  simu.time() << "  " ;
+      << simu.time() << "  " ;
 
-    integrals( Tm , log_file);     log_file << "  ";
-    fidelity(Tm,log_file );        log_file << "  ";
-    integrals( Tp , log_file);     log_file << "  ";
-    fidelity(  Tp , log_file );        log_file << endl;
+    // integrals( Tp , log_file);     log_file << "  ";
+    // fidelity(  Tp , log_file );    log_file << endl;
 
     simu.advance_time();
 
-  }
+  } // time loop
 
   time.stop();
 
@@ -308,9 +400,34 @@ int main() {
 
 }
 
+void clone(const Triangulation& Tfrom,Triangulation& Tto) {
+
+  for(F_v_it vit=Tfrom.vertices_begin();
+      vit != Tfrom.vertices_end();
+      vit++) {
+
+    Periodic_point pp=Tfrom.periodic_point(vit);
+    Point p=Tfrom.point(pp);
+
+    Vertex_handle fv=Tto.insert( p );
+
+    fv->rold.set( p );
+
+    fv->U.set( vit->U.val() );
+    fv->Uold.set( vit->U.val() );
+
+    fv->idx.set( vit->idx.val() );
+
+  }      
+
+  return;
+  
+}
 
 
-void create(Triangulation& Tp ) {
+
+
+void create(Triangulation& Tp) {
 
   int N=simu.no_of_particles();
   std::vector<Point> points;
@@ -348,7 +465,7 @@ void create(Triangulation& Tp ) {
       //      for(int i = 0 ; i < Nb ; ++i )
 	
       
-      if( false ) {
+      if(simu.perturb()) {
 	CGAL::perturb_points_2(
 			       points.begin(), points.end(),
 			       simu.pert_rel()* spacing );//,Creator());
@@ -368,43 +485,146 @@ void create(Triangulation& Tp ) {
 }
 
 
-void clone(const Triangulation& Tfrom,Triangulation& Tto) {
+void load_fields_on_fft( const Triangulation& T , CH_FFT& fft  ) {
 
-  for(F_v_it vit=Tfrom.vertices_begin();
-      vit != Tfrom.vertices_end();
+  int Nb = fft.Nx();
+
+  size_t align=fft.alignment();
+
+  c_array u0x( Nb , Nb , align );
+  c_array u0y( Nb , Nb , align );
+
+  // fully implicit
+  c_array uux( Nb , Nb , align );
+  c_array uuy( Nb , Nb , align );
+
+  for(F_v_it vit=T.vertices_begin();
+      vit != T.vertices_end();
       vit++) {
 
-    Periodic_point pp=Tfrom.periodic_point(vit);
-    Point p=Tfrom.point(pp);
+    int nx = vit->nx.val();
+    int ny = vit->ny.val();
 
-    Vertex_handle fv=Tto.insert( p );
+    // "right" ordering 
+    int i = ( Nb - 1 ) - ny ;
+    int j = nx;
 
-    fv->rold.set( p );
+    // "wrong" ordering
+    // int i = nx;
+    // int j = ny;
+    
+    Vector_2 v0 =  vit->Uold.val();
+    u0x(i,j) = v0.x();
+    u0y(i,j) = v0.y();
 
-    fv->U.set( vit->U.val() );
-    fv->Uold.set( vit->U.val() );
+    // fully implicit
+    //Vector_2 vv =  vit->U.val();
+    //uux(i,j) = vv.x();
+    //uuy(i,j) = vv.y();
 
-    fv->idx.set( vit->idx.val() );
 
-  }      
+    //FT val =  vit->alpha.val();
 
-  return;
+
+
+  }
+
+  fft.set_u( u0x , u0y );
+
+  // fully implicit
+  // hack force field to store current velocity
+  //  fft.set_force( uux , uuy );
   
+  return;
 }
 
+
+
+void load_fields_from_fft(const CH_FFT& fft , Triangulation& T  ) {
+
+  int Nb = fft.Nx();
+
+  c_array vx = fft.field_vel_x();
+  c_array vy = fft.field_vel_y();
+
+  c_array al = fft.field_f();
+
+  c_array pp = fft.field_p();
+
+  for(F_v_it vit=T.vertices_begin();
+      vit != T.vertices_end();
+      vit++) {
+
+    int nx = vit->nx.val();
+    int ny = vit->ny.val();
+
+    // "right" ordering 
+    int i = ( Nb - 1 ) - ny ;
+    int j = nx;
+
+    // "wrong" ordering
+    // int i = nx;
+    // int j = ny;
+
+    vit->alpha.set( real( al(i,j) ) );
+    vit->p.set( real( pp(i,j) ) );
+    
+    Vector_2 v1( real( vx(i,j) ) , real( vy(i,j) ) );
+    Vector_2 v0 =  vit->Uold.val();
+
+    // FLIPincr trick
+    vit->Delta_U.set( v1 - v0 );
+
+    // whole velocity
+    // vit->U.set( Vector_2( real( vx(i,j) ) , real( vy(i,j) ) ) );
+
+    //  TODO: return more fields (chem pot, pressure, force, etc)
+  }
+
+  return;
+}
 
 
 
 void number(Triangulation& T) {
 
-  int i=0;
+  int idx=0;
 
+  int N=simu.no_of_particles();
+
+  int Nb=sqrt(N + 1e-12);
+    
+  FT spacing=LL/FT(Nb+0);
+  FT side=LL-1*spacing;
+
+  
   for(F_v_it vit=T.vertices_begin();
       vit != T.vertices_end();
       vit++) {
     //    vit->indx.set(i); //or
-    vit->idx=i;
-    ++i;
+    vit->idx = idx;
+
+    FT x = vit->point().x() + side/2.0;
+    FT y = vit->point().y() + side/2.0;
+
+    int i = rint(  FT(Nb) * x / LL );//+ 0.5);
+    int j = rint(  FT(Nb) * y / LL );//+ 0.5);
+
+    //    --i; --j;
+    
+    vit->nx = i;
+    vit->ny = j;
+
+    // cout << idx
+    // 	 << "  " << i
+    //   	 << "  " << j
+    //   	 << "  " << x
+    //   	 << "  " << y
+    // 	 << endl;
+
+
+    ++idx;
+
   }
 
   return;
