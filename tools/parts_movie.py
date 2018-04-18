@@ -21,14 +21,14 @@ dirs.sort( key = float )
 
 import pylab as pl
 
-for dir_step in dirs[0:] :
+for dir_step in dirs[1:] :
 
     step = int(dir_step)
 
     time=Dt*step #+ Dt/2.0
     pl.clf()
 
-    dtm=pl.loadtxt(str(step)+'/particles.dat')
+    dtm=pl.loadtxt(str(step)+'/mesh.dat')
     #    dtm=pl.loadtxt(path+str(n)+'/mesh.dat')
 
     xm=dtm[:,0]; ym=dtm[:,1];  pm=dtm[:,5];
@@ -37,11 +37,12 @@ for dir_step in dirs[0:] :
     vel=vxm**2+vym**2
 
     #    pl.scatter( xm , ym , c=alm, s=80, vmin= -limits , vmax= limits)
-    pl.scatter( xm , ym , c=vel, s=80/LL , cmap= pl.cm.bwr , linewidths=0 )
+    pl.scatter( xm , ym , c= pm , s=80/LL , cmap= pl.cm.bwr , linewidths=0 )
+    pl.colorbar()
+    pl.quiver( xm , ym , vxm , vym )
 
     pl.xlim([ -LL/2 , LL/2 ])
     pl.ylim([ -LL/2 , LL/2 ])
-    pl.colorbar()
     #    pl.colorbar(ticks=[0.45,0.55])
     #    pl.savefig('parts'+str(n/skip)  )
 
