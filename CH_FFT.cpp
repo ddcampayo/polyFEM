@@ -137,6 +137,8 @@ void CH_FFT::draw(const std::string& name, const int time, const c_array& ff ) {
   namefile << time << '/' <<
     "field_" << name << ".dat";
 
+  cout << "FFT draw on file " <<  namefile.str() << endl;
+  
   std::ofstream main_data;
 
   main_data.open(namefile.str().c_str() );

@@ -328,10 +328,10 @@ int main() {
 
     } // iter loop
 
-    cout << "Writing acceleration FT " << endl;
+    // cout << "Writing acceleration FT " << endl;
     
-    fft.draw( "accel_x", 0 , fft.field_grad_mu_q_x() );
-    fft.draw( "accel_y", 0 , fft.field_grad_mu_q_y() );
+    // fft.draw( "accel_x", simu.current_step() , fft.field_grad_mu_q_x() );
+    // fft.draw( "accel_y", simu.current_step() , fft.field_grad_mu_q_y() );
 
     cout << "Moving whole step: relative ";
 
@@ -372,7 +372,8 @@ int main() {
     if(simu.current_step()%simu.every()==0) {
       draw(Tm, mesh_file     , true);
       draw(Tp, particle_file , true);
-      //      fft.histogram( "phi", simu.current_step() , fft.field_fq() );
+      fft.histogram("accel_x", simu.current_step() , fft.field_grad_mu_q_x() );
+      fft.histogram("accel_y", simu.current_step() , fft.field_grad_mu_q_y() );
     }
 
     move_info( Tm );
@@ -380,7 +381,7 @@ int main() {
     
     log_file
       << simu.current_step() << "  "
-      << simu.time() << "  " ;
+      << simu.time() << "  " << endl ;
 
     // integrals( Tp , log_file);     log_file << "  ";
     // fidelity(  Tp , log_file );    log_file << endl;
