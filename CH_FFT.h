@@ -125,6 +125,8 @@ class CH_FFT {
   c_array field_p() const {return press_r;}
   c_array field_grad_mu_x() const {return grad_mu_x_r;}
   c_array field_grad_mu_y() const {return grad_mu_y_r;}
+  c_array field_grad_mu_q_x() const {return grad_mu_x;}
+  c_array field_grad_mu_q_y() const {return grad_mu_y;}
   c_array field_force_x() const {return force_x_r;}
   c_array field_force_y() const {return force_y_r;}
   c_array field_vel_x() const {return v_x_r;}

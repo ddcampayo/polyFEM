@@ -103,22 +103,14 @@ int main() {
 
   CH_FFT fft( LL , Nb );
 
-  load_fields_on_fft( Tm , fft );
+  //  load_fields_on_fft( Tm , fft );
 
   FT dt=simu.dt();
   FT mu=simu.mu();
   
-  fft.all_fields_NS( dt * mu );
-
-  fft.draw( "phi", 0, fft.field_f() );
-
-  fft.draw( "press", 0, fft.field_p() );
-
-  fft.draw( "vel_x", 0, fft.field_vel_x() );
-
-  fft.draw( "vel_y", 0, fft.field_vel_y() );
+  //  fft.all_fields_NS( dt * mu );
   
-  load_fields_from_fft( fft, Tm );
+  //  load_fields_from_fft( fft, Tm );
   
   // just once!
   linear algebra(Tm);
@@ -162,6 +154,11 @@ int main() {
 
   draw(Tm, mesh_file     , true);
 
+  //fft.draw( "phi", 0, fft.field_f() );
+  //fft.draw( "press", 0, fft.field_p() );
+  //fft.draw( "vel_x", 0, fft.field_vel_x() );
+  //fft.draw( "vel_y", 0, fft.field_vel_y() );
+  
   simu.advance_time();
   simu.next_step();
 
@@ -333,7 +330,8 @@ int main() {
 
     cout << "Writing acceleration FT " << endl;
     
-    fft.draw( "accel", 0 , fft.field_f() );
+    fft.draw( "accel_x", 0 , fft.field_grad_mu_q_x() );
+    fft.draw( "accel_y", 0 , fft.field_grad_mu_q_y() );
 
     cout << "Moving whole step: relative ";
 

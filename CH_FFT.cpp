@@ -134,7 +134,7 @@ void CH_FFT::freq_scramble( c_array& f)
 void CH_FFT::draw(const std::string& name, const int time, const c_array& ff ) {
 
   std::stringstream  namefile;
-  namefile << simu.current_step() << '/' <<
+  namefile << time << '/' <<
     "field_" << name << ".dat";
 
   std::ofstream main_data;
@@ -620,9 +620,20 @@ void CH_FFT::all_fields_NS(const FT& aa ) {
 
       // OR:
       // The whole velocity is returned
+
+      // hack: the increment is stored in grad_mu
+      grad_mu_x(i,j) = v_x(i,j) ;
+
       v_x(i,j) = vstar_x - qqx * ip;
+
+      grad_mu_x(i,j) = v_x(i,j) - grad_mu_x(i,j);
+
+      grad_mu_y(i,j) = v_y(i,j) ;
+      
       v_y(i,j) = vstar_y - qqy * ip;
 
+      grad_mu_y(i,j) = v_y(i,j) - grad_mu_y(i,j);
+      
       
     }
 
