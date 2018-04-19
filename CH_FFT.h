@@ -131,6 +131,8 @@ class CH_FFT {
   c_array field_force_y() const {return force_y_r;}
   c_array field_vel_x() const {return v_x_r;}
   c_array field_vel_y() const {return v_y_r;}
+  c_array field_vel_q_x() const {return v_x;}
+  c_array field_vel_q_y() const {return v_y;}
 
   int Nx() const {return nx;}
   size_t alignment() const {return align;}

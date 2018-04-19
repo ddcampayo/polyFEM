@@ -374,6 +374,8 @@ int main() {
       draw(Tp, particle_file , true);
       fft.histogram("accel_x", simu.current_step() , fft.field_grad_mu_q_x() );
       fft.histogram("accel_y", simu.current_step() , fft.field_grad_mu_q_y() );
+      fft.histogram("vel_x", simu.current_step() , fft.field_vel_q_x() );
+      fft.histogram("vel_y", simu.current_step() , fft.field_vel_q_y() );
     }
 
     move_info( Tm );

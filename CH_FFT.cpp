@@ -680,6 +680,12 @@ void CH_FFT::evolve(const FT b) {
 
 }
 
+
+// This is actually a circular distribution in Fourier space
+// Not really a histogram, since no binning is done. It
+// resembles a histogram because data with the same q_x^2 + q_y^2
+// will end up averaged, for this q^2 value
+
 void CH_FFT::histogram(const std::string& name,
 		       const int time, const c_array& ff ) {
 
