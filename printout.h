@@ -19,4 +19,5 @@ main_data
 << vit->gradchempot.val() << "  "  //  23 & 24
 << vit->nx.val()  << "  "  //  25
 << vit->ny.val()  << "  "  //  26
+<< vit->Delta_U.val() << "  "  //  27 & 28
 << endl;

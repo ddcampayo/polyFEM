@@ -35,10 +35,26 @@ vy=dty[ 1: , 1]
 # Kinetic energy
 vv = (vx**2 + vy**2)/2
 
-tiny=1e-30
+tiny=1e-16
 
 pl.plot( qq , np.log( vv + tiny) )
 
 pl.savefig('vel_'+step+'.png')
 
-np.savetxt('power_K' + step+ '.dat', np.column_stack(( qq , vv )) )
+# print only non-vanishing values:
+
+#mat = np.column_stack( ( qq , vv ) )
+
+outf = open('power_K' + step+ '.dat','w')
+
+idx = 0
+
+for index, vv2 in np.ndenumerate(vv) :
+   if (vv2 > tiny) :
+     outf.write( ' %g %g \n' % ( qq[idx] , vv2 ) )
+
+   idx += 1
+
+outf.close()
+
+#np.savetxt('power_K' + step+ '.dat', np.column_stack(( qq , vv )) )

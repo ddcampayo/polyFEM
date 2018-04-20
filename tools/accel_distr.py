@@ -13,9 +13,9 @@ if len(sys.argv) == 1:
 else:
    step=sys.argv[1]
 
-dtx = np.loadtxt(step+'/histo_accel_x.dat', dtype = np.float64)
+dtx = np.loadtxt(step+'/mesh.dat', dtype = np.float64)
 
-ax=dtx[ : , 1]
+ax=dtx[ : , 27]
 
 nbins = int(ax.size/10)
 
@@ -27,7 +27,7 @@ pdf_ax_x = np.zeros(h_size)
 pdf_ax_y = np.zeros(h_size)
 
 for k in range(h_size):
-    pdf_ax_x[k] = 0.5*(bins[k]+bins[k+1])
+    pdf_ax_x[k] = 0.5*( bins[k]+bins[k+1] )
     pdf_ax_y[k] = ha_x[k]
 
 pl.plot(pdf_ax_x, pdf_ax_y)
