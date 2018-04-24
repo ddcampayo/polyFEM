@@ -2,7 +2,7 @@
 
 import pylab as pl
 
-def grid(x, y, z , resX=100, resY=100):
+def grid(x, y, z , resX=90, resY=90):
     "Convert 3 column data to matplotlib grid"
     xi = pl.linspace(min(x), max(x), resX)
     yi = pl.linspace(min(y), max(y), resY)
