@@ -15,7 +15,8 @@ if len(sys.argv) == 1:
 else:
    step=sys.argv[1]
 
-dtx = np.loadtxt(step+'/mesh.dat', dtype = np.float64)
+#dtx = np.loadtxt(step+'/mesh.dat', dtype = np.float64)
+dtx = np.loadtxt('./mesh.dat', dtype = np.float64)
 
 ax=dtx[ : , 27]
 

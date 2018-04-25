@@ -773,3 +773,73 @@ void CH_FFT::histogram(const std::string& name,
 
 
 }
+
+
+// Like histogram above, but no averaging whatsoever is done
+
+void CH_FFT::power(const std::string& name,
+		       const int time, const c_array& ff ) {
+
+  histo.clear();
+
+  
+  for(uint i=0; i < nx; i++)
+    for(uint j=0; j < ny; j++) {
+      // FT qq=sqrt( q2(i,j) );
+
+      FT re=real( ff(i,j) );
+      FT im=imag( ff(i,j) );
+
+      int ii = i - nx /2.0  ;
+
+      int jj = j - ny /2.0 ;
+
+      long int iijj= ii * ii + jj * jj;
+
+      //      hist_data data;
+
+      histo[iijj].f += re*re + im*im ;
+      ++histo[iijj].count;
+
+      if(histo[iijj].count == 1) { // 1st time
+
+	FT qqx= q_x(j);
+	FT qqy= q_y(i);
+
+	histo[iijj].q2 =  qqx*qqx + qqy*qqy;
+      }
+      
+      
+
+    }
+
+  std::map<long int,hist_data>::iterator it;
+
+  std::stringstream  namefile;
+  namefile << time << "/histo_" << name << ".dat";
+
+  cout << "writing power spectrum on file : " << namefile.str() << endl;
+
+  std::ofstream main_data;
+
+  main_data.open(namefile.str().c_str() );
+
+  for ( it = histo.begin(); it != histo.end(); it++ ) {
+
+    FT qq = sqrt(it->second.q2 );
+    FT ff = it->second.f;
+    
+    main_data << qq
+              << "  "
+              << ff
+	      // << "  "
+              // << it->second.count
+              << std::endl ;
+  }
+  
+  main_data.close();
+
+  return;
+
+
+}

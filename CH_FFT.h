@@ -108,6 +108,7 @@ class CH_FFT {
   void vel_fields(void);
   void evolve( const FT );
   void histogram(const std::string& name, const int time, const c_array& ff );
+  void power(const std::string& name, const int time, const c_array& ff );
 
   void set_f(const uint i,const uint j, const FT val) {
     fr(i,j).re = val;

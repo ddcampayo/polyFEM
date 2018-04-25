@@ -33,7 +33,11 @@ dty = np.loadtxt(step+'/histo_vel_y.dat', dtype = np.float64)
 vy=dty[ 1: , 1]
 
 # Kinetic energy
-vv = (vx**2 + vy**2)/2
+#vv = (vx**2 + vy**2)/2
+
+#I _think_ velocities are already squared
+
+vv = (vx + vy)/2
 
 tiny=1e-16
 
