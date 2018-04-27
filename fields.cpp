@@ -41,6 +41,24 @@ void set_forces_Kolmo(Triangulation& T) {
   return;
 }
 
+void set_forces_Kolmo(Triangulation& T, const int nn ) {
+
+  FT f0 = 4 * M_PI * M_PI * simu.v0() ;
+
+  for(F_v_it vit=T.finite_vertices_begin();
+      vit != T.finite_vertices_end();
+      vit++) {
+
+    FT y = vit->point().y();
+
+    vit->force.set( f0 * Vector_2(field_cos( nn * y ) , 0) );
+  }
+
+  return;
+}
+
+
+
 void set_fields_cos(Triangulation& T) {
 
   for(F_v_it vit=T.finite_vertices_begin();

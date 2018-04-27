@@ -551,7 +551,7 @@ void CH_FFT::vel_fields_NS( void )
 }
 
 
-void CH_FFT::all_fields_NS(const FT& aa ) {
+void CH_FFT::all_fields_NS(const FT& aa , const FT& dt ) {
 
   // p_fields( aa );
   // vel_fields_NS();
@@ -581,8 +581,17 @@ void CH_FFT::all_fields_NS(const FT& aa ) {
       // semi-implicit approach,  u^* = u_0  + vu Lapl(u^*)
       // This is the most stable
       FT den1 =  1 + aa * qq2 ;
+
       Complex vx = v_x(i,j);
       Complex vy = v_y(i,j);
+
+      
+      if( dt > 1e-16)  { // version with forces
+	vx += dt * force_x(i,j) ;
+	vy += dt * force_y(i,j) ;
+      }
+
+
       Complex vstar_x = vx / den1 ;
       Complex vstar_y = vy / den1 ;
 
@@ -757,7 +766,10 @@ void CH_FFT::histogram(const std::string& name,
     //    FT qq2 = freq_pref*sqrt(FT (  it->first ) );
 
     FT qq = sqrt(it->second.q2 );
-    FT qf= qq * it->second.f / FT(  it->second.count );
+    FT qf= M_PI * qq * it->second.f / FT(  it->second.count );
+
+    // see e.g. G Bofetta and R.E. Ecke, "Two-Dimensional Turbulence"
+    // Annu. Rev. Fluid Mech. 2012. 44:427-51, equation (3)
     
     main_data << qq
               << "  "
@@ -776,6 +788,9 @@ void CH_FFT::histogram(const std::string& name,
 
 
 // Like histogram above, but no averaging whatsoever is done
+// it seems the usual procedure is the previous one !!!
+// see e.g. G Bofetta and R.E. Ecke, "Two-Dimensional Turbulence"
+// Annu. Rev. Fluid Mech. 2012. 44:427-51
 
 void CH_FFT::power(const std::string& name,
 		       const int time, const c_array& ff ) {
@@ -827,11 +842,11 @@ void CH_FFT::power(const std::string& name,
   for ( it = histo.begin(); it != histo.end(); it++ ) {
 
     FT qq = sqrt(it->second.q2 );
-    FT ff = it->second.f;
+    FT fq = qq * it->second.f;
     
     main_data << qq
               << "  "
-              << ff
+              << fq
 	      // << "  "
               // << it->second.count
               << std::endl ;

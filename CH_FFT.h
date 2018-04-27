@@ -100,7 +100,7 @@ class CH_FFT {
   void printout_x(const std::string& name, const unsigned int nx);
   void random( void );
   void all_fields(void);
-  void all_fields_NS(const FT&);
+  void all_fields_NS(const FT& , const FT& dt = 0 );
   void vel_fields_NS(void);
   void p_fields( const FT& ) ;
   void mu_fields(void);
