@@ -88,7 +88,7 @@ int main() {
     
     cout << "Creating force field " << endl;
 
-    set_forces_Kolmo( Tm , 2 ) ;
+    set_forces_Kolmo( Tm , 8 ) ;
     //set_fields_cos( Tm ) ;
     
     cout << "Numbering mesh " << endl;
