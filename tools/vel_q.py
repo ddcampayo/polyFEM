@@ -24,7 +24,7 @@ import pylab as pl
 
 dtx = np.loadtxt(step+'/histo_vel_x.dat', dtype = np.float64)
 
-qq=dtx[ 1: , 0]
+qq = dtx[ 1: , 0]
 
 vx=dtx[ 1: , 1]
 
@@ -39,7 +39,12 @@ vy=dty[ 1: , 1]
 
 vv = (vx + vy)/2
 
-tiny=1e-16
+Etot =  integrate.trapz( vv , qq )
+
+# Normalize to 1
+vv /= Etot
+
+tiny=0 # 1e-16
 
 pl.plot( qq , np.log( vv + tiny) )
 
@@ -61,4 +66,3 @@ for index, vv2 in np.ndenumerate(vv) :
 
 outf.close()
 
-#np.savetxt('power_K' + step+ '.dat', np.column_stack(( qq , vv )) )

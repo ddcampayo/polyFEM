@@ -12,7 +12,7 @@ def grid(x, y, z , resX=90, resY=90):
 
 pl.figure(figsize=(8,8))
 
-skip=1
+skip=100
 #path='timings_full/'
 path='./'
 
@@ -20,9 +20,7 @@ cols = ['k' , 'b', 'g']
 
 ic = 0
 
-range=max(vxm)/10
-
-for n in range(0,2+skip,skip):
+for n in range(0,200+skip,skip):
  #   dtm=pl.loadtxt(path+str(n)+'/particles.dat')
     dtm=pl.loadtxt(path+str(n)+'/mesh.dat')
     xm=dtm[:,0]; ym=dtm[:,1];  pm=dtm[:,5];  vxm=dtm[:,8]; vym=dtm[:,9]; alm=dtm[:,4]
@@ -31,7 +29,7 @@ for n in range(0,2+skip,skip):
 #    dt2=pl.loadtxt(path+str(n)+'/mesh.dat')
     X, Y, Z = grid(xm, ym, vxm)
 
-    pl.contourf( X,Y,Z, [-range,range] , colors=[ cols[ ic ]  ] )
+    pl.contourf( X,Y,Z, [0.49,0.51] , colors=[ cols[ ic ]  ] )
 
     ic += 1
 
