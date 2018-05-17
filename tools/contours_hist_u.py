@@ -19,9 +19,22 @@ skip=1
 #path='timings_full/'
 path='./'
 
-for n in range(1,400+skip,skip):
+import glob
+
+dirs=glob.glob('[0-9]*')
+
+dirs.sort( key = float )
+
+import pylab as pl
+
+LL=1
+
+for dir_step in dirs[1:] :
+
+    step = int(dir_step)
+
  #   dtm=pl.loadtxt(path+str(n)+'/particles.dat')
-    dtm=np.loadtxt(path+str(n)+'/mesh.dat')
+    dtm=np.loadtxt(path+str(step)+'/mesh.dat')
     xm=dtm[:,0]; ym=dtm[:,1];  pm=dtm[:,5];  vxm=dtm[:,8]; vym=dtm[:,9]; alm=dtm[:,4]
 #    rr=max(vxm)/10
 #    p1 = dtm[:,5] - pl.mean(dtm[:,5] )
@@ -33,18 +46,18 @@ for n in range(1,400+skip,skip):
 #    pl.contourf( X,Y,Z, [-rr,rr] , colors='k')
 #    plt.contourf( X,Y,Z, [-rr,rr] )
 
-    fig = plt.figure()
+#    fig = plt.figure()
+#    ax1  = fig.add_subplot(1,2,1, adjustable='box', aspect = 1)
+#    ax2  = fig.add_subplot(1,2,2)
 
-    ax1  = fig.add_subplot(2,1,1, adjustable='box', aspect = 1)
+    fig, (ax1, ax2) = plt.subplots(1,2, gridspec_kw = {'width_ratios':[3, 1]})
 
-    ax2  = fig.add_subplot(2,1,2)
+    ax1.set_aspect('equal', adjustable='box')
 
-    ax1.quiver( xm , ym , vxm , vym )
+#    ax1.quiver( xm , ym , vxm , vym )
 
     ax1.set_xlim([ -LL/2 , LL/2 ])
     ax1.set_ylim([ -LL/2 , LL/2 ])
-
-
 
     ax1.contourf( X,Y,Z )
 #    plt.contour( X,Y,Z ,  3, colors='k')
@@ -65,13 +78,18 @@ for n in range(1,400+skip,skip):
 
     vv = (vx + vy)/2
 
-    tiny=1e-16
+    tiny = 0 # 1e-16
 
-    ax2.semilogy( qq , vv + tiny )
+    #ax2.semilogy( qq , vv + tiny )
+    ax2.loglog( qq , vv + tiny )
 
-    plt.savefig('contours_histo_'+str(step).zfill(5)+'.png')
-    
+    ax2.set_ylim( 1e-15 , 1e-1 )
 
+    fig.tight_layout()
+
+    plt.savefig('./contours_histo/contours_histo_'+str(step).zfill(5)+'.png')
+
+    plt.close( fig )
 #    pl.colorbar(ticks=[0.45,0.55])
 
 #pl.xlim([-0.7,0.7]) ; pl.xlabel('$x/L$')
