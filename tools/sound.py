@@ -12,7 +12,7 @@ PyAudio = pyaudio.PyAudio     #initialize pyaudio
 BITRATE = 44100     #number of frames per second/frameset.      
 
 #FREQUENCY = 1.5*440     #Hz, waves per second, 261.63=C4-note.
-LENGTH_FR = 0.02     #seconds to play sound for each frame
+LENGTH_FR = 0.0075     #seconds to play sound for each frame
 
 #if FREQUENCY > BITRATE:
 #    BITRATE = FREQUENCY*10
