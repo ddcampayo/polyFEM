@@ -5,7 +5,7 @@ LL= 2*64.0
 import pylab as pl
 import sys
 
-pl.figure(figsize=(8,8))
+pl.figure(figsize=(9.945,8))
 
 pl.tight_layout()
 

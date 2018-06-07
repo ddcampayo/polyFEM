@@ -49,8 +49,9 @@ for dir_step in dirs :
 
  ff= p0**2
 
- print " %g  %g " % (
+ print( " %g  %g " % (
   time ,
   (np.sum( dd )  / np.sum( ff ))**1
- )
+  )
+  )
 

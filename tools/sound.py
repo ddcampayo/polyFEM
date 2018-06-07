@@ -9,10 +9,10 @@ PyAudio = pyaudio.PyAudio     #initialize pyaudio
 
 #See https://en.wikipedia.org/wiki/Bit_rate#Audio
 #BITRATE = 16000     #number of frames per second/frameset.
-BITRATE = 40000     #number of frames per second/frameset.      
+BITRATE = 44100     #number of frames per second/frameset.      
 
 #FREQUENCY = 1.5*440     #Hz, waves per second, 261.63=C4-note.
-LENGTH_FR = 1     #seconds to play sound for each frame
+LENGTH_FR = 0.02     #seconds to play sound for each frame
 
 #if FREQUENCY > BITRATE:
 #    BITRATE = FREQUENCY*10
@@ -23,10 +23,18 @@ dirs=glob.glob('[0-9]*')
 
 dirs.sort( key = float )
 
-LENGTH = LENGTH_FR * len(dirs)
+LENGTH = LENGTH_FR * ( len(dirs) - 1 ) # "0" dir is excluded
 
-NUMBEROFFRAMES = int(BITRATE * LENGTH)
-RESTFRAMES = NUMBEROFFRAMES % BITRATE
+print('Sound clip length: {} s'.format(LENGTH) )
+
+print('Bit rate: {}'.format(BITRATE) )
+
+NUMBEROFFRAMES = int(BITRATE * LENGTH_FR )
+TOTALNUMBEROFFRAMES = int(BITRATE * LENGTH )
+
+print('Total bits per snapshot: {}'.format(NUMBEROFFRAMES) )
+
+RESTFRAMES = TOTALNUMBEROFFRAMES % BITRATE
 
 WAVEDATA = ''    
 
@@ -34,7 +42,7 @@ base =  int(BITRATE / 100) # = 1000 # Hz for deepest bass
 
 chunks = BITRATE / base
 
-for dir_step in dirs[0:] :
+for dir_step in dirs[1:] :
 
     dtm=pl.loadtxt( dir_step + '/particles.dat')
 
@@ -76,6 +84,7 @@ for dir_step in dirs[0:] :
 
 
         #generating wawes
+
     for x in range(NUMBEROFFRAMES):
         time = x / BITRATE
 
@@ -95,15 +104,16 @@ for x in range(RESTFRAMES):
 p = PyAudio()
 
 FORMAT = p.get_format_from_width(1)
-stream = p.open(format = FORMAT, 
-                channels = 1, 
-                rate = BITRATE, 
-                output = True)
 
-stream.write(WAVEDATA)
-stream.stop_stream()
-stream.close()
-p.terminate()
+#stream = p.open(format = FORMAT, 
+#                channels = 1, 
+#                rate = BITRATE, 
+#                output = True)
+
+#stream.write(WAVEDATA)
+#stream.stop_stream()
+#stream.close()
+#p.terminate()
 
 waveFile = wv.open('sound1.wav', 'wb')
 waveFile.setnchannels( 1 )

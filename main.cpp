@@ -3,10 +3,24 @@
 // plus, correction to quadratic consistency
 // periodic boundary conditions
 
-// Solves NS equation for an incompressible
-// fluid in Fourier space
+// Cahn-Hilliard solver, overdamped regime, reduced units
 
-// particle re-creation!
+
+// 
+// Parameters:
+// "Db" below, a reduced diffusion parameter for the CH equation
+// The SD length in CH_FFT.h: e.g "static constexpr FT L_SD = 62.5;"
+
+// LL below: length of the system
+// max_displ: maximum average displacement for convergence of iterative
+// mid-point move
+
+// projected to and from mesh
+
+// Jan 2018 version. This is the one used for an article on
+// segregation in biomembranes (work initiated at the U of W, Seattle Wa
+
+
 
 #include <CGAL/Timer.h>
 
@@ -28,15 +42,16 @@
 
 #include"periodic.h"
 
-const FT LL=1; // length of original domain
+const FT LL=128; // length of original domain
+const FT Db=0.0271; // diffusion constant
 
 Iso_rectangle domain(-LL/2, -LL/2, LL/2, LL/2);
-
 
 // TODO: the two triangulations store different things.
 //       specific bases and faces should be implemented for each
 
 sim_pars simu;
+
 
 //#define FULL
 #define FULL_FULL
@@ -57,15 +72,12 @@ sim_pars simu;
 //const Eigen::IOFormat OctaveFmt(Eigen::StreamPrecision, 0, ", ", ";\n", "", "", "[", "];");
 
 
-//Triangulation Tp(domain); // particles
+Triangulation Tp(domain); // particles
 Triangulation Tm(domain); // mesh
 
-void load_force_on_fft(const Triangulation& T , CH_FFT& fft  );
-void load_fields_on_fft(const Triangulation& T , CH_FFT& fft  );
+void create(void);
+void load_alpha0_on_fft(const Triangulation& T , CH_FFT& fft  );
 void load_fields_from_fft(const CH_FFT& fft , Triangulation& T  );
-void create(Triangulation&);
-void clone(const Triangulation&,Triangulation&);
-
 
 int main() {
 
@@ -77,22 +89,21 @@ int main() {
 
   simu.read();
 
-  create(Tm);
+  create();
   
   if(simu.create_points()) {
 
     //    set_alpha_circle( Tp , 2);
     //    set_alpha_under_cos(  Tp ) ;
 
-
+    cout << "Creating alpha field " << endl;
     
-    cout << "Creating force field " << endl;
-
-    set_forces_Kolmo( Tm , 8 ) ;
-    //set_fields_cos( Tm ) ;
+    set_alpha_random(  Tm ) ;
+    //set_alpha_cos( Tm );
     
-    cout << "Numbering mesh " << endl;
+    cout << "Numbering particles " << endl;
 
+    number(Tp);
     number(Tm);
   }
 
@@ -104,15 +115,32 @@ int main() {
 
   CH_FFT fft( LL , Nb );
 
-  load_force_on_fft( Tm , fft );
+  load_alpha0_on_fft( Tm , fft );
 
-  FT dt=simu.dt();
-  FT mu=simu.mu();
+  fft.all_fields();
+
+  fft.draw( "phi", 0, fft.field_f() );
+
+  fft.draw( "mu", 0, fft.field_mu() );
+
+  fft.draw( "grad_mu_x", 0, fft.field_grad_mu_x() );
+
+  fft.draw( "grad_mu_y", 0, fft.field_grad_mu_y() );
+
+  fft.draw( "force_x", 0, fft.field_force_x() );
+
+  fft.draw( "force_y", 0, fft.field_force_y() );
+
+  fft.draw( "vel_x", 0, fft.field_vel_x() );
+
+  fft.draw( "vel_y", 0, fft.field_vel_y() );
   
-  //  fft.all_fields_NS( dt * mu );
+  load_fields_from_fft( fft, Tm );
   
-  //  load_fields_from_fft( fft, Tm );
-  
+  // every step
+  areas(Tp);
+  quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );
+
   // just once!
   linear algebra(Tm);
 
@@ -124,7 +152,7 @@ int main() {
   // TODO: Are these two needed at all?
   //  if(simu.create_points()) {
   //  nabla(Tm);
-  // TODO, they are, not too clear why
+  // TODO, they is, too clear why
   Delta(Tm);
     //  }
 
@@ -132,9 +160,24 @@ int main() {
   const std::string particle_file("particles.dat");
 
   // // step 0 draw.-
-  //draw(Tm, mesh_file     , true);
-  //draw(Tp, particle_file , true);
+  //   draw(Tm, mesh_file     , true);
+  //   draw(Tp, particle_file , true);
   
+  cout << "Assigning alpha to particles " << endl;
+
+#if defined FULL_FULL
+  {
+    Delta(Tp);
+    linear algebra_p(Tp);
+    from_mesh_full( Tm , Tp ,  algebra_p , kind::ALPHA);
+  }
+#elif defined FULL_LUMPED
+  from_mesh_lumped( Tm , Tp , kind::ALPHA);
+ #elif defined FLIP
+  from_mesh(Tm , Tp , kind::ALPHA);
+ #else
+  from_mesh(Tm , Tp , kind::ALPHA);
+#endif
 
 // #if defined FULL_FULL
 //   {
@@ -152,13 +195,12 @@ int main() {
 
   cout << "Moving info" << endl;
   move_info( Tm );
+  move_info( Tp );
 
   draw(Tm, mesh_file     , true);
+  draw(Tp, particle_file , true);
 
-  //fft.draw( "phi", 0, fft.field_f() );
-  //fft.draw( "press", 0, fft.field_p() );
-  //fft.draw( "vel_x", 0, fft.field_vel_x() );
-  //fft.draw( "vel_y", 0, fft.field_vel_y() );
+  //  return 1;
   
   simu.advance_time();
   simu.next_step();
@@ -195,7 +237,7 @@ int main() {
     FT min_displ=1e10;
     int min_iter=0;
 
-    const int max_iter=8; //10;
+    const int max_iter=5; //10;
     const FT  max_displ=  1e-8; // < 0 : disable
 
 //  leapfrog, special first step.-
@@ -204,23 +246,9 @@ int main() {
 //    dt2 *= 0.5;
 
     move_info(Tm);
+    move_info(Tp);
 
-  // TODO: map Tm onto Tp
-  // every step
-    Triangulation Tp(domain); // particles
-    clone(Tm,Tp);
-
-    //    number(Tp);
-    //    areas(Tp);
-    //quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );
-
-    //cout << "Assigning velocities to particles " << endl;
-
-    //from_mesh_v(Tm , Tp , kind::U);
-
-    //move_info(Tp);
-
-
+    
     // iter loop
     for( ; ; iter++) {
       
@@ -229,8 +257,6 @@ int main() {
       FT d0;
 
       displ = move( Tp , dt2 , d0 );
-
-      cout << "Moved half step " << endl;
 
       areas(Tp);
       quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );
@@ -256,71 +282,42 @@ int main() {
 	break;
       }
 
-      cout << "Proj advected U0 velocities onto mesh " << endl;
+      cout << "Proj alpha0 onto mesh " << endl;
 
 #if defined FULL
-      onto_mesh_full_v(Tp,Tm,algebra,kind::UOLD);
+      onto_mesh_full (Tp,Tm,algebra,kind::ALPHA0);
 #elif defined FLIP
       flip_volumes   (Tp , Tm , simu.FEMm() );
-      onto_mesh_flip_v(Tp,Tm,simu.FEMm(),kind::UOLD);
+      onto_mesh_flip (Tp,Tm,simu.FEMm(),kind::ALPHA0);
 #else
-      onto_mesh_delta_v(Tp,Tm,kind::UOLD);
+      onto_mesh_delta(Tp,Tm,kind::ALPHA0);
 #endif
 
-      load_fields_on_fft( Tm , fft );
+      load_alpha0_on_fft( Tm , fft );
 
-      FT b = mu * dt2;
-     
-      fft.all_fields_NS( b , dt2 );
+      fft.all_fields();
   
-//      fft.evolve( b );
+      FT b = Db * dt2;
+
+      fft.evolve( b );
       
       load_fields_from_fft( fft , Tm );
 
-// It used to be: search "FLIPincr" in CH_FFT.cpp to change accordingly!
-// That's NOT needed anymore in latest versions
-// EITHER:
-// FLIP idea: project only increments
+      cout << "Proj U from mesh " << endl;
       
-       cout << "Proj Delta U from mesh onto particles" << endl;
-      
- #if defined FULL_FULL
-       {
- 	Delta(Tp);
- 	linear algebra_p(Tp);
- 	from_mesh_full_v(Tm, Tp, algebra_p , kind::DELTAU);
-       }
- #elif defined FULL_LUMPED
-       from_mesh_lumped_v(Tm, Tp, kind::DELTAU);
- #elif defined FLIP
-       from_mesh_v(Tm, Tp, kind::DELTAU);
- #else
-       from_mesh_v(Tm, Tp, kind::DELTAU);
- #endif
-
-       incr_v( Tp ,  kind::UOLD , kind::DELTAU , kind::U );
-
-
-// OR:
-// project the whole velocity
-      
-//      cout << "Proj U from mesh onto particles" << endl;
-//      
-//#if defined FULL_FULL
-//      {
-//	Delta(Tp);
-//	linear algebra_p(Tp);
-//	from_mesh_full_v(Tm, Tp, algebra_p , kind::U);
-//      }
-//#elif defined FULL_LUMPED
-//      from_mesh_lumped_v(Tm, Tp, kind::U);
-//#elif defined FLIP
-//      from_mesh_v(Tm, Tp, kind::U);
-//#else
-//      from_mesh_v(Tm, Tp, kind::U);
-//#endif
-
-      
+#if defined FULL_FULL
+      {
+	Delta(Tp);
+	linear algebra_p(Tp);
+	from_mesh_full_v(Tm, Tp, algebra_p , kind::U);
+      }
+#elif defined FULL_LUMPED
+      from_mesh_lumped_v(Tm, Tp, kind::U);
+#elif defined FLIP
+      from_mesh_v(Tm, Tp, kind::U);
+#else
+      from_mesh_v(Tm, Tp, kind::U);
+#endif
 
       
       // // substract spurious overall movement.-      
@@ -329,10 +326,23 @@ int main() {
 
     } // iter loop
 
-    // cout << "Writing acceleration FT " << endl;
+    cout << "Proj alpha from mesh " << endl;
     
-    // fft.draw( "accel_x", simu.current_step() , fft.field_grad_mu_q_x() );
-    // fft.draw( "accel_y", simu.current_step() , fft.field_grad_mu_q_y() );
+#if defined FULL_FULL
+      {
+	Delta(Tp);
+	linear algebra_p(Tp);
+	from_mesh_full(Tm, Tp, algebra_p , kind::ALPHA);
+      }
+#elif defined FULL_LUMPED
+      from_mesh_lumped(Tm, Tp, kind::ALPHA);
+#elif defined FLIP
+      from_mesh(Tm, Tp, kind::ALPHA);
+#else
+      from_mesh(Tm, Tp, kind::ALPHA);
+#endif
+    
+      // comment for no move.-
 
     cout << "Moving whole step: relative ";
 
@@ -352,6 +362,7 @@ int main() {
     update_half_alpha( Tp );
 
     areas(Tp);
+
     quad_coeffs(Tp , simu.FEMp() ); volumes(Tp, simu.FEMp() );
 
     // this, for the looks basically .-
@@ -369,22 +380,16 @@ int main() {
     onto_mesh_delta_v(Tp,Tm,kind::U);
     onto_mesh_delta  (Tp,Tm,kind::ALPHA);
 #endif
-
+    
     if(simu.current_step()%simu.every()==0) {
       draw(Tm, mesh_file     , true);
       draw(Tp, particle_file , true);
-      fft.histogram("accel_x", simu.current_step() , fft.field_grad_mu_q_x() );
-      fft.histogram("accel_y", simu.current_step() , fft.field_grad_mu_q_y() );
-      fft.histogram("vel_x", simu.current_step() , fft.field_vel_q_x() );
-      fft.histogram("vel_y", simu.current_step() , fft.field_vel_q_y() );
+      fft.histogram( "phi", simu.current_step() , fft.field_fq() );
     }
 
-    move_info( Tm );
-    move_info( Tp );
-    
     log_file
       << simu.current_step() << "  "
-      << simu.time() << "  " << endl ;
+      << simu.time() << "  " ;
 
     // integrals( Tp , log_file);     log_file << "  ";
     // fidelity(  Tp , log_file );    log_file << endl;
@@ -402,34 +407,9 @@ int main() {
 
 }
 
-void clone(const Triangulation& Tfrom,Triangulation& Tto) {
-
-  for(F_v_it vit=Tfrom.vertices_begin();
-      vit != Tfrom.vertices_end();
-      vit++) {
-
-    Periodic_point pp=Tfrom.periodic_point(vit);
-    Point p=Tfrom.point(pp);
-
-    Vertex_handle fv=Tto.insert( p );
-
-    fv->rold.set( p );
-
-    fv->U.set( vit->U.val() );
-    fv->Uold.set( vit->U.val() );
-
-    fv->idx.set( vit->idx.val() );
-
-  }      
-
-  return;
-  
-}
 
 
-
-
-void create(Triangulation& Tp) {
+void create(void) {
 
   int N=simu.no_of_particles();
   std::vector<Point> points;
@@ -476,29 +456,150 @@ void create(Triangulation& Tp) {
 
     }
 
-   }
-
     cout << "Inserting" << endl;
 
     Tp.insert(points.begin(), points.end());
 
-    return;
+    points.clear();
+
+    // int Nb = sqrt(N + 1e-12);
+    // int nm = Nb* simu.mesh_factor() + 1 ;
+    // int Nm = nm * nm;
+
+    int Nm=simu.no_of_nodes();
+
+    int nm=sqrt(Nm + 1e-12);
+
+    Nm= nm * nm;
+
+    simu.set_no_of_nodes(Nm);
+
+    points.reserve(Nm);
+    cout << Nm << " mesh on square lattice" << endl;
+
+    FT spacing=LL/FT( nm +0);
+    FT side=LL-1*spacing;
+
+    points_on_square_grid_2(side/2.0, Nm , std::back_inserter(points),Creator());;
+
+    // // TODO: perfectly regular square grids are not too good, in fact
+    // CGAL::perturb_points_2(
+    // 			   points.begin(), points.end(),
+    // 			   0.001* spacing );
+
+    Tm.insert(points.begin(), points.end());
+
+  } else {
+
+    int N=simu.no_of_particles();
+
+    char part_file[]="particles.dat";
+
+    cout << "reading from file : " << part_file << endl;
+
+    std::ifstream main_data;
+    main_data.open(part_file );
+
+    for(int i=0;i<N;i++) {
+      FT x,y;
+      main_data >> x;
+      main_data >> y;
+
+      //      cout << x << "  " << y << endl;
+
+      Vertex_handle vh=Tp.insert(Point(x,y));
+
+#include"readin.h"
+
+
+    }
+  
+    cout << "particles' data read" << endl;
+
+    main_data.close();
+
+    char mesh_file[]="mesh.dat";
+
+    cout << "reading from file : " << mesh_file << endl;
+
+    main_data.open(mesh_file );
+
+    int Nm=simu.no_of_nodes();
+
+    for(int i=0;i<Nm;i++) {
+      FT x,y;
+      main_data >> x;
+      main_data >> y;
+
+      //      cout << x << "  " << y << endl;
+      
+      Vertex_handle vh=Tm.insert(Point(x,y));
+
+#include"readin.h"
+
+
+    }
+  
+    cout << "mesh data read" << endl;
+
+    main_data.close();
+
+  }
+
+  // straight from the manual.-
+
+  Triangulation::Covering_sheets cs = Tp.number_of_sheets();
+
+  cout << "Original covering (particles): " << cs[0] << ' ' << cs[1] << endl;
+
+//  return ;
+  
+  Tp.convert_to_1_sheeted_covering();
+
+  cs = Tp.number_of_sheets();
+
+  cout << "Current covering (particles): " << cs[0] << ' ' << cs[1] << endl;
+
+
+  return ;
+
+  if ( Tp.is_triangulation_in_1_sheet() ) // = true
+    {
+      bool is_extensible = Tp.is_extensible_triangulation_in_1_sheet_h1()
+	|| Tp.is_extensible_triangulation_in_1_sheet_h2(); // = false
+      Tp.convert_to_1_sheeted_covering();
+      cs = Tp.number_of_sheets();
+      cout << "Current covering: " << cs[0] << ' ' << cs[1] << endl;
+      if ( is_extensible ) // = false
+	cout << "It is safe to change the triangulation here." << endl;
+      else {
+	cout << "It is NOT safe to change the triangulation here!" << endl;
+	abort();
+      }
+      //      T.convert_to_9_sheeted_covering();
+      //      cs = T.number_of_sheets();
+      //      cout << "Current covering: " << cs[0] << ' ' << cs[1] << endl;
+    } else {
+	cout << "Triangulation not on one sheet!" << endl;
+	abort();    
+  }
+
+
+  //  cout << "It is (again) safe to modify the triangulation." << endl;
+
+
+  return ;
 
 }
 
 
-void load_fields_on_fft( const Triangulation& T , CH_FFT& fft  ) {
+void load_alpha0_on_fft( const Triangulation& T , CH_FFT& fft  ) {
 
   int Nb = fft.Nx();
 
   size_t align=fft.alignment();
 
-  c_array u0x( Nb , Nb , align );
-  c_array u0y( Nb , Nb , align );
-
-  // fully implicit
-  c_array uux( Nb , Nb , align );
-  c_array uuy( Nb , Nb , align );
+  c_array al( Nb , Nb , align );
 
   for(F_v_it vit=T.vertices_begin();
       vit != T.vertices_end();
@@ -515,70 +616,17 @@ void load_fields_on_fft( const Triangulation& T , CH_FFT& fft  ) {
     // int i = nx;
     // int j = ny;
     
-    Vector_2 v0 =  vit->Uold.val();
-    u0x(i,j) = v0.x();
-    u0y(i,j) = v0.y();
-
-    // fully implicit
-    //Vector_2 vv =  vit->U.val();
-    //uux(i,j) = vv.x();
-    //uuy(i,j) = vv.y();
-
-
+    FT val =  vit->alpha0.val();
     //FT val =  vit->alpha.val();
 
-
-
-  }
-
-  fft.set_u( u0x , u0y );
-
-  return;
-}
-
-
-
-
-void load_force_on_fft( const Triangulation& T , CH_FFT& fft  ) {
-
-  int Nb = fft.Nx();
-
-  size_t align=fft.alignment();
-
-  c_array f0x( Nb , Nb , align );
-  c_array f0y( Nb , Nb , align );
-
-  for(F_v_it vit=T.vertices_begin();
-      vit != T.vertices_end();
-      vit++) {
-
-    int nx = vit->nx.val();
-    int ny = vit->ny.val();
-
-    // "right" ordering 
-    int i = ( Nb - 1 ) - ny ;
-    int j = nx;
-
-    // "wrong" ordering
-    // int i = nx;
-    // int j = ny;
-    
-    Vector_2 f0 =  vit->force.val();
-    f0x(i,j) = f0.x();
-    f0y(i,j) = f0.y();
+    al(i,j) = val;
 
   }
 
-  fft.set_force( f0x , f0y );
-
-  // fully implicit
-  // hack force field to store current velocity
-  //  fft.set_force( uux , uuy );
+  fft.set_f( al );
   
   return;
 }
-
-
 
 
 
@@ -588,11 +636,15 @@ void load_fields_from_fft(const CH_FFT& fft , Triangulation& T  ) {
 
   c_array vx = fft.field_vel_x();
   c_array vy = fft.field_vel_y();
-
   c_array al = fft.field_f();
 
-  c_array pp = fft.field_p();
-
+  c_array mu = fft.field_mu();
+  
+  c_array gmx = fft.field_grad_mu_x();
+  c_array gmy = fft.field_grad_mu_y();
+  c_array fx = fft.field_force_x();
+  c_array fy = fft.field_force_y();
+  
   for(F_v_it vit=T.vertices_begin();
       vit != T.vertices_end();
       vit++) {
@@ -609,16 +661,13 @@ void load_fields_from_fft(const CH_FFT& fft , Triangulation& T  ) {
     // int j = ny;
 
     vit->alpha.set( real( al(i,j) ) );
-    vit->p.set( real( pp(i,j) ) );
-    
-    Vector_2 v1( real( vx(i,j) ) , real( vy(i,j) ) );
-    Vector_2 v0 =  vit->Uold.val();
 
-    // FLIPincr trick
-    vit->Delta_U.set( v1 - v0 );
+    vit->chempot.set( real( mu(i,j) ) );
 
-    // whole velocity
-    // vit->U.set( Vector_2( real( vx(i,j) ) , real( vy(i,j) ) ) );
+    vit->U.set          ( Vector_2( real( vx(i,j) ) , real( vy(i,j) ) ) );
+    vit->force.set      ( Vector_2( real( fx(i,j) ) , real( fy(i,j) ) ) );
+    vit->gradchempot.set( Vector_2( real(gmx(i,j) ) , real(gmy(i,j) ) ) );
+
 
     //  TODO: return more fields (chem pot, pressure, force, etc)
   }
