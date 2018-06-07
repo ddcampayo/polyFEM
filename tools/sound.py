@@ -12,67 +12,85 @@ PyAudio = pyaudio.PyAudio     #initialize pyaudio
 BITRATE = 40000     #number of frames per second/frameset.      
 
 #FREQUENCY = 1.5*440     #Hz, waves per second, 261.63=C4-note.
-LENGTH = 1     #seconds to play sound
+LENGTH_FR = 1     #seconds to play sound for each frame
 
 #if FREQUENCY > BITRATE:
 #    BITRATE = FREQUENCY*10
 
+import glob
+
+dirs=glob.glob('[0-9]*')
+
+dirs.sort( key = float )
+
+LENGTH = LENGTH_FR * len(dirs)
+
 NUMBEROFFRAMES = int(BITRATE * LENGTH)
 RESTFRAMES = NUMBEROFFRAMES % BITRATE
+
 WAVEDATA = ''    
 
-base = 1000 # Hz for deepest bass
-
-dtm=pl.loadtxt(str( 100 )+'/particles.dat')
-xm=dtm[:,0]; ym=dtm[:,1];  pm=dtm[:,5];  vxm=dtm[:,8]; vym=dtm[:,9]; alm=dtm[:,4]
-
-y_vx = sorted( zip( ym , vxm) )
-
-#y   = [ y   for y , vx in y_vx]
-
-vx  = [ vx  for y , vx in y_vx]
-
-vx_l= pl.size( vx )
-
-nn = int( np.sqrt( vx_l ) )
-
-vxi = np.zeros( nn )
-
-#integrate on x
-
-for i in range(nn) :
-    vxi[i]= np.average( vx[ i : vx_l : nn ] )
-
-vx_min = min(vxi)
-vx_max = max(vxi)
-vx_amp = vx_max - vx_min 
-
-vxi = ( vxi - vx_min ) / vx_amp   # normalized between 0 and 1
-
-vxi_l= pl.size( vxi )
-
-#def wave(time) :
-#    phase = 2 * math.pi * time * FREQUENCY
-#    return 0.2 * math.sin( phase ) + 0.5 * math.sin( 2 * phase ) + 0.3 * math.sin( 3 * phase )
+base =  int(BITRATE / 100) # = 1000 # Hz for deepest bass
 
 chunks = BITRATE / base
 
-#generating wawes
-for x in range(NUMBEROFFRAMES):
-    time = x / BITRATE
+for dir_step in dirs[0:] :
 
-    #    WAVEDATA = WAVEDATA+chr( int(  wave( time ) * 127 + 128 ))    
+    dtm=pl.loadtxt( dir_step + '/particles.dat')
 
-    # 0 to 1 in each one of the samples
-    time_in = ( x % chunks ) / chunks
-    wave = vxi[ int( time_in * vxi_l )  ]
-    #    wave = vxi[ ( int(time * base) % int(base)   ) * vxi_l ]
-    #wave = vxi[ x % vxi_l ]
+    print('Reading dir ' + dir_step )
 
-    WAVEDATA = WAVEDATA+chr( int(  wave * 127 + 128 ))    
+    #    xm=dtm[:,0];   pm=dtm[:,5];  vym=dtm[:,9];     alm=dtm[:,4]
+    ym=dtm[:,1];
+    vxm=dtm[:,8];
+
+    y_vx = sorted( zip( ym , vxm) )
+
+    #y   = [ y   for y , vx in y_vx]
+
+    vx  = [ vx  for y , vx in y_vx]
+
+    vx_l= len( vx )
+
+    nn = int( np.sqrt( vx_l ) )
+
+    vxi = np.zeros( nn )
+
+    #integrate on x
+
+    for i in range(nn) :
+        vxi[i]= np.average( vx[ i : vx_l : nn ] )
+
+        vx_min = min(vxi)
+        vx_max = max(vxi)
+        vx_amp = vx_max - vx_min 
+
+        vxi = ( vxi - vx_min ) / vx_amp   # normalized between 0 and 1
+
+        vxi_l= len( vxi )
+
+        #def wave(time) :
+        #    phase = 2 * math.pi * time * FREQUENCY
+        #    return 0.2 * math.sin( phase ) + 0.5 * math.sin( 2 * phase ) + 0.3 * math.sin( 3 * phase )
+
+
+
+        #generating wawes
+    for x in range(NUMBEROFFRAMES):
+        time = x / BITRATE
+
+        #    WAVEDATA = WAVEDATA+chr( int(  wave( time ) * 127 + 128 ))    
+
+        # 0 to 1 in each one of the samples
+        time_in = ( x % chunks ) / chunks
+        wave = vxi[ int( time_in * vxi_l )  ]
+        #    wave = vxi[ ( int(time * base) % int(base)   ) * vxi_l ]
+        #wave = vxi[ x % vxi_l ]
+
+        WAVEDATA = WAVEDATA+chr( int(  wave * 127 + 128 ))    
 
 for x in range(RESTFRAMES): 
- WAVEDATA = WAVEDATA+chr(128)
+    WAVEDATA = WAVEDATA+chr(128)
 
 p = PyAudio()
 
