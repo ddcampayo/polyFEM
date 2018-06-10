@@ -21,7 +21,8 @@ path='./'
 
 import glob
 
-dirs=glob.glob('[0-9]*')
+#dirs=glob.glob('[0-9]*')
+dirs=glob.glob('[5-9]??')
 
 dirs.sort( key = float )
 

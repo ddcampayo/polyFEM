@@ -42,8 +42,8 @@
 
 #include"periodic.h"
 
-const FT LL=32; // length of original domain
-const FT Db=0.04; // diffusion constant
+const FT LL=128; // length of original domain
+const FT Db=0.0271; // diffusion constant
 
 Iso_rectangle domain(-LL/2, -LL/2, LL/2, LL/2);
 
@@ -75,7 +75,7 @@ sim_pars simu;
 Triangulation Tp(domain); // particles
 Triangulation Tm(domain); // mesh
 
-
+void create(void);
 void load_alpha0_on_fft(const Triangulation& T , CH_FFT& fft  );
 void load_fields_from_fft(const CH_FFT& fft , Triangulation& T  );
 

@@ -9,17 +9,19 @@ PyAudio = pyaudio.PyAudio     #initialize pyaudio
 
 #See https://en.wikipedia.org/wiki/Bit_rate#Audio
 #BITRATE = 16000     #number of frames per second/frameset.
-BITRATE = 44100     #number of frames per second/frameset.      
+BITRATE = 25600     #number of frames per second/frameset.      
 
 #FREQUENCY = 1.5*440     #Hz, waves per second, 261.63=C4-note.
-LENGTH_FR = 0.009     #seconds to play sound for each frame
+#LENGTH_FR = 0.009     #seconds to play sound for each frame
+LENGTH_FR = 1
 
 #if FREQUENCY > BITRATE:
 #    BITRATE = FREQUENCY*10
 
 import glob
 
-dirs=glob.glob('[0-9]*')
+#dirs=glob.glob('[1-9]*')
+dirs=glob.glob('1[1-3]')
 
 dirs.sort( key = float )
 
@@ -75,7 +77,7 @@ for dir_step in dirs[1:] :
 
         vxi = ( vxi - vx_min ) / vx_amp   # normalized between 0 and 1
 
-        vxi_l= len( vxi )
+    vxi_l= nn
 
         #def wave(time) :
         #    phase = 2 * math.pi * time * FREQUENCY
