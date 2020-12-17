@@ -48,13 +48,13 @@ Vector_2 {
 
 
 
-
-
 namespace kind {
   enum f {P , PSTAR, VOL , GRADP , LAPLP , 
 	  U, USTAR, DELTAU, UOLD, DIVU, LAPLU, ALPHA, ALPHA0, CHEMPOT ,
 	  GRADALPHA , GRADCHEMPOT , FORCE};
 };
+
+
 
 template < class Gt, class Vb >
 class My_vertex_base
@@ -94,7 +94,7 @@ public:
  My_vertex_base(const Point & p) :
   Base(p) {reset_fields(); }
  My_vertex_base(const Point & p, Face_handle f) :
-  Base(f,p) {reset_fields(); }
+   Base( p, f ) {reset_fields(); }
  My_vertex_base(Face_handle f) : 
   Base(f) {reset_fields(); }
 

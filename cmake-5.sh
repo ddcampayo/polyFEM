@@ -1,0 +1,8 @@
+#CGAL_DIR=/usr/include/CGAL
+CGAL_DIR=$HOME/CGAL-5.0.2
+#cmake -DCGAL_DIR=$CGAL_DIR -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS=-pg
+cmake -DCGAL_DIR=$CGAL_DIR -DCMAKE_BUILD_TYPE=Release
+
+
+#Debug
+#Release

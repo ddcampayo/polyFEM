@@ -2,11 +2,9 @@
 #undef DEBUG
 
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
-#include <CGAL/Periodic_2_triangulation_traits_2.h>
 #include <CGAL/Periodic_2_Delaunay_triangulation_2.h>
-
+#include <CGAL/Periodic_2_Delaunay_triangulation_traits_2.h>
 #include <CGAL/Triangulation_vertex_base_2.h>
-
 #include <CGAL/point_generators_2.h>
 
 #include <CGAL/spatial_sort.h>
@@ -18,12 +16,21 @@ using std::cout;
 using std::cin;
 
 
-
 #include <fstream>
 
 //using namespace CGAL;
 
 typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
+
+//typedef CGAL::Periodic_2_triangulation_filtered_traits_2<K> GT;
+typedef CGAL::Periodic_2_Delaunay_triangulation_traits_2<K> GT;
+
+typedef CGAL::Periodic_2_triangulation_vertex_base_2<GT>    VbDS;
+
+//typedef CGAL::Periodic_2_triangulation_vertex_base_2<GT>    VbDS;
+
+typedef CGAL::Periodic_2_triangulation_face_base_2<GT>      FbDS;
+
 
 typedef K::FT FT;
 
@@ -34,13 +41,9 @@ typedef CGAL::Point_2<K>        Point;
 
 typedef CGAL::Creator_uniform_2<FT,Point> Creator;
 
-typedef CGAL::Periodic_2_triangulation_filtered_traits_2<K> GT;
-typedef CGAL::Periodic_2_triangulation_vertex_base_2<GT>    VbDS;
-
-typedef CGAL::Periodic_2_triangulation_vertex_base_2<GT>    VbDS;
-typedef CGAL::Periodic_2_triangulation_face_base_2<GT>      FbDS;
 
 #include"vrtx_info.h"
+
 
 typedef My_vertex_base<GT, VbDS>                             Vb;
 typedef My_face_base<GT, FbDS>                               Fb;
@@ -49,6 +52,7 @@ typedef CGAL::Triangulation_data_structure_2<Vb, Fb>         Tds;
 
 //#include"my_Tr.h"
 typedef CGAL::Periodic_2_Delaunay_triangulation_2<GT, Tds>   Triangulation;
+
 
 typedef Triangulation::Face_handle    Face_handle;
 typedef Triangulation::Face           Face;
