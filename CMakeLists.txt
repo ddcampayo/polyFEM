@@ -20,7 +20,8 @@ find_library(FFTW_LIB NAMES fftw3)
 
 
 add_executable( pFEM
-	main.cpp linear.cpp gradient.cpp nabla.cpp
+	main.cpp
+	linear.cpp gradient.cpp nabla.cpp
 	quad_coeffs.cpp
 	periodic.cpp fields.cpp Delta.cpp move.cpp
 	draw.cpp onto_from_mesh.cpp volumes.cpp CH_FFT.cpp

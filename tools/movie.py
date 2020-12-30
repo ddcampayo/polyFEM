@@ -20,8 +20,8 @@ LL=32.0
 
 for n in range(0,2000000+skip,skip):
     pl.clf()
- #   dtm=pl.loadtxt(path+str(n)+'/particles.dat')
-    dtm=pl.loadtxt(path+str(n)+'/mesh.dat')
+    dtm=pl.loadtxt(path+str(n)+'/particles.dat')
+#    dtm=pl.loadtxt(path+str(n)+'/mesh.dat')
     xm=dtm[:,0]; ym=dtm[:,1];  pm=dtm[:,5];  vxm=dtm[:,8]; vym=dtm[:,9]; alm=dtm[:,4]
 #    p1 = dtm[:,5] - pl.mean(dtm[:,5] )
 #    dt2=pl.loadtxt(path+'fem1/'+str(n)+'/particles.dat')

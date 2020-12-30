@@ -104,6 +104,7 @@ public:
   void u_inv_od(const kind::f velocity);
   void PPE(const kind::f velocity , const FT dt,  const kind::f pressure );
   void mass_v(const kind::f vectorf );
+  void mass_v_lumped(const kind::f vectorf );
   void mass_s(const kind::f scalarf );
   void save_matrices(void);
   void load_matrices(void);

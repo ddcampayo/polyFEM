@@ -222,6 +222,8 @@ public:
       return alpha0;
     else if(a==kind::CHEMPOT)
       return chempot;
+    //default
+    return p;
   }
 
   vector_field& vf(const kind::f a) {
@@ -243,7 +245,8 @@ public:
       return force;
     else if(a==kind::DELTAU)
       return Delta_U;
-
+    //default
+    return U;
   }
  
 

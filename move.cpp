@@ -230,6 +230,25 @@ void u_star(Triangulation& T, FT dt , bool semi ) {
 }
 
 
+void u_star_inviscid(Triangulation& T ) { 
+
+  for(F_v_it fv=T.finite_vertices_begin();
+      fv!=T.finite_vertices_end();
+      fv++) {
+
+    Vector_2 U0 = fv->Uold() ;
+
+    fv->Ustar.set(U0) ;
+
+  }
+
+  return;
+
+}
+
+
+
+
 void update_half_velocity( Triangulation& Tp , const bool overdamped ) {
 
   if (overdamped) return;

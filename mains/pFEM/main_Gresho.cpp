@@ -113,10 +113,9 @@ int main() {
 
   time.start();
 
-  std::ofstream log_file, ints_file;
+  std::ofstream log_file;
 
   log_file.open("main.log");
-  ints_file.open("integrals.log");
 
   bool overdamped = ( simu.mu() > 1 ) ; // high or low Re
 
@@ -183,10 +182,7 @@ int main() {
 
 	algebra.laplacian_v(kind::UOLD,kind::LAPLU);
 
-	//	u_star(Tp, dt2 , false );
-
-	// Use only with no forces or viscosity !!
-	u_star_inviscid( Tp );
+	u_star(Tp, dt2 , false );
 
 #else
 
@@ -204,12 +200,7 @@ int main() {
 	algebra.PPE( kind::USTAR, dt2 , kind:: P );
 
 	cout << "Calculating grad p" << endl;
-
-	// full version:
-	//	algebra.gradient(kind::P, kind::GRADP);
-
-	// lumped version:
-	algebra.gradient(kind::P, kind::GRADP, false);
+	algebra.gradient(kind::P, kind::GRADP);
 
 	cout << "Evolving U " << endl;
 
@@ -232,14 +223,10 @@ int main() {
 
     log_file
       << simu.current_step() << "  "
-      << simu.time() << "  "
-      << " iters = " << iter-1
-      << " T =  " << kinetic_E( Tp )
-      << " L2_vel =  " << L2_vel_Gresho( Tp )
-      << endl ;
-    
-    integrals( Tp , ints_file);     ints_file << "  ";
-    fidelity(  Tp , ints_file );    ints_file << endl;
+      <<  simu.time() << "  " ;
+
+    integrals( Tp , log_file);     log_file << "  ";
+    fidelity(  Tp , log_file );    log_file << endl;
 
     simu.advance_time();
 
@@ -248,7 +235,6 @@ int main() {
   time.stop();
 
   log_file.close();
-  ints_file.close();
   
   cout << "Total runtime: " << time.time() << endl;
   return 0;

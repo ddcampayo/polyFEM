@@ -524,14 +524,9 @@ void linear::laplace_div(
 }
 
 
-//#undef LUMPED
-//#define LUMPED
-
-#ifdef LUMPED
-
 // lumped mass "inversion"
 
-void linear::mass_v(const kind::f vectorf ) {
+void linear::mass_v_lumped(const kind::f vectorf ) {
 
   for(F_v_it vit=T.vertices_begin();
       vit != T.vertices_end();
@@ -562,8 +557,6 @@ void linear::mass_v(const kind::f vectorf ) {
 // solves mass x vectorf =  vectorf
 // vectorf is I/O
 // full mass matrix inversion
-
-#else
 
 
 // void linear::mass_v( VectorXd& fx , VectorXd& fy ) {
@@ -657,8 +650,6 @@ void linear::mass_s(const kind::f scalarf ) {
 
   return;
 }
-
-#endif
 
 
 // TODO, not needed after all

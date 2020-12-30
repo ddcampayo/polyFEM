@@ -9,3 +9,4 @@ void set_alpha_under_cos( Triangulation& T );
 void set_alpha_cos( Triangulation& T );
 void set_alpha_random( Triangulation& T ) ;
 void zero_mean_v( Triangulation& T ,  const kind::f vectorf );
+void set_vels_Gresho(Triangulation& T);

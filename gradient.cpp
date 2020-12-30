@@ -26,6 +26,8 @@ void linear::gradient(const kind::f scalarf, const kind::f vectorf, bool do_mass
   if(do_mass)
     // full mass inversion.-
     mass_v(vectorf);
+  else
+    mass_v_lumped(vectorf);
 
   return;
 }

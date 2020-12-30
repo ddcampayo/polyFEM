@@ -105,6 +105,7 @@ void curvature(void) ;
 FT move(Triangulation& T, FT, FT& ) ;
 void move_info(Triangulation& T) ;
 void u_star(Triangulation& T, FT, bool) ;
+void u_star_inviscid(Triangulation& T ) ;
 void u_new(Triangulation& T, const FT) ;
 //void u_star_new(Triangulation& T, FT) ;
 void update_half_velocity( Triangulation& T , const bool );
@@ -119,6 +120,11 @@ void areas(Triangulation& T);
 void volumes(Triangulation& T, bool);
 void integrals(Triangulation& T, std::ofstream& log_file);
 void fidelity(Triangulation& T, std::ofstream& log_file );
+
+
+FT L2_vel_Gresho( Triangulation& T) ;
+FT kinetic_E( Triangulation& T);
+
 
 // TODO: don't have these around as global vars
 //extern Triangulation Tm;

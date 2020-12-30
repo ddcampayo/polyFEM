@@ -26,6 +26,73 @@ Vector_2 field_rotation(const FT x,const FT y, bool deriv=false) ;
 FT field_sin_cos(const FT x,const FT y, bool deriv=false) ;
 void alpha_set_mean( Triangulation& T , const FT& mean ) ;
 
+
+
+Vector_2 Gresho_v( const FT x, const FT y) {
+
+  const FT tiny = 1e-10;
+
+  const FT rc1 = 0.2;
+  const FT rc2 = 0.4;
+
+  FT r2 =  x*x + y*y ;
+  FT r  =  std::sqrt( r2 ) ;
+  Vector_2  u_theta( Vector_2( -y , x ) / ( r + tiny) ) ;
+
+  FT amp = 0;
+
+  if( r <= rc1 ) amp = 5*r ;
+  else if( r <= rc2 )  amp = 2 - 5*r;
+
+  return amp * u_theta ;
+
+}
+
+
+void set_vels_Gresho(Triangulation& T) {
+  
+  for(F_v_it vit=T.finite_vertices_begin();
+      vit != T.finite_vertices_end();
+      vit++) {
+
+    FT x=vit->point().x();
+    FT y=vit->point().y();
+
+    vit->U.set( Gresho_v( x , y) ) ;
+
+  }
+
+  return;
+}
+
+
+
+
+
+FT L2_vel_Gresho( Triangulation& T) {
+
+  FT L2=0;
+  int nn=0;
+  for(F_v_it vit=T.finite_vertices_begin();
+      vit != T.finite_vertices_end();
+      vit++) {
+
+    FT x=vit->point().x();
+    FT y=vit->point().y();
+
+    Vector_2 U0 = Gresho_v( x , y) ;
+    Vector_2 U  = vit->U.val();
+    L2 += ( U - U0 ).squared_length();
+    ++nn;
+    
+  }
+
+  return L2 / nn;
+}
+
+
+
+
 void set_forces_Kolmo(Triangulation& T) {
 
   for(F_v_it vit=T.finite_vertices_begin();
